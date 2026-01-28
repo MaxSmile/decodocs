@@ -19,25 +19,25 @@ const computeSHA256 = async (data) => {
 // Function to detect scanned documents
 const detectScannedDocument = (textContent, numPages) => {
   if (!textContent || numPages === 0) return 0;
-  
+
   const MIN_CHARS_PER_PAGE = 50; // Threshold for determining if a page is scanned
   const pages = textContent.split('\f'); // Assuming form feed character separates pages
   let pagesWithLowText = 0;
-  
+
   for (let i = 0; i < Math.min(pages.length, numPages); i++) {
     const pageText = pages[i] || '';
     if (pageText.trim().length < MIN_CHARS_PER_PAGE) {
       pagesWithLowText++;
     }
   }
-  
+
   return pagesWithLowText / numPages; // Return ratio of pages with low text
 };
 
 const DocumentViewer = () => {
   const { authState, app, auth } = useAuth();
   const [firebaseError, setFirebaseError] = useState(null);
-  
+
   const [analysisResults, setAnalysisResults] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [pdfDoc, setPdfDoc] = useState(null);
@@ -50,6 +50,7 @@ const DocumentViewer = () => {
   const [clauseMarkers, setClauseMarkers] = useState([]);
   const [riskBadges, setRiskBadges] = useState([]);
   const [docHash, setDocHash] = useState(null);
+  const [loadingMessage, setLoadingMessage] = useState('');
   const fileInputRef = useRef(null);
   const canvasRef = useRef(null);
   const textLayerRef = useRef(null);
@@ -79,18 +80,18 @@ const DocumentViewer = () => {
   useEffect(() => {
     const initPdfJs = async () => {
       const pdfjsLib = await import('pdfjs-dist');
-      
+
       // Set the worker source
       pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
-      
+
       window.pdfjsLib = pdfjsLib;
-      
+
       // If fileName is provided in the route, load the test PDF
       if (fileName) {
         await loadTestPdf(fileName);
       }
     };
-    
+
     initPdfJs();
   }, [fileName]);
 
@@ -108,27 +109,42 @@ const DocumentViewer = () => {
 
     try {
       setIsLoading(true);
-      
+
+      // Set loading message with filename
+      const fileName = fileBlob.name || 'document';
+      setLoadingMessage(`Loading ${fileName}...`);
+
       // Convert blob to array buffer
       const arrayBuffer = await fileBlob.arrayBuffer();
-      
+
       // Compute document hash from PDF bytes
       const docHashValue = await computeSHA256(String.fromCharCode(...new Uint8Array(arrayBuffer)));
       setDocHash(docHashValue);
-      
+
       const pdfjsLib = window.pdfjsLib;
-      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-      
+      const pdf = await pdfjsLib.getDocument({
+        data: arrayBuffer,
+        onProgress: (progress) => {
+          const percent = Math.round((progress.loaded / progress.total) * 100);
+          setLoadingMessage(`Loading ${fileName}: ${percent}%`);
+        }
+      }).promise;
+
       setPdfDoc(pdf);
       setNumPages(pdf.numPages);
-      
+
       // Extract text content from the entire PDF
+      setLoadingMessage(`Extracting text from ${fileName}...`);
       await extractPdfText(pdf);
-      
+
       // Render the first page
       await renderPage(1);
+
+      // Clear loading message when complete
+      setLoadingMessage('');
     } catch (error) {
       console.error('Error loading PDF from blob:', error);
+      setLoadingMessage('');
     } finally {
       setIsLoading(false);
     }
@@ -217,7 +233,7 @@ const DocumentViewer = () => {
         // Apply transformation matrix
         const tx = transform[0] * item.transform[4] + transform[2] * item.transform[5] + transform[4];
         const ty = transform[1] * item.transform[4] + transform[3] * item.transform[5] + transform[5];
-        
+
         span.style.left = `${tx}px`;
         span.style.top = `${ty}px`;
         span.style.width = `${item.width * transform[0]}px`;
@@ -319,28 +335,28 @@ const DocumentViewer = () => {
 
     try {
       setIsLoading(true);
-      
+
       // Construct the URL for the test PDF
       const pdfUrl = `/test-docs/${fileName}`;
-      
+
       // Fetch the PDF file
       const response = await fetch(pdfUrl);
       if (!response.ok) {
         throw new Error(`Failed to fetch PDF: ${response.statusText}`);
       }
-      
+
       const arrayBuffer = await response.arrayBuffer();
-      
+
       // Compute document hash from PDF bytes
       const docHashValue = await computeSHA256(String.fromCharCode(...new Uint8Array(arrayBuffer)));
       setDocHash(docHashValue);
-      
+
       const pdfjsLib = window.pdfjsLib;
       const pdf = await pdfjsLib.getDocument({ url: pdfUrl }).promise;
-      
+
       setPdfDoc(pdf);
       setNumPages(pdf.numPages);
-      
+
       // Set the selected document info
       setSelectedDocument({
         id: fileName,
@@ -349,10 +365,10 @@ const DocumentViewer = () => {
         type: 'application/pdf',
         file: null // We don't have the File object, but we have the ArrayBuffer
       });
-      
+
       // Extract text content from the PDF
       await extractPdfText(pdf);
-      
+
       // Render the first page
       await renderPage(1);
     } catch (error) {
@@ -394,7 +410,7 @@ const DocumentViewer = () => {
   const handleFileUpload = (event) => {
     const files = Array.from(event.target.files);
     const pdfFiles = files.filter(file => file.type === 'application/pdf');
-    
+
     if (pdfFiles.length > 0) {
       const file = pdfFiles[0];
       const newDocument = {
@@ -404,7 +420,7 @@ const DocumentViewer = () => {
         type: file.type,
         file: file
       };
-      
+
       setSelectedDocument(newDocument);
       navigate('/view', { state: { document: newDocument } });
     }
@@ -413,19 +429,19 @@ const DocumentViewer = () => {
   // Preflight check before analysis
   const runPreflightCheck = async () => {
     if (!pdfTextContent || !numPages) return { ok: true, classification: 'FREE_OK' }; // Default to OK if no data
-    
+
     // Check if Firebase functions are available
     if (!functions) {
       console.error('Firebase functions not available. Returning default response.');
       return { ok: true, classification: 'FREE_OK' };
     }
-    
+
     try {
       // Count characters per page
       const pages = pdfTextContent.split('\f');
       const charsPerPage = pages.map(page => page.length);
       const totalChars = pages.reduce((sum, page) => sum + page.length, 0);
-      
+
       // Call the preflight check function
       const preflightCheck = httpsCallable(functions, 'preflightCheck');
       const result = await preflightCheck({
@@ -437,7 +453,7 @@ const DocumentViewer = () => {
           pdfSizeBytes: selectedDocument?.size || 0
         }
       });
-      
+
       return result.data;
     } catch (error) {
       console.error('Preflight check error:', error);
@@ -447,12 +463,12 @@ const DocumentViewer = () => {
         code: error.code,
         details: error.details
       });
-      
+
       // Log the full error for debugging
       if (error.details?.details) {
         console.error('Function error details:', error.details.details);
       }
-      
+
       // Default to allowing the request if preflight fails
       return { ok: true, classification: 'FREE_OK' };
     }
@@ -461,20 +477,20 @@ const DocumentViewer = () => {
   // Analyze document using extracted text
   const handleAnalyzeDocument = async () => {
     if (!selectedDocument || !pdfTextContent || !docHash) return;
-    
+
     // Check if Firebase functions are available
     if (!isFirebaseAvailable()) {
       // Don't show alert, just log the error
       console.warn('Document analysis unavailable: Firebase services not accessible.');
       return;
     }
-    
+
     setIsLoading(true);
-    
+
     try {
       // Run preflight check first
       const preflightResult = await runPreflightCheck();
-      
+
       if (!preflightResult.ok) {
         if (preflightResult.code === 'SCAN_DETECTED_PRO_REQUIRED' || preflightResult.code === 'AI_BUDGET_EXCEEDED_PRO_REQUIRED') {
           // Show upgrade message
@@ -485,18 +501,18 @@ const DocumentViewer = () => {
           throw new Error(preflightResult.message || 'Preflight check failed');
         }
       }
-      
+
       if (preflightResult.classification !== 'FREE_OK') {
         // Show upgrade message
         alert(`This document requires deeper analysis, available on Pro. ${preflightResult.reasons?.map(r => r.message).join(', ') || ''}`);
         return;
       }
-      
+
       // Prepare document statistics
       const pages = pdfTextContent.split('\f');
       const charsPerPage = pages.map(page => page.length);
       const totalChars = pages.reduce((sum, page) => sum + page.length, 0);
-      
+
       // Call the Firebase Function for analysis using extracted text
       const analyzeText = httpsCallable(functions, 'analyzeText');
       const result = await analyzeText({
@@ -521,7 +537,7 @@ const DocumentViewer = () => {
           targetLanguage: null
         }
       });
-      
+
       if (result.data.ok) {
         // Map the new result structure to the existing format for compatibility
         const mappedAnalysis = {
@@ -536,12 +552,12 @@ const DocumentViewer = () => {
           })),
           recommendations: result.data.result.risks.flatMap(risk => risk.whatToCheck || [])
         };
-        
+
         setAnalysisResults(prev => ({
           ...prev,
           [selectedDocument.id]: mappedAnalysis
         }));
-        
+
         // Update highlights, clause markers, and risk badges based on analysis
         updateAnnotationsFromAnalysis(mappedAnalysis);
       } else {
@@ -561,12 +577,12 @@ const DocumentViewer = () => {
         code: error.code,
         details: error.details
       });
-      
+
       // Log additional details if available
       if (error.details?.details) {
         console.error('Function error details:', error.details.details);
       }
-      
+
       throw error; // Re-throw the error instead of falling back to mock data
     } finally {
       setIsLoading(false);
@@ -600,7 +616,7 @@ const DocumentViewer = () => {
     setHighlights(newHighlights);
     setClauseMarkers(newClauseMarkers);
     setRiskBadges(newRiskBadges);
-    
+
     // Re-render current page to show new annotations
     renderPage(pageNumber);
   };
@@ -616,17 +632,17 @@ const DocumentViewer = () => {
 
   const handleExplainSelection = async () => {
     if (!selectedDocument || !docHash) return;
-    
+
     // Check if Firebase functions are available
     if (!isFirebaseAvailable()) {
       // Don't show alert, just log the error
       console.warn('Explain selection unavailable: Firebase services not accessible.');
       return;
     }
-    
+
     // For demo purposes, we'll use a sample selection
     const selection = "Limitation of liability clause";
-    
+
     try {
       const explainSelection = httpsCallable(functions, 'explainSelection');
       const result = await explainSelection({
@@ -634,7 +650,7 @@ const DocumentViewer = () => {
         selection,
         documentContext: pdfTextContent
       });
-      
+
       if (result.data.success) {
         alert(`Explanation: ${result.data.explanation.plainExplanation}`);
       } else {
@@ -649,27 +665,27 @@ const DocumentViewer = () => {
         code: error.code,
         details: error.details
       });
-      
+
       if (error.details?.details) {
         console.error('Function error details:', error.details.details);
       }
-      
+
       throw error; // Re-throw instead of fallback
     }
   };
 
   const handleHighlightRisks = async () => {
     if (!selectedDocument || !docHash) return;
-    
+
     // Check if Firebase functions are available
     if (!isFirebaseAvailable()) {
       // Don't show alert, just log the error
       console.warn('Risk highlighting unavailable: Firebase services not accessible.');
       return;
     }
-    
+
     setIsLoading(true);
-    
+
     try {
       const highlightRisks = httpsCallable(functions, 'highlightRisks');
       const result = await highlightRisks({
@@ -677,10 +693,10 @@ const DocumentViewer = () => {
         documentText: pdfTextContent,
         documentType: 'contract'
       });
-      
+
       if (result.data.success) {
         alert(`Found ${result.data.risks.summary.totalRisks} risks in the document.`);
-        
+
         // Update risk badges based on API results
         const newRiskBadges = result.data.risks.items?.map((risk, idx) => ({
           id: idx,
@@ -691,7 +707,7 @@ const DocumentViewer = () => {
           description: risk.description,
           explanation: risk.explanation
         })) || [];
-        
+
         setRiskBadges(newRiskBadges);
         renderPage(pageNumber);
       } else {
@@ -706,11 +722,11 @@ const DocumentViewer = () => {
         code: error.code,
         details: error.details
       });
-      
+
       if (error.details?.details) {
         console.error('Function error details:', error.details.details);
       }
-      
+
       throw error; // Re-throw instead of fallback
     } finally {
       setIsLoading(false);
@@ -719,23 +735,23 @@ const DocumentViewer = () => {
 
   const handleTranslateToPlainEnglish = async () => {
     if (!selectedDocument || !docHash) return;
-    
+
     // Check if Firebase functions are available
     if (!isFirebaseAvailable()) {
       // Don't show alert, just log the error
       console.warn('Translation unavailable: Firebase services not accessible.');
       return;
     }
-    
+
     try {
       const legalText = pdfTextContent.substring(0, 500); // Use first 500 chars for demo
-      
+
       const translateToPlainEnglish = httpsCallable(functions, 'translateToPlainEnglish');
       const result = await translateToPlainEnglish({
         docHash,
         legalText
       });
-      
+
       if (result.data.success) {
         alert(`Original: ${result.data.translation.originalText}\n\nPlain English: ${result.data.translation.plainEnglishTranslation}`);
       } else {
@@ -750,11 +766,11 @@ const DocumentViewer = () => {
         code: error.code,
         details: error.details
       });
-      
+
       if (error.details?.details) {
         console.error('Function error details:', error.details.details);
       }
-      
+
       throw error; // Re-throw instead of fallback
     }
   };
@@ -783,21 +799,23 @@ const DocumentViewer = () => {
         </Link>
       </header>
       
-      {/* Warning banner for Firebase errors */}
-      {firebaseError && (
-        <div style={{
-          backgroundColor: '#FFFBCC', // Yellow background
-          color: '#746A00', // Darker yellow text for contrast
-          padding: '10px 20px',
-          textAlign: 'center',
-          fontWeight: '500',
-          fontSize: '14px',
-          borderBottom: '1px solid #E5E500'
-        }}>
-          ⚠️ AI calls are disabled because of "{firebaseError}". Document viewing features remain available.
-        </div>
-      )}
-      
+      {/* Status banner for Firebase authentication */}
+      <div style={{
+        backgroundColor: authState.status === 'authenticated' ? '#E6F4EA' : '#FFFBCC', // Green if authenticated, yellow if error
+        color: authState.status === 'authenticated' ? '#0D652D' : '#746A00', // Dark green text if authenticated, darker yellow if error
+        padding: '10px 20px',
+        textAlign: 'center',
+        fontWeight: '500',
+        fontSize: '14px',
+        borderBottom: authState.status === 'authenticated' ? '1px solid #81C387' : '1px solid #E5E500'
+      }}>
+        {authState.status === 'authenticated' 
+          ? '✅ Firebase authenticated - AI features available' 
+          : firebaseError 
+            ? `⚠️ AI calls disabled: "${firebaseError}". Document viewing features remain available.`
+            : '⚠️ Authenticating with Firebase...'}
+      </div>
+
       <div className="pdf-viewer-layout">
         <div className="pdf-viewer-container">
           <div className="pdf-controls">
@@ -820,43 +838,43 @@ const DocumentViewer = () => {
               <span>{Math.round(pageScale * 100)}%</span>
               <button onClick={zoomIn}>Zoom In</button>
             </div>
-            <input 
-              type="file" 
+            <input
+              type="file"
               ref={fileInputRef}
-              accept=".pdf" 
+              accept=".pdf"
               onChange={handleFileUpload}
               style={{ display: 'none' }}
             />
           </div>
-          
-          <div 
-            className="pdf-display" 
-            style={{ 
-              height: 'calc(100vh - 200px)', 
+
+          <div
+            className="pdf-display"
+            style={{
+              height: 'calc(100vh - 200px)',
               overflow: 'auto',
               position: 'relative',
               backgroundColor: '#f0f0f0'
             }}
           >
             {pdfDoc ? (
-              <div 
-                style={{ 
-                  position: 'relative', 
+              <div
+                style={{
+                  position: 'relative',
                   margin: '0 auto',
                   width: 'fit-content'
                 }}
               >
-                <canvas 
-                  ref={canvasRef} 
-                  style={{ 
+                <canvas
+                  ref={canvasRef}
+                  style={{
                     display: 'block',
-                    maxWidth: '100%', 
+                    maxWidth: '100%',
                     maxHeight: '100%',
                     backgroundColor: 'white',
                     boxShadow: '0 0 10px rgba(0,0,0,0.1)'
                   }}
                 />
-                
+
                 {/* Text layer for selection and searching */}
                 <div
                   ref={textLayerRef}
@@ -871,7 +889,7 @@ const DocumentViewer = () => {
                     lineHeight: 1
                   }}
                 />
-                
+
                 {/* Annotations overlay */}
                 <div
                   ref={annotationsRef}
@@ -886,7 +904,7 @@ const DocumentViewer = () => {
               </div>
             ) : selectedDocument ? (
               <div className="pdf-loading">
-                Loading PDF...
+                {loadingMessage || 'Processing PDF...'}
               </div>
             ) : (
               <div className="pdf-placeholder">
@@ -895,7 +913,7 @@ const DocumentViewer = () => {
             )}
           </div>
         </div>
-        
+
         <div className="toolbox-section">
           <h3>Document Analysis Tools</h3>
           <div className="toolbox-buttons">
@@ -918,7 +936,7 @@ const DocumentViewer = () => {
               Suggest Improvements
             </button>
           </div>
-          
+
           {analysisResults[selectedDocument?.id] && (
             <div className="analysis-results">
               <h4>Analysis Results</h4>
@@ -926,7 +944,7 @@ const DocumentViewer = () => {
                 <h5>Document Summary</h5>
                 <p>{analysisResults[selectedDocument.id].summary}</p>
               </div>
-              
+
               <div className="risks-section">
                 <h5>Identified Risks</h5>
                 {analysisResults[selectedDocument.id].risks.map(risk => (
@@ -944,7 +962,7 @@ const DocumentViewer = () => {
                   </div>
                 ))}
               </div>
-              
+
               <div className="recommendations-section">
                 <h5>Recommendations</h5>
                 <ul>
@@ -959,7 +977,7 @@ const DocumentViewer = () => {
           )}
         </div>
       </div>
-      
+
       <footer className="standard-footer">
         <div className="footer-content">
           <p>© SnapSign Pty Ltd</p>
