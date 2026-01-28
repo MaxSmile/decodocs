@@ -902,9 +902,9 @@ const DocumentViewer = () => {
                   }}
                 />
               </div>
-            ) : selectedDocument ? (
+            ) : isLoading ? (
               <div className="pdf-loading">
-                {loadingMessage || 'Processing PDF...'}
+                {loadingMessage || 'Loading PDF...'}
               </div>
             ) : (
               <div className="pdf-placeholder">
