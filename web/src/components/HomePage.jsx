@@ -103,7 +103,7 @@ const HomePage = () => {
       price: "$5/mo",
       features: [
         "N AI calls per document",
-        "Decodocs storage",
+        "DecoDocs storage",
         "OCR support",
         "Higher limits",
         "Export reports"
@@ -159,7 +159,7 @@ const HomePage = () => {
       {/* Top Navigation */}
       <nav className={`navbar ${isScrolled ? 'scrolled' : ''}`}>
         <div className="nav-container">
-          <div className="nav-logo">SnapSign</div>
+          <div className="nav-logo">DecoDocs</div>
           <div className="nav-links">
             <a href="#product">Product</a>
             <a href="#pricing">Pricing</a>
@@ -190,7 +190,7 @@ const HomePage = () => {
               </button>
             </div>
             <p className="trust-line">
-              No storage in Free. Paid can store in Decodocs.
+              No storage in Free. Paid can store in DecoDocs.
             </p>
           </div>
           <div className="hero-visual">
@@ -269,7 +269,7 @@ const HomePage = () => {
             </div>
             <div className="comparison-card">
               <h3>Upload (Pro)</h3>
-              <p>Stored in Decodocs, history, export</p>
+              <p>Stored in DecoDocs, history, export</p>
               <ul>
                 <li>Persistent storage</li>
                 <li>Document history</li>

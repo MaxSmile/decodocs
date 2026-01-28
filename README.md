@@ -202,6 +202,6 @@ TBD
 ## Contact
 
 Project owner:  
-**Snap Sign Pte Ltd**  
+**Snap Sign Pty Ltd**  
 📧 team@snapsign.com.au  
 🌐 https://decodocs.com

@@ -32,7 +32,7 @@ test.describe('Local DecoDocs Application Flow', () => {
 
   test('should have correct navigation elements', async ({ page }) => {
     // Check header
-    await expect(page.locator('.nav-logo')).toContainText('SnapSign');
+    await expect(page.locator('.nav-logo')).toContainText('DecoDocs');
     
     // Check navigation links
     await expect(page.locator('a', { hasText: 'Product' })).toBeVisible();

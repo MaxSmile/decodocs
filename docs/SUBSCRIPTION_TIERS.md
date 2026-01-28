@@ -1,4 +1,4 @@
-# SnapSign / Decodocs — Subscription Tiers (Technical Spec)
+# SnapSign / DecoDocs — Subscription Tiers (Technical Spec)
 
 ## Core Terminology
 

@@ -1,45 +1,74 @@
 # DecoDocs Roadmap
 
+_Last updated: January 28, 2026_
+
 ## Overview
-This roadmap outlines the phased development of DecoDocs, prioritizing input convenience and distribution rather than new analysis logic. The core SnapSign logic remains unchanged throughout all phases.
+DecoDocs is a document understanding product built by **Snap Sign Pty Ltd (Australia)**. It focuses on clarity before
+commitment: explain what a document says, surface risks/obligations, and only then move into sharing/signing flows.
+
+This roadmap prioritizes (1) reducing document input friction and (2) making outcomes easy to act on, before adding
+heavier analysis depth.
+
+### Naming
+- **Company**: Snap Sign Pty Ltd
+- **Product**: DecoDocs
+- **Brand family**: SnapSign (company/umbrella branding)
 
 ---
 
-## Phase 1 — MVP (Launched)
+## Current State (as of January 28, 2026)
 
-### Completed Features
-- ✅ PDF support
-- ✅ Email-to-sign (stateless for Free tier)
-- ✅ Free vs Pro differentiation based on AI call budget
-- ✅ Document storage for Pro tier
-- ✅ HubSpot integration (kill feature)
-- ✅ Core analysis pipeline
-- ✅ Firebase Functions with Gemini AI
-- ✅ React frontend with routing
-- ✅ Technical documentation
+### Implemented (in this repo)
+- PDF open/view workflow in the web app
+- Anonymous auth + graceful degradation when auth fails
+- Firebase callable functions for:
+  - `preflightCheck` (classification/limits)
+  - `analyzeText` (analysis entry point, MVP behavior)
+  - `getEntitlement` (plan/limits, MVP behavior)
+- Firebase Hosting target uses `decodocs-repo/web/dist` (Vite build output)
+
+### Specified/Planned (documented, not fully implemented)
+- Email-to-sign flow
+- Cloud storage integrations (Drive/OneDrive/iCloud)
+- Full signing workflow + verification/audit exports
+
+---
+
+## Phase 1 — Web MVP Foundation (Live, Iterating)
+
+### Goal
+Ship a reliable, privacy-forward web experience for PDF understanding, with clear plan enforcement and predictable UI
+states.
+
+### User-facing outcomes
+- Open a PDF and read it (even if auth fails)
+- Trigger analysis and see results in a structured panel
+- Understand what’s gated by plan (Free vs Pro) before spending time
 
 ### Technical Foundation
-- Firebase Hosting and Functions
-- Google Generative AI SDK integration
-- Three-tier subscription model (Free/Pro/Premium)
-- Preflight analyzer for document classification
-- Stateless processing for Free tier
-- Persistent storage for Pro tier
+- Firebase Hosting + Cloud Functions + Firestore usage tracking
+- Preflight document classification (size/scanned heuristics)
+- Tier model and call-budget enforcement (MVP)
+- Test coverage (unit + Playwright tests)
+- Google Identity Services (GIS) for Google sign-in and token handling in the web app
 
 ---
 
-## Phase 2 — Cloud Storage Integrations
+## Phase 2 — Cloud Storage Integrations (Target: Q2 2026)
 
 ### Goal
 Reduce friction of "getting the document in" without increasing storage liability.
 
-### Target Completion
-Q2 2025
+### Scope (user stories)
+- As a user, I can connect Google Drive / OneDrive and pick a file to analyze (explicit, user-initiated).
+- As a Free user, I can **open** a cloud file ephemerally (no storage by default).
+- As a Pro user, I can optionally **save/upload** (explicit action) for history/export.
+- As a user, I can revoke access and the app stops using stored tokens immediately.
 
 ### Google Drive
 - OAuth-based, read-only access
 - Default mode: **open (ephemeral)**
-- Optional: user explicitly chooses "save to Decodocs" (Pro)
+- Optional: user explicitly chooses "save to DecoDocs" (Pro)
 - No automatic import
 - No background sync
 - No file mirroring
@@ -69,15 +98,16 @@ Q2 2025
 
 ---
 
-## Phase 3 — Premium Features
+## Phase 3 — Paid Depth + Multi-Document (Target: Q3 2026)
 
-### Target Completion
-Q3 2025
+### Goal
+Offer deeper analysis features that are clearly more expensive (and therefore paid), without compromising the Free tier
+core experience.
 
 ### DOCX Support (Premium only)
 - Conversion to internal canonical format
 - Normalization & cleanup
-- Counts as multiple AI calls
+- Counts as multiple AI calls / higher budget
 - No partial support
 
 ### Advanced Multi-Document Analysis
@@ -95,13 +125,14 @@ Q3 2025
 
 ---
 
-## Phase 4 — Mobile Apps
+## Phase 4 — Mobile Apps (Target: Q4 2026)
 
 ### Goal
-Make SnapSign usable at the moment of signing.
+Make DecoDocs usable at the moment of decision (email attachment, file share, meeting).
 
-### Target Completion
-Q4 2025
+### Approach (v1)
+Native shells (or lightweight native apps) that open documents from the share sheet and deep-link into the same analysis
+pipeline as the web experience.
 
 ### Mobile Platforms
 - iOS native application
@@ -113,7 +144,7 @@ Q4 2025
   - Device files
   - Google Drive / OneDrive / iCloud
 - Run same analysis pipeline as web/email
-- Share-to-SnapSign entry point
+- Share-to-DecoDocs entry point
 - View explanation before signing elsewhere
 
 ### Technical Constraints (v1)
@@ -130,10 +161,10 @@ Q4 2025
 
 ---
 
-## Phase 5 — Signing & Verification (Future)
+## Phase 5 — Signing & Verification (Target: 2027+)
 
 ### Scope
-Out of MVP scope, but enabled by prior steps:
+Out of the initial analysis MVP scope, but enabled by prior steps.
 
 ### Planned Features
 - Append-only signatures in envelope
@@ -141,9 +172,6 @@ Out of MVP scope, but enabled by prior steps:
 - Timeline & audit export
 - Advanced signing workflows
 - Legal compliance features
-
-### Timeline
-Q1 2026 (subject to regulatory requirements)
 
 ---
 
@@ -178,8 +206,8 @@ If a feature:
 - Auto-sync from cloud drives
 - Background scanning of user files
 - "Unlimited" anything
-- Complex analysis algorithm changes
-- On-device AI processing (Phase 1)
+- Heavy “document management system” features
+- On-device AI processing in early phases
 
 ---
 
@@ -198,7 +226,7 @@ If a feature:
 
 ### Phase 4 Success Criteria
 - Mobile app download and retention
-- Share-to-SnapSign usage rate
+- Share-to-DecoDocs usage rate
 - Mobile vs web feature parity
 - User engagement at point of signing
 

@@ -16,12 +16,11 @@ const AboutPage = () => {
         <div className="about-container">
           {/* Header Section */}
           <section className="about-header">
-            <h1>About SnapSign</h1>
+            <h1>About DecoDocs</h1>
             <p>
-              SnapSign is a document intelligence product designed to help people understand what they are about to sign. 
-              Before any signature, SnapSign explains documents in plain language, highlights caveats and unfair conditions, 
-              flags logical inconsistencies, and provides translations when needed. Decodocs is the document analysis layer 
-              of SnapSign. Our focus is clarity before commitment.
+              DecoDocs is a document intelligence product designed to help people understand what they are about to sign.
+              Before any signature, DecoDocs explains documents in plain language, highlights caveats and unfair conditions,
+              flags logical inconsistencies, and provides translations when needed. Our focus is clarity before commitment.
             </p>
           </section>
 
@@ -39,7 +38,7 @@ const AboutPage = () => {
 
           {/* Scope Definition */}
           <section className="scope-definition">
-            <h2>What SnapSign Is — and Is Not</h2>
+            <h2>What DecoDocs Is — and Is Not</h2>
             <div className="scope-columns">
               <div className="scope-column">
                 <h3>Is</h3>
@@ -64,13 +63,12 @@ const AboutPage = () => {
             </div>
           </section>
 
-          {/* Decodocs Clarification */}
+          {/* Product Clarification */}
           <section className="decodocs-clarification">
-            <h2>About Decodocs</h2>
+            <h2>How It Relates To SnapSign</h2>
             <p>
-              Decodocs is the document analysis component of SnapSign. It provides structured document decoding, 
-              analysis depth control, and optional storage for paid users. Decodocs is not a separate product; 
-              it is the concrete implementation of SnapSign's core idea.
+              Snap Sign Pty Ltd builds DecoDocs. SnapSign is the company brand and broader product family; DecoDocs is the
+              document understanding and analysis product in that family.
             </p>
           </section>
 

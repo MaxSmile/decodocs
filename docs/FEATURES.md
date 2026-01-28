@@ -33,6 +33,7 @@
 - **Firebase Backend**: Scalable serverless functions
 - **REST API**: Well-documented API endpoints
 - **Cross-platform Compatibility**: Works across different browsers and devices
+ - **Google Identity Services (GIS)**: Google sign-in and OAuth token management for the web app
 
 ## Planned Features (Roadmap)
 
@@ -96,7 +97,7 @@
 ### Planned Feature Specifications
 
 #### User Authentication
-- **OAuth Integration**: Google, Microsoft, and Apple sign-in
+- **OAuth Integration**: Google, Microsoft, and Apple sign-in (Google implemented via Google Identity Services)
 - **Password Security**: Strong password requirements and hashing
 - **Two-Factor Authentication**: Additional security layer
 - **Session Management**: Secure session handling
@@ -146,7 +147,7 @@
 
 ### Integration Requirements
 - **Payment Processing**: Stripe API integration
-- **Identity Providers**: OAuth 2.0 support
+- **Identity Providers**: OAuth 2.0 support, with Google Identity Services (GIS) for Google accounts
 - **Business Tools**: API for third-party integrations
 - **Document Storage**: Cloud storage solutions
 

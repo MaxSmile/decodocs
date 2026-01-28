@@ -135,6 +135,44 @@ The `firebase.json` file in the project root contains the deployment configurati
 }
 ```
 
+### Domain and Redirect Strategy
+
+The DecoDocs web app is hosted on Firebase Hosting under the `decodocs` target, which serves:
+- `https://decodocs-site.web.app`
+- `https://decodocs-site.firebaseapp.com`
+
+In production, these Firebase domains are **not the primary brand URL**. Instead, they must issue a **permanent redirect (301)** to the canonical domain:
+
+- `https://decodocs.com`
+
+This redirect behavior is configured in `firebase.json` using a `redirects` block under the `decodocs` hosting target, for example:
+
+```json
+{
+  "hosting": [
+    {
+      "target": "decodocs",
+      "public": "decodocs-repo/web/dist",
+      "redirects": [
+        {
+          "source": "**",
+          "destination": "https://decodocs.com",
+          "type": 301
+        }
+      ]
+    }
+  ]
+}
+```
+
+Once deployed with:
+
+```bash
+firebase deploy --only hosting:decodocs
+```
+
+any request to `decodocs-site.web.app` or `decodocs-site.firebaseapp.com` will be permanently redirected to `https://decodocs.com`, while `decodocs.com` itself can be mapped via Firebase Hosting custom domains to the same `decodocs` target.
+
 ### Environment Variables
 
 Currently, the application doesn't use environment variables, but they can be configured using Firebase Functions secrets if needed in the future.

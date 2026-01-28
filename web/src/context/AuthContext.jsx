@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth, signInAnonymously } from 'firebase/auth';
+import { getAuth, signInAnonymously, connectAuthEmulator } from 'firebase/auth';
 
 /**
  * AuthContext provides auth state management with error handling
@@ -16,15 +16,44 @@ const firebaseConfig = {
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || process.env.REACT_APP_FIREBASE_STORAGE_BUCKET || 'snapsign-au.appspot.com',
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
   appId: import.meta.env.VITE_FIREBASE_APP_ID || process.env.REACT_APP_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || process.env.REACT_APP_FIREBASE_MEASUREMENT_ID,
+};
+
+const isProbablyPlaceholder = (v) => {
+  if (!v || typeof v !== 'string') return true;
+  const s = v.trim();
+  return (
+    s === '' ||
+    s.includes('your_') ||
+    s.includes('replace_me') ||
+    s.includes('changeme')
+  );
 };
 
 // Initialize Firebase
 let app = null;
 let auth = null;
+let authEmulatorConnected = false;
 
 try {
+  // Fail fast with a clear message if the developer left placeholder config in place.
+  // Bypass check if we are in MOCK_AUTH mode (e.g. End-to-End tests)
+  if (!window.MOCK_AUTH && isProbablyPlaceholder(firebaseConfig.apiKey)) {
+    throw new Error(
+      'Missing/placeholder Firebase API key. Set VITE_FIREBASE_API_KEY in decodocs-repo/web/.env (or enable the Auth emulator).'
+    );
+  }
+
   app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
   auth = getAuth(app);
+
+  // Optional: local dev can run against the Firebase Auth emulator.
+  // This keeps local development unblocked when you don't want to use real project keys.
+  const useEmulator = String(import.meta.env.VITE_USE_FIREBASE_EMULATOR || '').toLowerCase() === 'true';
+  if (useEmulator && !authEmulatorConnected) {
+    connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
+    authEmulatorConnected = true;
+  }
 } catch (error) {
   console.error('Failed to initialize Firebase:', error);
 }
@@ -38,6 +67,22 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const initAuth = async () => {
+      // Test Mode Mock
+      if (window.MOCK_AUTH) {
+        // window.MOCK_AUTH_USER can be set to null to simulate logged-out state
+        // If undefined, defaults to a valid user
+        const mockUser = window.MOCK_AUTH_USER === undefined 
+          ? { uid: 'test-user', isAnonymous: true } 
+          : window.MOCK_AUTH_USER;
+
+        setAuthState({
+          status: mockUser ? 'authenticated' : 'unauthenticated',
+          user: mockUser,
+          error: null
+        });
+        return;
+      }
+
       if (!auth) {
         setAuthState({
           status: 'error',

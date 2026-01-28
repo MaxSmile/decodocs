@@ -25,7 +25,7 @@ This document outlines the technical specifications for integrating cloud storag
 
 ### Processing Modes
 - Default: **Open mode** (ephemeral processing)
-- Pro users: Option to save to Decodocs storage
+- Pro users: Option to save to DecoDocs storage
 - Clear UI indicators for processing mode
 
 ### Technical Implementation

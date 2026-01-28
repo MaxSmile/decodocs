@@ -58,6 +58,7 @@ This application follows a modern React architecture with:
 - **React Router**: Client-side routing for multi-view application
 - **Firebase Functions**: Serverless backend for AI processing
 - **Google Generative AI**: AI-powered document analysis
+- **Google Identity Services (GIS)**: Google sign-in and OAuth token handling for the web app
 
 ## Features
 
@@ -111,4 +112,4 @@ Please read the [Development Guide](../docs/DEVELOPMENT.md) for details on our c
 
 ## License
 
-This project is proprietary to Snap Sign Pte Ltd.
+This project is proprietary to Snap Sign Pty Ltd.

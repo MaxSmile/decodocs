@@ -3,6 +3,9 @@ import { useParams, useLocation, useNavigate, Link } from 'react-router-dom';
 import { getIdToken } from 'firebase/auth';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { useAuth } from '../context/AuthContext.jsx';
+// Use local worker from public folder to ensure stability in tests and offline
+const pdfWorker = '/pdf.worker.min.mjs';
+// import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
 // Utility function to compute SHA-256 hash
 const computeSHA256 = async (data) => {
@@ -63,7 +66,7 @@ const DocumentViewer = () => {
       const pdfjsLib = await import('pdfjs-dist');
       
       // Set the worker source
-      pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.js', import.meta.url).toString();
+      pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
       
       window.pdfjsLib = pdfjsLib;
     };
@@ -338,7 +341,7 @@ const DocumentViewer = () => {
     if (!pdfTextContent || !numPages) return { ok: true, classification: 'FREE_OK' }; // Default to OK if no data
     
     // Check if Firebase functions are available
-    if (!window.firebaseFunctions) {
+    if (!functions) {
       console.error('Firebase functions not available. Returning default response.');
       return { ok: true, classification: 'FREE_OK' };
     }
@@ -350,7 +353,7 @@ const DocumentViewer = () => {
       const totalChars = pages.reduce((sum, page) => sum + page.length, 0);
       
       // Call the preflight check function
-      const preflightCheck = httpsCallable(window.firebaseFunctions, 'preflightCheck');
+      const preflightCheck = httpsCallable(functions, 'preflightCheck');
       const result = await preflightCheck({
         docHash,
         stats: {
@@ -391,7 +394,7 @@ const DocumentViewer = () => {
     }
     
     // Check if Firebase functions are available
-    if (!window.firebaseFunctions) {
+    if (!functions) {
       console.error('Firebase functions not available. Please ensure Firebase is properly configured.');
       alert('Firebase services are not available. Please contact support or ensure the app is properly configured.');
       return;
@@ -426,7 +429,7 @@ const DocumentViewer = () => {
       const totalChars = pages.reduce((sum, page) => sum + page.length, 0);
       
       // Call the Firebase Function for analysis using extracted text
-      const analyzeText = httpsCallable(window.firebaseFunctions, 'analyzeText');
+      const analyzeText = httpsCallable(functions, 'analyzeText');
       const result = await analyzeText({
         docHash,
         stats: {
@@ -551,7 +554,7 @@ const DocumentViewer = () => {
     }
     
     // Check if Firebase functions are available
-    if (!window.firebaseFunctions) {
+    if (!functions) {
       console.error('Firebase functions not available. Please ensure Firebase is properly configured.');
       alert('Firebase services are not available. Please contact support or ensure the app is properly configured.');
       return;
@@ -561,7 +564,7 @@ const DocumentViewer = () => {
     const selection = "Limitation of liability clause";
     
     try {
-      const explainSelection = httpsCallable(window.firebaseFunctions, 'explainSelection');
+      const explainSelection = httpsCallable(functions, 'explainSelection');
       const result = await explainSelection({
         docHash,
         selection,
@@ -600,7 +603,7 @@ const DocumentViewer = () => {
     }
     
     // Check if Firebase functions are available
-    if (!window.firebaseFunctions) {
+    if (!functions) {
       console.error('Firebase functions not available. Please ensure Firebase is properly configured.');
       alert('Firebase services are not available. Please contact support or ensure the app is properly configured.');
       return;
@@ -609,7 +612,7 @@ const DocumentViewer = () => {
     setIsLoading(true);
     
     try {
-      const highlightRisks = httpsCallable(window.firebaseFunctions, 'highlightRisks');
+      const highlightRisks = httpsCallable(functions, 'highlightRisks');
       const result = await highlightRisks({
         docHash,
         documentText: pdfTextContent,
@@ -664,7 +667,7 @@ const DocumentViewer = () => {
     }
     
     // Check if Firebase functions are available
-    if (!window.firebaseFunctions) {
+    if (!functions) {
       console.error('Firebase functions not available. Please ensure Firebase is properly configured.');
       alert('Firebase services are not available. Please contact support or ensure the app is properly configured.');
       return;
@@ -673,7 +676,7 @@ const DocumentViewer = () => {
     try {
       const legalText = pdfTextContent.substring(0, 500); // Use first 500 chars for demo
       
-      const translateToPlainEnglish = httpsCallable(window.firebaseFunctions, 'translateToPlainEnglish');
+      const translateToPlainEnglish = httpsCallable(functions, 'translateToPlainEnglish');
       const result = await translateToPlainEnglish({
         docHash,
         legalText
