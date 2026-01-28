@@ -114,6 +114,13 @@ Future expansion may include teams, integrations, and regulated workflows.
 - AI-powered semantic search
 - Version-aware history
 
+### File Upload & Processing Policy
+- Files under 10MB processed with client-side preview
+- Files larger than 10MB require authentication and server-side processing
+- Only registered users with active subscriptions can process large files on server
+- Free-tier users limited to smaller files with client-side processing
+- Explicit user consent required before any file upload
+
 ### Optional / Later
 - Integrations (Drive, OneDrive, HubSpot, etc.)
 - Mobile apps

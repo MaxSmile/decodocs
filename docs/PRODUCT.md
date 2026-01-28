@@ -83,6 +83,7 @@ Action turns understanding into revenue and protection.
 - not legal advice
 - not an enterprise compliance platform
 - not a document dumping ground
+- not unlimited free document processing
 
 DecoDocs is **practical, clarity-first, and business-oriented**.
 

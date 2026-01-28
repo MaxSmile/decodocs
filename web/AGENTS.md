@@ -133,6 +133,27 @@ Evolving approach:
    - Client renders decode output + annotations UI
    - Client operations remain mostly local and responsive
 
+## File Upload Conditions and Limitations
+
+### When File Upload Occurs
+- Explicit user action is required (clicking upload button after file selection)
+- User must be authenticated before any file upload
+- File size is validated before upload begins
+- User receives confirmation before initiating upload
+
+### Large File Processing Policy
+- Files larger than 10MB require server-side processing due to browser limitations
+- Only registered users with active subscriptions have access to server-side processing for large files
+- Free-tier users are limited to client-side processing (smaller files only)
+- Users are notified if their file exceeds the client-side processing threshold
+- A subscription upgrade option is presented when large file processing is needed
+
+### Security Measures
+- All uploads require authentication tokens
+- Files are encrypted during transfer
+- Temporary storage has limited retention periods
+- Access logs are maintained for security auditing
+
 ## “Client-side first” UX Expectations
 
 Agents should prioritize:
