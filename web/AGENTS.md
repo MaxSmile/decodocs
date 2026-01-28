@@ -65,14 +65,14 @@ Anything that involves:
 
 The client may request these actions, but **never performs them directly**.
 
-## Next.js Role (Web Folder)
+## ReactJS Role (Web Folder)
 
-`/web` is expected to be a Next.js app.
+`/web` is expected to be a ReactJS app hosted on Firebase.
 
-Next.js is used for:
+ReactJS is used for:
 - UI + routing
-- server routes (API endpoints) that must remain private
-- acting as a lightweight gateway to VPS services when needed
+- client-side operations
+- interacting with Firebase services
 - verifying Firebase ID tokens and enforcing authorization
 
 Even though the UI is client-heavy, we keep secrets and permission checks on the server.

@@ -2,8 +2,9 @@
 
 ## Architecture
 - hybrid architecture: client-heavy UI + server-authoritative security
-- Next.js web app as UI and gateway
+- ReactJS web app hosted on Firebase as UI and gateway
 - Firebase Auth for identity only
+- Firebase Hosting for static content delivery
 - VPS backend for AI, search, and background jobs
 - object storage (S3-compatible) as canonical file store
 - client-first decode: extract text in browser, send text to backend for AI, persist file only when needed

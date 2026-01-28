@@ -135,7 +135,7 @@ Future expansion may include teams, integrations, and regulated workflows.
 
 ```
 
-/web            # Main web application (frontend + backend)
+/web            # ReactJS web application hosted on Firebase
 /ai             # AI prompts, pipelines, and logic
 /docs           # Product and technical documentation
 /infra          # Infrastructure and deployment configs
@@ -147,13 +147,15 @@ Exact structure may evolve as the project grows.
 
 ---
 
-## Technology (Flexible)
+## Technology (Specific Architecture)
 
-The project is intentionally technology-agnostic at this stage.
+The project uses a specific technology stack:
 
-Expected stack areas:
-- Modern web frontend
-- Server-side APIs
+Stack areas:
+- ReactJS web frontend hosted on Firebase
+- Firebase Authentication for user identity
+- Firebase Hosting for static content delivery
+- Server-side APIs on VPS
 - AI model integration
 - Secure document handling
 - Scalable storage and search

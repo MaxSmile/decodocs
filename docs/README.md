@@ -6,7 +6,7 @@ including the **Understand -> Manage -> Act** model for freelancers and SMBs.
 
 ## Source of Truth
 - Product vision and positioning: `README.md`
-- Web architecture and boundaries: `web/AGENTS.md`
+- Web architecture and boundaries: `web/AGENTS.md` (ReactJS + Firebase Hosting)
 - Infrastructure rules and topology: `infra/AGENTS.md`, `infra/README.md`
 - Mobile approach: `mobile/README.md`
 
