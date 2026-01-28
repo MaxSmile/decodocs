@@ -64,4 +64,4 @@ This file mirrors `decodocs-repo/docs/ROADMAP.md` and lists actionable engineeri
 - [ ] Update test plans when selectors/UX change (`docs/test-plans/`)
 
 ## New Todos
-- [ ] **Big Document Vector Management**: For big documents, RLM or other vector-based data management needs to be developed to efficiently handle large PDFs and document collections.
+- [ ] **Big Document Vector Management**: For big documents, RLM (Recursive Language Model) or other vector-based data management needs to be developed to efficiently handle large PDFs and document collections.
