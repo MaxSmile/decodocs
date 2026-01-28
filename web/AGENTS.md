@@ -18,11 +18,13 @@ We deliberately use a **hybrid** approach to optimize for:
 
 ### Client (Web) — “Most operations”
 The web app is designed to do **as much as possible on the client side**, including:
-- PDF rendering, paging, zoom, search-in-doc UI
+- PDF rendering using Mozilla PDF.js library, paging, zoom, search-in-doc UI
 - highlights, notes, annotations UI
 - local drafts / optimistic updates
 - caching decoded outputs for responsiveness
 - lightweight text transformations where feasible
+- client-side PDF editing using PDF-LIB (Hopding/pdf-lib) library
+- text extraction and preprocessing for AI analysis using Mozilla PDF.js
 
 **Important:** “client-side heavy” never means exposing secrets or bypassing access control.
 
@@ -45,11 +47,21 @@ The web app uploads directly to storage using **pre-signed URLs** generated serv
 ### VPS — Backend + AI + Search (source of truth for “heavy work”)
 A self-managed VPS (or small cluster) handles:
 - generation of pre-signed upload/download URLs (or delegated gateway)
-- AI “decode” pipelines (OCR if needed, chunking, summaries, risk highlights, rewrites)
+- AI “decode” pipelines using Gemini SDK (proxied through Firebase Functions for security)
+- text processing and preparation for AI analysis
+- OCR if needed, chunking, summaries, risk highlights, rewrites
 - semantic search indexing (pgvector/Qdrant) and retrieval
 - background jobs / queues / retries
 - rate limiting and cost control for AI operations
 - secure email workflows (send-for-sign, reminders) if/when implemented
+
+### Firebase Functions — AI Proxy Layer (Security & Access Control)
+Firebase Functions serve as a secure proxy layer for AI operations:
+- All Gemini SDK calls are routed through Firebase Functions
+- Provides authentication and authorization for AI access
+- Implements rate limiting and cost controls
+- Protects API keys and credentials
+- Logs AI usage for monitoring and billing
 
 ## Non-Negotiable Security Rules
 

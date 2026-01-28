@@ -160,10 +160,13 @@ The project uses a specific technology stack:
 
 Stack areas:
 - ReactJS web frontend hosted on Firebase
+- Mozilla PDF.js for PDF rendering and parsing
+- PDF-LIB (Hopding/pdf-lib) for client-side PDF editing
 - Firebase Authentication for user identity
+- Firebase Functions as secure proxy for AI services
 - Firebase Hosting for static content delivery
 - Server-side APIs on VPS
-- AI model integration
+- Gemini SDK for AI model integration (accessed via Firebase Functions)
 - Secure document handling
 - Scalable storage and search
 
