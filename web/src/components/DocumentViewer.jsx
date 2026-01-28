@@ -111,8 +111,8 @@ const DocumentViewer = () => {
       setIsLoading(true);
 
       // Set loading message with filename
-      const fileName = fileBlob.name || 'document';
-      setLoadingMessage(`Loading ${fileName}...`);
+      const fileNameForDisplay = fileBlob.name || 'document';
+      setLoadingMessage(`Loading ${fileNameForDisplay}...`);
 
       // Convert blob to array buffer
       const arrayBuffer = await fileBlob.arrayBuffer();
@@ -126,15 +126,14 @@ const DocumentViewer = () => {
         data: arrayBuffer,
         onProgress: (progress) => {
           const percent = Math.round((progress.loaded / progress.total) * 100);
-          setLoadingMessage(`Loading ${fileName}: ${percent}%`);
+          setLoadingMessage(`Loading ${fileNameForDisplay}: ${percent}%`);
         }
       }).promise;
 
       setPdfDoc(pdf);
       setNumPages(pdf.numPages);
 
-      // Extract text content from the entire PDF
-      setLoadingMessage(`Extracting text from ${fileName}...`);
+      setLoadingMessage(`Extracting text from ${fileNameForDisplay}...`);
       await extractPdfText(pdf);
 
       // Render the first page
@@ -335,6 +334,9 @@ const DocumentViewer = () => {
 
     try {
       setIsLoading(true);
+      
+      // Set loading message with filename
+      setLoadingMessage(`Loading ${fileName}...`);
 
       // Construct the URL for the test PDF
       const pdfUrl = `/test-docs/${fileName}`;
@@ -352,7 +354,13 @@ const DocumentViewer = () => {
       setDocHash(docHashValue);
 
       const pdfjsLib = window.pdfjsLib;
-      const pdf = await pdfjsLib.getDocument({ url: pdfUrl }).promise;
+      const pdf = await pdfjsLib.getDocument({ 
+        data: arrayBuffer,
+        onProgress: (progress) => {
+          const percent = Math.round((progress.loaded / progress.total) * 100);
+          setLoadingMessage(`Loading ${fileName}: ${percent}%`);
+        }
+      }).promise;
 
       setPdfDoc(pdf);
       setNumPages(pdf.numPages);
@@ -367,13 +375,18 @@ const DocumentViewer = () => {
       });
 
       // Extract text content from the PDF
+      setLoadingMessage(`Extracting text from ${fileName}...`);
       await extractPdfText(pdf);
 
       // Render the first page
       await renderPage(1);
+      
+      // Clear loading message when complete
+      setLoadingMessage('');
     } catch (error) {
       console.error('Error loading test PDF:', error);
       console.error(`Error loading test PDF: ${error.message}`);
+      setLoadingMessage('');
       // In a real environment, we might show an alert, but for testing purposes we'll log the error
       if (typeof window !== 'undefined' && window.alert) {
         window.alert(`Error loading test PDF: ${error.message}`);
