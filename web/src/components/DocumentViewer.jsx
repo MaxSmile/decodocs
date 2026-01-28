@@ -54,7 +54,7 @@ const DocumentViewer = () => {
   const canvasRef = useRef(null);
   const textLayerRef = useRef(null);
   const annotationsRef = useRef(null);
-  const { documentId } = useParams();
+  const { documentId, fileName } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -84,18 +84,23 @@ const DocumentViewer = () => {
       pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
       
       window.pdfjsLib = pdfjsLib;
+      
+      // If fileName is provided in the route, load the test PDF
+      if (fileName) {
+        await loadTestPdf(fileName);
+      }
     };
     
     initPdfJs();
-  }, []);
+  }, [fileName]);
 
   // Get document from location state
   useEffect(() => {
-    if (location.state?.document) {
+    if (location.state?.document && !fileName) { // Only run if not loading a test PDF
       setSelectedDocument(location.state.document);
       loadPdfFromBlob(location.state.document.file);
     }
-  }, [location]);
+  }, [location, fileName]);
 
   // Load PDF from Blob/File object
   const loadPdfFromBlob = async (fileBlob) => {
@@ -306,6 +311,60 @@ const DocumentViewer = () => {
   // Show risk details
   const showRiskDetails = (riskBadge) => {
     alert(`Risk: ${riskBadge.description}\n\n${riskBadge.explanation || 'No explanation available.'}`);
+  };
+
+  // Load test PDF from public folder
+  const loadTestPdf = async (fileName) => {
+    if (!window.pdfjsLib) return;
+
+    try {
+      setIsLoading(true);
+      
+      // Construct the URL for the test PDF
+      const pdfUrl = `/test-docs/${fileName}`;
+      
+      // Fetch the PDF file
+      const response = await fetch(pdfUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch PDF: ${response.statusText}`);
+      }
+      
+      const arrayBuffer = await response.arrayBuffer();
+      
+      // Compute document hash from PDF bytes
+      const docHashValue = await computeSHA256(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+      setDocHash(docHashValue);
+      
+      const pdfjsLib = window.pdfjsLib;
+      const pdf = await pdfjsLib.getDocument({ url: pdfUrl }).promise;
+      
+      setPdfDoc(pdf);
+      setNumPages(pdf.numPages);
+      
+      // Set the selected document info
+      setSelectedDocument({
+        id: fileName,
+        name: fileName,
+        size: arrayBuffer.byteLength,
+        type: 'application/pdf',
+        file: null // We don't have the File object, but we have the ArrayBuffer
+      });
+      
+      // Extract text content from the PDF
+      await extractPdfText(pdf);
+      
+      // Render the first page
+      await renderPage(1);
+    } catch (error) {
+      console.error('Error loading test PDF:', error);
+      console.error(`Error loading test PDF: ${error.message}`);
+      // In a real environment, we might show an alert, but for testing purposes we'll log the error
+      if (typeof window !== 'undefined' && window.alert) {
+        window.alert(`Error loading test PDF: ${error.message}`);
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Page navigation handlers
