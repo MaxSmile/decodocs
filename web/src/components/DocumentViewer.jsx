@@ -36,6 +36,7 @@ const detectScannedDocument = (textContent, numPages) => {
 
 const DocumentViewer = () => {
   const { authState, app, auth } = useAuth();
+  const [firebaseError, setFirebaseError] = useState(null);
   
   const [analysisResults, setAnalysisResults] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -57,8 +58,22 @@ const DocumentViewer = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  // Check for Firebase errors and set appropriate state
+  useEffect(() => {
+    if (authState.status === 'error' && authState.error) {
+      setFirebaseError(authState.error.message || 'Firebase authentication error');
+    } else if (!app) {
+      setFirebaseError('Firebase not initialized properly');
+    }
+  }, [authState, app]);
+
   // Initialize Firebase functions reference - updated to use context auth
   const functions = app ? getFunctions(app) : null;
+
+  // Function to check if Firebase functions are available
+  const isFirebaseAvailable = () => {
+    return app && functions && authState.status === 'authenticated';
+  };
 
   // Initialize PDF.js worker
   useEffect(() => {
@@ -388,15 +403,10 @@ const DocumentViewer = () => {
   const handleAnalyzeDocument = async () => {
     if (!selectedDocument || !pdfTextContent || !docHash) return;
     
-    if (authState.status === 'error') {
-      alert('Document analysis requires authentication. Please refresh the page and try again.');
-      return;
-    }
-    
     // Check if Firebase functions are available
-    if (!functions) {
-      console.error('Firebase functions not available. Please ensure Firebase is properly configured.');
-      alert('Firebase services are not available. Please contact support or ensure the app is properly configured.');
+    if (!isFirebaseAvailable()) {
+      // Don't show alert, just log the error
+      console.warn('Document analysis unavailable: Firebase services not accessible.');
       return;
     }
     
@@ -548,15 +558,10 @@ const DocumentViewer = () => {
   const handleExplainSelection = async () => {
     if (!selectedDocument || !docHash) return;
     
-    if (authState.status === 'error') {
-      alert('This feature requires authentication. Please refresh the page and try again.');
-      return;
-    }
-    
     // Check if Firebase functions are available
-    if (!functions) {
-      console.error('Firebase functions not available. Please ensure Firebase is properly configured.');
-      alert('Firebase services are not available. Please contact support or ensure the app is properly configured.');
+    if (!isFirebaseAvailable()) {
+      // Don't show alert, just log the error
+      console.warn('Explain selection unavailable: Firebase services not accessible.');
       return;
     }
     
@@ -597,15 +602,10 @@ const DocumentViewer = () => {
   const handleHighlightRisks = async () => {
     if (!selectedDocument || !docHash) return;
     
-    if (authState.status === 'error') {
-      alert('Risk highlighting requires authentication. Please refresh the page and try again.');
-      return;
-    }
-    
     // Check if Firebase functions are available
-    if (!functions) {
-      console.error('Firebase functions not available. Please ensure Firebase is properly configured.');
-      alert('Firebase services are not available. Please contact support or ensure the app is properly configured.');
+    if (!isFirebaseAvailable()) {
+      // Don't show alert, just log the error
+      console.warn('Risk highlighting unavailable: Firebase services not accessible.');
       return;
     }
     
@@ -661,15 +661,10 @@ const DocumentViewer = () => {
   const handleTranslateToPlainEnglish = async () => {
     if (!selectedDocument || !docHash) return;
     
-    if (authState.status === 'error') {
-      alert('Translation requires authentication. Please refresh the page and try again.');
-      return;
-    }
-    
     // Check if Firebase functions are available
-    if (!functions) {
-      console.error('Firebase functions not available. Please ensure Firebase is properly configured.');
-      alert('Firebase services are not available. Please contact support or ensure the app is properly configured.');
+    if (!isFirebaseAvailable()) {
+      // Don't show alert, just log the error
+      console.warn('Translation unavailable: Firebase services not accessible.');
       return;
     }
     
@@ -728,6 +723,21 @@ const DocumentViewer = () => {
           <p><strong>Decode documents. Act with confidence.</strong></p>
         </Link>
       </header>
+      
+      {/* Warning banner for Firebase errors */}
+      {firebaseError && (
+        <div style={{
+          backgroundColor: '#FFFBCC', // Yellow background
+          color: '#746A00', // Darker yellow text for contrast
+          padding: '10px 20px',
+          textAlign: 'center',
+          fontWeight: '500',
+          fontSize: '14px',
+          borderBottom: '1px solid #E5E500'
+        }}>
+          ⚠️ AI calls are disabled because of "{firebaseError}". Document viewing features remain available.
+        </div>
+      )}
       
       <div className="pdf-viewer-layout">
         <div className="pdf-viewer-container">
