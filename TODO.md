@@ -1,25 +1,67 @@
-# TODO
+# TODO (DecoDocs)
 
-## MCP-Markdown-RAG
-- [ ] Design a local-first MCP markdown RAG engine for this repo (components, data flow, and security model)
-- [ ] Select and wire a local vector store (e.g., SQLite/pgvector or similar) with an embedding pipeline for `/docs`, `/infra`, `/web`, `/ai`, and `/projects`
-- [ ] Build ingestion: chunk markdown, embed, store metadata (path, headings, hashes, updated_at) and enable incremental re-index
-- [ ] Expose retrieval for agents (MCP server or CLI endpoint) that returns ranked chunks + source paths
-- [ ] Add validation: small suite to confirm ingest/retrieval works end-to-end and guards against stale indexes
-- [ ] Document runbooks: how to ingest, query, and refresh the index locally
+_Last updated: January 28, 2026_
 
-## Documentation structure and gaps
-- [ ] Map ownership and “source of truth” per domain (product, web, infra, AI/pipelines, projects) and capture it in `docs/README.md`
-- [ ] Normalize document structure (titles, headings, status/last-updated/owner front-matter) across `docs/` and `projects/`
-- [ ] Run a gap pass: note missing sections or inconsistencies (product vs. roadmap vs. decisions; infra rules vs. actual setup; web architecture vs. code)
-- [ ] Adopt the hybrid project structure: brief entries in `docs/ROADMAP.md` under an “External/Side Projects” section, with full detail + contacts/links in `projects/<name>/README.md` and indexed in `projects/README.md` (start with SMRT16 and Voice VPN)
-- [ ] Ensure cross-references are accurate (links between roadmap, decisions, product, infra/web AGENTS) and remove duplicates/contradictions
-- [ ] Write a concise changelog or doc-index so contributors know where to put updates and how to keep the info complete/consistent
+This file mirrors `decodocs-repo/docs/ROADMAP.md` and lists actionable engineering + documentation tasks.
 
-## Monetization integrations (Gamezop + Qureka)
-- [ ] Voice VPN: place Gamezop/Qureka surfaces at natural breaks (post-connect/disconnect), enforce frequency caps, and measure ARPU/retention impact
-- [ ] Bella Chess: add rewarded/playable units between games or in menus; offer “watch/play to unlock hint/analysis” for free users; keep mid-game clean
-- [ ] 2ul: design free tier with rewarded/interstitial units; offer paid “remove ads + perks”; add optional “engage to earn perks” loop
-- [ ] 2ul desktop: implement Qureka web offer wall (https://cumbersome-vpn.web.app/api/ads/) at breakpoints; add a desktop-friendly CPA/native offer rail; instrument RPM/retention by device to avoid cannibalizing upgrades
-- [ ] Traffic fit: confirm Gamezop/Qureka mobile vs. desktop RPMs and SDK/web support; document any mobile-only constraints
-- [ ] Partner ops: add contacts/terms, revenue share, and reporting cadence for Gamezop and Qureka
+## Phase 1 - Web MVP Foundation (Live, Iterating)
+- [ ] Brand polish: ensure "DecoDocs" and "Snap Sign Pty Ltd" are consistent across UI + docs (no legacy names)
+- [ ] Replace placeholder Sign page with real "signing MVP scope" copy + clear CTA (or hide until implemented)
+- [ ] Add a visible "Free vs Pro" gating UX: explain *why* buttons are disabled + what upgrades unlock
+- [ ] Harden analysis flow: loading/error/empty states for analysis results; avoid partial UI renders
+- [ ] Make environment setup unambiguous: one canonical place to define required `.env` variables and how to run locally
+ - [ ] Implement Google Identity Services (GIS) in the web app for Google sign-in and token management
+ - [ ] Configure Firebase Hosting 301 redirects so `https://decodocs-site.web.app` and `https://decodocs-site.firebaseapp.com` permanently redirect to `https://decodocs.com` (via `firebase.json` hosting settings)
+- [ ] Testing:
+  - [ ] Expand Playwright: cover "auth failure still renders PDF", and "analysis buttons gated until authenticated"
+  - [ ] Add CI-friendly `npm run test:unit` + `npm run test:e2e` runbook for the web app
+
+## Phase 2 - Cloud Storage Integrations (Target: Q2 2026)
+- [ ] Define the "Open vs Upload" contract (Free vs Pro) as a spec:
+  - [ ] Default is ephemeral open (no storage)
+  - [ ] Upload/save is explicit and paid (history/export)
+  - [ ] Token revocation guarantees + audit logging expectations
+- [ ] Google Drive (read-only):
+  - [ ] OAuth consent + connect/disconnect UX
+  - [ ] File picker -> open -> analyze pipeline
+  - [ ] Token storage strategy (encrypted at rest; rotation/revocation)
+- [ ] OneDrive (read-only):
+  - [ ] Microsoft Graph integration + consistent UI with Drive
+  - [ ] Cross-browser testing matrix
+- [ ] iCloud Drive:
+  - [ ] User-initiated file selection flow (Safari/iOS constraints)
+  - [ ] Document open parity with local uploads
+- [ ] Security checklist:
+  - [ ] Least-privilege scopes (read-only)
+  - [ ] No background sync or indexing
+  - [ ] Clear user messaging about what is (not) stored
+
+## Phase 3 - Paid Depth + Multi-Document (Target: Q3 2026)
+- [ ] Define "Premium" value clearly (what's expensive and why):
+  - [ ] DOCX conversion pipeline scope and limits
+  - [ ] Multi-document session UX (bundle upload, ordering, references)
+- [ ] Build multi-document analysis scaffolding:
+  - [ ] Data model for bundles / references
+  - [ ] UI for selecting which docs are in scope
+  - [ ] Output schema for cross-document contradictions
+
+## Phase 4 - Mobile Apps (Target: Q4 2026)
+- [ ] Decide v1 architecture: WebView wrapper vs native shell + deep links
+- [ ] Implement "Open in DecoDocs" from share sheet (iOS + Android)
+- [ ] Establish auth + analytics parity with web (anonymous by default, upgrade path)
+- [ ] Define v1 non-goals explicitly (offline, on-device inference, native signing)
+
+## Phase 5 - Signing & Verification (Target: 2027+)
+- [ ] Write a signing MVP spec:
+  - [ ] What "sign" means (signature placement, audit trail, exports)
+  - [ ] Envelope format + integrity checks
+  - [ ] Legal/compliance assumptions and constraints by region
+- [ ] Decide storage policy for signed artifacts (retention, export, deletion)
+
+## Documentation Hygiene (Always On)
+- [ ] Keep dates current across docs (avoid timelines stuck in 2025 when it's 2026+)
+- [ ] Ensure roadmap claims match the code (mark items "specified" vs "implemented")
+- [ ] Update test plans when selectors/UX change (`docs/test-plans/`)
+
+## New Todos
+- [ ] **Big Document Vector Management**: For big documents, RLM (Recursive Language Model) or other vector-based data management needs to be developed to efficiently handle large PDFs and document collections.
