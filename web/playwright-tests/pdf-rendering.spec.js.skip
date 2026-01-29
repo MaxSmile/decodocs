@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('PDF Rendering Test', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to the document viewer page
-    await page.goto('https://decodocs-site.web.app/view');
+    await page.goto('/view');
   });
 
   test('should render PDF properly on at least 80% of the screen', async ({ page }) => {
@@ -11,7 +11,7 @@ test.describe('PDF Rendering Test', () => {
     await page.waitForLoadState('networkidle');
 
     // Check if we can access the test PDF
-    await page.goto('https://decodocs-site.web.app/view/test-docs/dummy.pdf');
+    await page.goto('/view/test-docs/dummy.pdf');
     
     // Wait for potential PDF loading
     await page.waitForTimeout(3000);
@@ -59,7 +59,7 @@ test.describe('PDF Rendering Test', () => {
 
   test('should handle direct PDF opening', async ({ page }) => {
     // Test opening a PDF directly via URL parameter
-    await page.goto('https://decodocs-site.web.app/');
+    await page.goto('/');
     
     // Look for the Open PDF button
     const openPdfButton = await page.locator('button:has-text("Open PDF"), button:has-text("Open PDF Document")');

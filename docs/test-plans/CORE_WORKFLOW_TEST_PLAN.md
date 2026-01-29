@@ -1,5 +1,7 @@
 # Core Document Workflow Test Plan
 
+IMPORTANT: when run playwrite do it with report list key, like:  npx playwright test --reporter=list
+
 ## 1. Overview
 This test plan focuses on the central value proposition of DecoDocs: **Document Ingestion → AI Analysis → Results Visualization**. It breaks down the workflow into granular, observable UI states and user interactions available in the production environment.
 

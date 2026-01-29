@@ -3,11 +3,11 @@ import { test, expect } from '@playwright/test';
 test.describe('Dummy PDF Loading Test', () => {
   test('should properly load and render dummy PDF via /view/test-docs/dummy.pdf route', async ({ page }) => {
     // Start the local development server first
-    // Note: This assumes the app is running locally at http://localhost:5173
+    // Note: This assumes the app is running locally at http://localhost:3000
     // You may need to start the server separately before running this test
     
     // Navigate to the test PDF route
-    await page.goto('http://localhost:3003/view/test-docs/dummy.pdf');
+    await page.goto('http://localhost:3000/view/test-docs/dummy.pdf');
     
     // Wait for the page to load and PDF to render
     await page.waitForLoadState('networkidle');
@@ -45,7 +45,7 @@ test.describe('Dummy PDF Loading Test', () => {
   test('should properly load and render dummy PDF via /view route with documentId', async ({ page }) => {
     // This test ensures that the regular /view route also works properly
     // For this test, we'll simulate loading the dummy PDF through the standard mechanism
-    await page.goto('http://localhost:3003/view');
+    await page.goto('http://localhost:3000/view');
     
     await page.waitForLoadState('networkidle');
     
@@ -60,7 +60,7 @@ test.describe('Dummy PDF Loading Test', () => {
 
   test('should handle invalid PDF file gracefully', async ({ page }) => {
     // Test that the app handles non-existent PDF files gracefully
-    await page.goto('http://localhost:3003/view/test-docs/nonexistent.pdf');
+    await page.goto('http://localhost:3000/view/test-docs/nonexistent.pdf');
     
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);

@@ -9,7 +9,7 @@ import { getAuth, signInAnonymously, connectAuthEmulator } from 'firebase/auth';
 const AuthContext = createContext();
 
 // Firebase configuration
-const firebaseConfig = {
+let firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || process.env.REACT_APP_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || process.env.REACT_APP_FIREBASE_AUTH_DOMAIN || 'snapsign-au.firebaseapp.com',
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || process.env.REACT_APP_FIREBASE_PROJECT_ID || 'snapsign-au',
@@ -36,9 +36,21 @@ let auth = null;
 let authEmulatorConnected = false;
 
 try {
-  // Fail fast with a clear message if the developer left placeholder config in place.
-  // Bypass check if we are in MOCK_AUTH mode (e.g. End-to-End tests)
-  if (!window.MOCK_AUTH && isProbablyPlaceholder(firebaseConfig.apiKey)) {
+  // Check if we are in MOCK_AUTH mode (e.g. End-to-End tests)
+  if (window.MOCK_AUTH) {
+     // In mock mode, if keys are missing, provide dummy values to ensure app initialization
+     if (isProbablyPlaceholder(firebaseConfig.apiKey)) {
+         console.log('Using dummy Firebase config for MOCK_AUTH mode');
+         firebaseConfig = {
+             apiKey: "AIzaSyDummyKeyForMockStats",
+             authDomain: "mock-project.firebaseapp.com",
+             projectId: "mock-project",
+             storageBucket: "mock-project.appspot.com",
+             messagingSenderId: "123456789",
+             appId: "1:123456789:web:abcdef"
+         };
+     }
+  } else if (isProbablyPlaceholder(firebaseConfig.apiKey)) {
     throw new Error(
       'Missing/placeholder Firebase API key. Set VITE_FIREBASE_API_KEY in decodocs-repo/web/.env (or enable the Auth emulator).'
     );
