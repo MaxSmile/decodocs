@@ -2,6 +2,7 @@ import React from 'react';
 
 import { footerLinks } from '../../lib/landingData.js';
 import logo from '../../assets/DecoDocsLogo.svg';
+import { APP_VERSION } from '../../lib/version.js';
 
 const Footer = () => {
   return (
@@ -20,6 +21,9 @@ const Footer = () => {
           </p>
           <p className="text-xs text-slate-500">
             © {new Date().getFullYear()} Snap Sign Pty Ltd. All rights reserved.
+          </p>
+          <p className="text-xs text-slate-400">
+            Version: {APP_VERSION}
           </p>
         </div>
 
