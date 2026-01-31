@@ -13,6 +13,19 @@
     />
     <link rel="canonical" href="https://decodocs.com/" />
 
+    <script>
+      (function () {
+        var canonicalHost = 'decodocs.com';
+        var host = location.host;
+        var isFirebase = host.endsWith('.web.app') || host.endsWith('.firebaseapp.com');
+        if (isFirebase && host !== canonicalHost) {
+          location.replace(
+            'https://' + canonicalHost + location.pathname + location.search + location.hash
+          );
+        }
+      })();
+    </script>
+
     <meta property="og:site_name" content="DecoDocs" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="DecoDocs — Understand documents before you sign" />
