@@ -1,9 +1,18 @@
 // utils/pdfUtils.js
 import * as pdfjsLib from 'pdfjs-dist';
 
-// Self-hosted worker for reliability and performance
-// Make sure pdf.worker.min.js from pdfjs-dist is present in your public/ directory
-pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
+// PDF.js worker
+//
+// Important: pdfjs-dist ships the worker as an ES module (.mjs). If we load it as a classic
+// worker script, browsers will throw: "Unexpected token 'export'".
+//
+// Using workerPort with { type: 'module' } avoids Firebase hosting/static-path issues and works
+// reliably with Vite.
+pdfjsLib.GlobalWorkerOptions.workerPort = new Worker(
+  new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url),
+  { type: 'module' }
+);
+
 
 /**
  * Loads a PDF document from a URL
