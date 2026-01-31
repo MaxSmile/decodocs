@@ -9,6 +9,9 @@
 
 **Rule:** Keep this as an independent repo (retain its own `.git/`).
 
+## Hosting target → production domain
+DecoDocs is deployed via the SnapSign-AU Firebase project:
+- `site: "decodocs-site"` → **decodocs.com**
 
 ## Hosting/Functions Requirements
 - **Only use simple (static or SPA) Firebase Hosting and basic gen2 Functions.**
