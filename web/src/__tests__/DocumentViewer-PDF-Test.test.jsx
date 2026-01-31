@@ -49,20 +49,21 @@ vi.mock('../context/AuthContext', () => ({
 global.fetch = vi.fn();
 
 // Mock PDFjs
-const mockGetDocument = vi.fn();
+// NOTE: vi.mock() is hoisted, so mocks that are referenced inside the factory
+// must be created with vi.hoisted() to avoid TDZ errors.
+const { mockGetDocument } = vi.hoisted(() => ({
+  mockGetDocument: vi.fn(),
+}));
+
 const mockGetPage = vi.fn();
 const mockGetViewport = vi.fn();
 const mockRender = vi.fn();
 const mockGetTextContent = vi.fn();
 
-vi.mock('pdfjs-dist', async () => {
-  const actual = await vi.importActual('pdfjs-dist');
-  return {
-    ...actual,
-    GlobalWorkerOptions: { workerSrc: '/pdf.worker.min.mjs' },
-    getDocument: mockGetDocument,
-  };
-});
+vi.mock('pdfjs-dist', () => ({
+  GlobalWorkerOptions: {},
+  getDocument: mockGetDocument,
+}));
 
 // Mock window.URL.createObjectURL
 global.URL = {
@@ -86,24 +87,30 @@ describe('DocumentViewer PDF Loading Tests', () => {
 
     mockGetDocument.mockImplementation((params) => {
       if (params.url) {
-        // For test-docs route
-        return Promise.resolve({
+        // Legacy path (not used for /test-docs)
+        return {
           promise: Promise.resolve({
             numPages: 1,
             getPage: mockGetPage,
             destroy: vi.fn(),
           }),
-        });
-      } else if (params.data) {
-        // For blob loading
-        return Promise.resolve({
-          promise: Promise.resolve({
-            numPages: 1,
-            getPage: mockGetPage,
-            destroy: vi.fn(),
-          }),
-        });
+        };
       }
+
+      if (params.data) {
+        // /test-docs loads via ArrayBuffer
+        return {
+          promise: Promise.resolve({
+            numPages: 1,
+            getPage: mockGetPage,
+            destroy: vi.fn(),
+          }),
+        };
+      }
+
+      return {
+        promise: Promise.reject(new Error('Unexpected getDocument params')),
+      };
     });
 
     mockGetPage.mockResolvedValue({
@@ -143,7 +150,10 @@ describe('DocumentViewer PDF Loading Tests', () => {
     });
 
     await waitFor(() => {
-      expect(mockGetDocument).toHaveBeenCalledWith({ url: '/test-docs/dummy.pdf' });
+      expect(mockGetDocument).toHaveBeenCalled();
+      expect(mockGetDocument.mock.calls[0][0]).toMatchObject({
+        data: expect.any(ArrayBuffer),
+      });
     });
 
     // Check that the PDF controls are rendered

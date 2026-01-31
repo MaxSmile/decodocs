@@ -152,10 +152,10 @@ export const footerLinks = {
   ],
   company: [
     { label: 'About', href: '/about' },
-    { label: 'Contact', href: 'mailto:contact@snapsign.com' }
+    { label: 'Contact', href: '/contact' }
   ],
   legal: [
-    { label: 'Privacy', href: '#privacy' },
-    { label: 'Terms', href: '#terms' }
+    { label: 'Privacy', href: '/privacy' },
+    { label: 'Terms', href: '/terms' }
   ]
 };

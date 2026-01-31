@@ -56,15 +56,15 @@ const Layout = ({ children, showHeader = true, showFooter = true }) => {
               <Link to="/about" className="text-gray-600 no-underline text-sm hover:text-gray-800 transition-colors">
                 About
               </Link>
-              <a href="#privacy" className="text-gray-600 no-underline text-sm hover:text-gray-800 transition-colors">
+              <Link to="/privacy" className="text-gray-600 no-underline text-sm hover:text-gray-800 transition-colors">
                 Privacy Policy
-              </a>
-              <a href="#terms" className="text-gray-600 no-underline text-sm hover:text-gray-800 transition-colors">
+              </Link>
+              <Link to="/terms" className="text-gray-600 no-underline text-sm hover:text-gray-800 transition-colors">
                 Terms of Service
-              </a>
-              <a href="#contact" className="text-gray-600 no-underline text-sm hover:text-gray-800 transition-colors">
+              </Link>
+              <Link to="/contact" className="text-gray-600 no-underline text-sm hover:text-gray-800 transition-colors">
                 Contact
-              </a>
+              </Link>
             </div>
           </div>
         </footer>

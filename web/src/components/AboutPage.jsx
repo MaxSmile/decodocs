@@ -8,7 +8,7 @@ const AboutPage = () => {
       <header className="App-header">
         <Link to="/" style={{ textDecoration: 'none', color: 'white' }}>
           <h1>DecoDocs</h1>
-          <p><strong>Decode documents. Act with confidence.</strong></p>
+          <p><strong>Understand documents before you sign.</strong></p>
         </Link>
       </header>
 
@@ -107,9 +107,9 @@ const AboutPage = () => {
           <p>ABN 72 679 570 757</p>
           <div className="footer-links">
             <Link to="/about">About</Link>
-            <a href="#privacy">Privacy Policy</a>
-            <a href="#terms">Terms of Service</a>
-            <a href="#contact">Contact</a>
+            <Link to="/privacy">Privacy Policy</Link>
+            <Link to="/terms">Terms of Service</Link>
+            <Link to="/contact">Contact</Link>
           </div>
         </div>
       </footer>

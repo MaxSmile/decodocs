@@ -17,6 +17,25 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
+// Basic polyfills for libraries that expect browser primitives
+// (pdfjs-dist in particular expects DOMMatrix and Worker)
+if (!globalThis.DOMMatrix) {
+  // Minimal stub: enough to keep pdfjs from crashing in unit tests
+  globalThis.DOMMatrix = class DOMMatrix {
+    constructor() {}
+  };
+}
+
+if (!globalThis.Worker) {
+  globalThis.Worker = class Worker {
+    constructor() {}
+    postMessage() {}
+    terminate() {}
+    addEventListener() {}
+    removeEventListener() {}
+  };
+}
+
 // Runs a cleanup after each test case (e.g. clearing jsdom)
 afterEach(() => {
   cleanup();

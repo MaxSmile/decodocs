@@ -4,6 +4,9 @@ import HomePage from './components/HomePage.jsx';
 import DocumentViewer from './components/DocumentViewer.jsx';
 import DocumentEditor from './components/DocumentEditor.jsx';
 import AboutPage from './components/AboutPage.jsx';
+import PrivacyPage from './components/PrivacyPage.jsx';
+import TermsPage from './components/TermsPage.jsx';
+import ContactPage from './components/ContactPage.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 import AuthErrorNotification from './components/AuthErrorNotification.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
@@ -40,6 +43,21 @@ function App() {
             <Route path="/about" element={
               <div className="App">
                 <AboutPage />
+              </div>
+            } />
+            <Route path="/privacy" element={
+              <div className="App">
+                <PrivacyPage />
+              </div>
+            } />
+            <Route path="/terms" element={
+              <div className="App">
+                <TermsPage />
+              </div>
+            } />
+            <Route path="/contact" element={
+              <div className="App">
+                <ContactPage />
               </div>
             } />
             <Route path="/view/:documentId?" element={

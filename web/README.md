@@ -60,6 +60,15 @@ This application follows a modern React architecture with:
 - **Google Generative AI**: AI-powered document analysis
 - **Google Identity Services (GIS)**: Google sign-in and OAuth token handling for the web app
 
+## Pages / Routes
+
+- `/` landing
+- `/view` viewer
+- `/about` about
+- `/privacy` privacy policy
+- `/terms` terms of service
+- `/contact` contact + signing waitlist
+
 ## Features
 
 ### Document Analysis

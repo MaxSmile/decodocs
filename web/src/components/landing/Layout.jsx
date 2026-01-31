@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 import logo from '../../assets/DecoDocsLogo.svg';
+import Footer from './Footer.jsx';
 
 const Layout = ({ onOpenPdf, children }) => {
   return (
@@ -43,6 +44,7 @@ const Layout = ({ onOpenPdf, children }) => {
         </header>
 
         <main className="relative z-10">{children}</main>
+        <Footer />
       </div>
     </div>
   );
