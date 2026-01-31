@@ -9,14 +9,19 @@ import { getAuth, signInAnonymously, connectAuthEmulator } from 'firebase/auth';
 const AuthContext = createContext();
 
 // Firebase configuration
+// NOTE: This config is public and safe to ship to the client (it is not a secret).
+// It identifies the Firebase project used by the app; security is enforced by Firebase rules.
+//
+// We keep a hard default so production works without any .env setup, but allow overrides for
+// local experimentation via Vite env vars.
 let firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || process.env.REACT_APP_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || process.env.REACT_APP_FIREBASE_AUTH_DOMAIN || 'snapsign-au.firebaseapp.com',
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || process.env.REACT_APP_FIREBASE_PROJECT_ID || 'snapsign-au',
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || process.env.REACT_APP_FIREBASE_STORAGE_BUCKET || 'snapsign-au.appspot.com',
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || process.env.REACT_APP_FIREBASE_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || process.env.REACT_APP_FIREBASE_MEASUREMENT_ID,
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyDqow-DLrBOZGUbGCN2nxpMCqXcbqDQe5Q',
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'snapsign-au.firebaseapp.com',
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'snapsign-au',
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'snapsign-au.firebasestorage.app',
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '388378898686',
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || '1:388378898686:web:ec9931e426c1e7e768b5af',
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || 'G-R41Q720M9W',
 };
 
 const isProbablyPlaceholder = (v) => {
@@ -52,7 +57,7 @@ try {
      }
   } else if (isProbablyPlaceholder(firebaseConfig.apiKey)) {
     throw new Error(
-      'Missing/placeholder Firebase API key. Set VITE_FIREBASE_API_KEY in decodocs-repo/web/.env (or enable the Auth emulator).'
+      'Missing/placeholder Firebase API key. This should not happen in production. For local dev you can set VITE_FIREBASE_API_KEY or enable the Auth emulator.'
     );
   }
 
