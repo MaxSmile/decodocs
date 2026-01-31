@@ -12,7 +12,10 @@ export default defineConfig({
     'process.env': {}
   },
   build: {
-    outDir: 'dist'
+    // Build output is nested inside the web app folder so SnapSign-AU can deploy it
+    // via firebase.json without copying artifacts around.
+    outDir: 'decodocs.com',
+    emptyOutDir: true
   },
   test: {
     environment: 'jsdom',
