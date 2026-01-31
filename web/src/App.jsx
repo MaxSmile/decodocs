@@ -30,16 +30,8 @@ function App() {
         <AuthErrorNotification />
         <Router>
           <Routes>
-            <Route path="/" element={
-              <div className="App homepage-app">
-                <HomePage />
-              </div>
-            } />
-            <Route path="/app" element={
-              <div className="App homepage-app">
-                <HomePage />
-              </div>
-            } />
+            <Route path="/" element={<HomePage />} />
+            <Route path="/app" element={<HomePage />} />
             <Route path="/sign" element={
               <div className="App">
                 <SignPage />
