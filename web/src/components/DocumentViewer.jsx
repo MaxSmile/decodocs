@@ -12,7 +12,6 @@ import { usePDFRenderer } from '../hooks/usePDFRenderer.js';
 import { computeSHA256, extractPdfText } from '../utils/pdfUtils.js';
 
 // Use local worker from public folder to ensure stability in tests and offline
-const pdfWorker = '/pdf.worker.min.mjs';
 
 const DocumentViewer = () => {
   const { authState, app, auth } = useAuth();
@@ -64,11 +63,12 @@ const DocumentViewer = () => {
     return app && functions && authState.status === 'authenticated';
   };
 
-  // Initialize PDF.js worker
+  // Initialize PDF.js
+  // NOTE: Worker is configured in utils/pdfUtils.js via GlobalWorkerOptions.workerPort
+  // as a module Worker to avoid "Unexpected token 'export'".
   useEffect(() => {
     const initPdfJs = async () => {
       const pdfjsLib = await import('pdfjs-dist');
-      pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
       window.pdfjsLib = pdfjsLib;
       setPdfLibLoaded(true);
 
@@ -107,7 +107,6 @@ const DocumentViewer = () => {
 
       const arrayBuffer = await fileBlob.arrayBuffer();
       console.log('PDF Buffer Size:', arrayBuffer.byteLength);
-      console.log('Worker Src:', window.pdfjsLib.GlobalWorkerOptions.workerSrc);
       const docHashValue = await computeSHA256(arrayBuffer);
       setDocHash(docHashValue);
 

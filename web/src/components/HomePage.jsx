@@ -9,7 +9,6 @@ import FeatureGrid from './landing/FeatureGrid.jsx';
 import UseCases from './landing/UseCases.jsx';
 import Pricing from './landing/Pricing.jsx';
 import FAQ from './landing/FAQ.jsx';
-import Footer from './landing/Footer.jsx';
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -71,7 +70,6 @@ const HomePage = () => {
       <UseCases />
       <Pricing />
       <FAQ />
-      <Footer />
     </LandingLayout>
   );
 };
