@@ -29,10 +29,10 @@ const Footer = () => {
 
         <div>
           <p className="text-sm font-semibold text-slate-900">Product</p>
-          <ul className="mt-4 space-y-3 text-sm text-slate-600">
+          <ul className="mt-4 space-y-3 text-sm text-slate-600 list-none p-0 m-0">
             {footerLinks.product.map((link) => (
-              <li key={link.label}>
-                <a className="hover:text-slate-900" href={link.href}>
+              <li key={link.label} className="m-0">
+                <a className="text-slate-600 no-underline hover:text-slate-900 hover:underline" href={link.href}>
                   {link.label}
                 </a>
               </li>
@@ -42,10 +42,10 @@ const Footer = () => {
 
         <div>
           <p className="text-sm font-semibold text-slate-900">Company</p>
-          <ul className="mt-4 space-y-3 text-sm text-slate-600">
+          <ul className="mt-4 space-y-3 text-sm text-slate-600 list-none p-0 m-0">
             {footerLinks.company.map((link) => (
-              <li key={link.label}>
-                <a className="hover:text-slate-900" href={link.href}>
+              <li key={link.label} className="m-0">
+                <a className="text-slate-600 no-underline hover:text-slate-900 hover:underline" href={link.href}>
                   {link.label}
                 </a>
               </li>
@@ -55,10 +55,10 @@ const Footer = () => {
 
         <div>
           <p className="text-sm font-semibold text-slate-900">Legal</p>
-          <ul className="mt-4 space-y-3 text-sm text-slate-600">
+          <ul className="mt-4 space-y-3 text-sm text-slate-600 list-none p-0 m-0">
             {footerLinks.legal.map((link) => (
-              <li key={link.label}>
-                <a className="hover:text-slate-900" href={link.href}>
+              <li key={link.label} className="m-0">
+                <a className="text-slate-600 no-underline hover:text-slate-900 hover:underline" href={link.href}>
                   {link.label}
                 </a>
               </li>
