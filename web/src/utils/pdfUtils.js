@@ -105,11 +105,28 @@ export const extractPdfText = async (pdf, pageNumber) => {
   }
 };
 
-/** Utility function to compute SHA-256 hash */
+/** Utility function to compute SHA-256 hash
+ *
+ * Accepts:
+ * - string (encoded as UTF-8)
+ * - ArrayBuffer
+ * - Uint8Array
+ */
 export const computeSHA256 = async (data) => {
-  const encoder = new TextEncoder();
-  const dataBuffer = encoder.encode(data);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', dataBuffer);
+  let inputBuffer;
+
+  if (typeof data === 'string') {
+    const encoder = new TextEncoder();
+    inputBuffer = encoder.encode(data);
+  } else if (data instanceof ArrayBuffer) {
+    inputBuffer = new Uint8Array(data);
+  } else if (data instanceof Uint8Array) {
+    inputBuffer = data;
+  } else {
+    throw new Error('computeSHA256: unsupported input type');
+  }
+
+  const hashBuffer = await crypto.subtle.digest('SHA-256', inputBuffer);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
 };

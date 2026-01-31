@@ -108,7 +108,7 @@ const DocumentViewer = () => {
       const arrayBuffer = await fileBlob.arrayBuffer();
       console.log('PDF Buffer Size:', arrayBuffer.byteLength);
       console.log('Worker Src:', window.pdfjsLib.GlobalWorkerOptions.workerSrc);
-      const docHashValue = await computeSHA256(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+      const docHashValue = await computeSHA256(arrayBuffer);
       setDocHash(docHashValue);
 
       const lib = window.pdfjsLib;
@@ -153,7 +153,7 @@ const DocumentViewer = () => {
       }
 
       const arrayBuffer = await response.arrayBuffer();
-      const docHashValue = await computeSHA256(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+      const docHashValue = await computeSHA256(arrayBuffer);
       setDocHash(docHashValue);
 
       const pdfjsLib = window.pdfjsLib;
