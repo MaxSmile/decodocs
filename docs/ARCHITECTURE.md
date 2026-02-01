@@ -94,9 +94,12 @@ functions/
 ### Service Layer
 
 #### AI Processing Service
-- **Google Generative AI SDK**: AI model integration
-- **Gemini 2.0 Flash**: Optimized for efficiency
-- **Prompt Engineering**: Structured prompts for consistent output
+- **LLM provider(s)**: Gemini initially (e.g. Gemini 2.x Flash), but designed to be swappable.
+- **DSPy prompt programs (planned)**:
+  - document → structured facts → risks → answers
+  - allows automatic prompt optimization to minimize token waste
+  - improves predictability of token usage over time
+- **Prompt Engineering**: Structured outputs as JSON for consistent rendering and evaluation
 
 #### Document Analysis Service
 - **Text Extraction**: PDF content processing

@@ -52,6 +52,13 @@ states.
 - Test coverage (unit + Playwright tests)
 - Google Identity Services (GIS) for Google sign-in and token handling in the web app
 
+### AI Pipeline Direction (DSPy)
+We will evolve prompts into a **DSPy** pipeline:
+- document → structured facts → risks → answers
+- DSPy will optimize for **lower token waste** by learning concise prompts over time.
+- Makes it easier to swap models (e.g. **Gemini 2.5 Flash ↔ other providers**) without rewriting prompt logic.
+- Token usage becomes more predictable and optimizable as we accumulate eval data.
+
 ---
 
 ## Phase 2 — Cloud Storage Integrations (Target: Q2 2026)
