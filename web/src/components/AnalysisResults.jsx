@@ -2,22 +2,86 @@ import React from 'react';
 import RiskItem from './RiskItem.jsx';
 
 /**
- * Analysis results display component
+ * Analysis results display component.
+ *
+ * The DocumentViewer stores analysis per-document with a small `_meta` status object.
+ *
+ * Shape:
+ * {
+ *   _meta?: { status: 'idle'|'loading'|'success'|'error', message?: string }
+ *   summary?: string
+ *   risks?: Array<...>
+ *   recommendations?: string[]
+ *   typeSpecific?: object
+ * }
  */
 const AnalysisResults = ({ analysis }) => {
-  if (!analysis) return null;
+  const meta = analysis?._meta || { status: analysis ? 'success' : 'idle' };
+
+  // Empty state
+  if (!analysis || meta.status === 'idle') {
+    return (
+      <div className="bg-white rounded-lg p-4 shadow-md mt-2.5">
+        <h4 className="mt-0 text-gray-800 border-b border-gray-300 pb-2">
+          Analysis Results
+        </h4>
+        <p className="text-gray-700 m-0">No analysis yet. Run “Type-specific analysis (recommended)” to see results here.</p>
+      </div>
+    );
+  }
+
+  // Loading state
+  if (meta.status === 'loading') {
+    return (
+      <div className="bg-white rounded-lg p-4 shadow-md mt-2.5">
+        <h4 className="mt-0 text-gray-800 border-b border-gray-300 pb-2">
+          Analysis Results
+        </h4>
+        <div className="flex items-center gap-3 text-gray-700">
+          <div className="w-5 h-5 border-2 border-gray-200 border-t-blue-500 rounded-full animate-spin" />
+          <div>{meta.message || 'Analyzing…'}</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (meta.status === 'error') {
+    return (
+      <div className="bg-white rounded-lg p-4 shadow-md mt-2.5">
+        <h4 className="mt-0 text-gray-800 border-b border-gray-300 pb-2">
+          Analysis Results
+        </h4>
+        <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-900">
+          <div className="font-semibold">Analysis failed</div>
+          <div className="mt-1">{meta.message || 'Request failed.'}</div>
+        </div>
+      </div>
+    );
+  }
+
+  const hasSummary = typeof analysis.summary === 'string' && analysis.summary.trim().length > 0;
+  const hasRisks = Array.isArray(analysis.risks) && analysis.risks.length > 0;
+  const hasRecommendations = Array.isArray(analysis.recommendations) && analysis.recommendations.length > 0;
 
   return (
     <div className="bg-white rounded-lg p-4 shadow-md mt-2.5">
       <h4 className="mt-0 text-gray-800 border-b border-gray-300 pb-2">
         Analysis Results
       </h4>
-      <div className="mb-4">
-        <h5 className="mt-0 text-gray-700 font-semibold mb-2">Document Summary</h5>
-        <p className="text-gray-700">{analysis.summary}</p>
-      </div>
 
-      {analysis.risks && analysis.risks.length > 0 && (
+      {!hasSummary && !analysis.typeSpecific ? (
+        <p className="text-gray-700 m-0">No results were returned yet.</p>
+      ) : null}
+
+      {hasSummary && (
+        <div className="mb-4">
+          <h5 className="mt-0 text-gray-700 font-semibold mb-2">Document Summary</h5>
+          <p className="text-gray-700">{analysis.summary}</p>
+        </div>
+      )}
+
+      {hasRisks && (
         <div className="mb-4">
           <h5 className="mt-0 text-gray-700 font-semibold mb-2">Identified Risks</h5>
           {analysis.risks.map((risk) => (
@@ -91,7 +155,7 @@ const AnalysisResults = ({ analysis }) => {
         </div>
       )}
 
-      {analysis.recommendations && analysis.recommendations.length > 0 && (
+      {hasRecommendations && (
         <div>
           <h5 className="mt-0 text-gray-700 font-semibold mb-2">Recommendations</h5>
           <ul className="list-none p-0">

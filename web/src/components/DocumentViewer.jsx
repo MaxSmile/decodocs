@@ -392,6 +392,15 @@ const DocumentViewer = () => {
       return;
     }
 
+    // Make the results panel deterministic: show a loading state immediately.
+    setAnalysisResults((prev) => ({
+      ...prev,
+      [selectedDocument.id]: {
+        ...(prev[selectedDocument.id] || {}),
+        _meta: { status: 'loading', message: 'Running type-specific analysis…' },
+      },
+    }));
+
     setIsLoading(true);
 
     try {
@@ -404,6 +413,13 @@ const DocumentViewer = () => {
           secondaryLabel: null,
           secondaryTo: null,
         });
+        setAnalysisResults((prev) => ({
+          ...prev,
+          [selectedDocument.id]: {
+            ...(prev[selectedDocument.id] || {}),
+            _meta: { status: 'error', message: 'Not available in mock mode yet.' },
+          },
+        }));
         return;
       }
 
@@ -426,6 +442,7 @@ const DocumentViewer = () => {
         ...prev,
         [selectedDocument.id]: {
           ...(prev[selectedDocument.id] || {}),
+          _meta: { status: 'success' },
           typeSpecific,
         },
       }));
@@ -444,6 +461,13 @@ const DocumentViewer = () => {
       });
     } catch (e) {
       console.error('analyzeByType error:', e);
+      setAnalysisResults((prev) => ({
+        ...prev,
+        [selectedDocument.id]: {
+          ...(prev[selectedDocument.id] || {}),
+          _meta: { status: 'error', message: e?.message || 'Request failed.' },
+        },
+      }));
       setGate({
         title: 'Type-specific analysis failed',
         message: e?.message || 'Request failed.',
@@ -466,6 +490,14 @@ const DocumentViewer = () => {
       return;
     }
 
+    setAnalysisResults((prev) => ({
+      ...prev,
+      [selectedDocument.id]: {
+        ...(prev[selectedDocument.id] || {}),
+        _meta: { status: 'loading', message: 'Running analysis…' },
+      },
+    }));
+
     setIsLoading(true);
 
     try {
@@ -477,9 +509,17 @@ const DocumentViewer = () => {
       }
 
       if (preflightResult.classification === 'PRO_REQUIRED') {
+        const msg = preflightResult.reasons?.map((r) => r.message).join(' ') || 'This document requires Pro features (OCR / deeper processing).';
+        setAnalysisResults((prev) => ({
+          ...prev,
+          [selectedDocument.id]: {
+            ...(prev[selectedDocument.id] || {}),
+            _meta: { status: 'error', message: msg },
+          },
+        }));
         setGate({
           title: 'Pro required',
-          message: preflightResult.reasons?.map((r) => r.message).join(' ') || 'This document requires Pro features (OCR / deeper processing).',
+          message: msg,
           primaryLabel: 'Upgrade to Pro',
           primaryTo: '/pricing',
           secondaryLabel: 'Cancel',
@@ -542,6 +582,7 @@ const DocumentViewer = () => {
       if (result.data.ok) {
         setGate(null);
         const mappedAnalysis = {
+          _meta: { status: 'success' },
           summary: result.data.result.plainExplanation,
           keyPoints: [],
           risks: result.data.result.risks.map((risk) => ({
@@ -563,9 +604,17 @@ const DocumentViewer = () => {
       } else {
         const code = result.data.code;
         if (code === 'SCAN_DETECTED_PRO_REQUIRED') {
+          const msg = result.data.message || 'This PDF appears to be scanned. OCR is available on Pro.';
+          setAnalysisResults((prev) => ({
+            ...prev,
+            [selectedDocument.id]: {
+              ...(prev[selectedDocument.id] || {}),
+              _meta: { status: 'error', message: msg },
+            },
+          }));
           setGate({
             title: 'Scanned PDF (OCR requires Pro)',
-            message: result.data.message || 'This PDF appears to be scanned. OCR is available on Pro.',
+            message: msg,
             primaryLabel: 'Upgrade to Pro',
             primaryTo: '/pricing',
             secondaryLabel: 'Cancel',
@@ -575,9 +624,17 @@ const DocumentViewer = () => {
         }
 
         if (code === 'ANON_TOKEN_LIMIT') {
+          const msg = result.data.message || 'Anonymous token limit reached. Create a free account to continue.';
+          setAnalysisResults((prev) => ({
+            ...prev,
+            [selectedDocument.id]: {
+              ...(prev[selectedDocument.id] || {}),
+              _meta: { status: 'error', message: msg },
+            },
+          }));
           setGate({
             title: 'Limit reached',
-            message: result.data.message || 'Anonymous token limit reached. Create a free account to continue.',
+            message: msg,
             primaryLabel: 'Create free account',
             primaryTo: '/sign-in',
             secondaryLabel: 'Cancel',
@@ -587,9 +644,17 @@ const DocumentViewer = () => {
         }
 
         if (code === 'FREE_TOKEN_LIMIT') {
+          const msg = result.data.message || 'Daily token limit reached. Upgrade to Pro to continue.';
+          setAnalysisResults((prev) => ({
+            ...prev,
+            [selectedDocument.id]: {
+              ...(prev[selectedDocument.id] || {}),
+              _meta: { status: 'error', message: msg },
+            },
+          }));
           setGate({
             title: 'Daily limit reached',
-            message: result.data.message || 'Daily token limit reached. Upgrade to Pro to continue.',
+            message: msg,
             primaryLabel: 'Upgrade to Pro',
             primaryTo: '/pricing',
             secondaryLabel: 'Cancel',
@@ -603,7 +668,22 @@ const DocumentViewer = () => {
       }
     } catch (error) {
       console.error('Error analyzing document:', error);
-      throw error;
+      setAnalysisResults((prev) => ({
+        ...prev,
+        [selectedDocument.id]: {
+          ...(prev[selectedDocument.id] || {}),
+          _meta: { status: 'error', message: error?.message || 'Analysis failed.' },
+        },
+      }));
+      setGate({
+        title: 'Analysis failed',
+        message: error?.message || 'Request failed.',
+        primaryLabel: 'OK',
+        primaryTo: null,
+        secondaryLabel: null,
+        secondaryTo: null,
+      });
+      return;
     } finally {
       setIsLoading(false);
     }
@@ -1034,7 +1114,7 @@ const DocumentViewer = () => {
             hasDocument={!!selectedDocument}
           />
 
-          {analysisResults[selectedDocument?.id] && (
+          {selectedDocument && (
             <div className="w-[350px] p-5 bg-gray-50 border-l border-gray-300 overflow-y-auto">
               <AnalysisResults analysis={analysisResults[selectedDocument.id]} />
             </div>
