@@ -388,6 +388,60 @@ const DocumentViewer = () => {
     }
   };
 
+  const handleAnalyzeByType = async () => {
+    if (!selectedDocument || !pdfTextContent || !docHash) return;
+
+    if (!isFirebaseAvailable()) {
+      console.warn('Type-specific analysis unavailable: Firebase services not accessible.');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      if (isMockMode) {
+        setGate({
+          title: 'Type-specific analysis (beta)',
+          message: 'Not available in mock mode yet.',
+          primaryLabel: 'OK',
+          primaryTo: null,
+          secondaryLabel: null,
+          secondaryTo: null,
+        });
+        return;
+      }
+
+      const analyzeByType = httpsCallable(functions, 'analyzeByType');
+      const resp = await analyzeByType({ docHash, text: pdfTextContent });
+      const data = resp?.data || {};
+
+      setGate({
+        title: 'Type-specific analysis (beta)',
+        message:
+          `effectiveTypeId: ${data.effectiveTypeId || 'null'}\n` +
+          `validationSlug: ${data.validationSlug || 'null'}\n\n` +
+          (data.validationSpec?.title ? `Spec: ${data.validationSpec.title}\n\n` : '') +
+          (data.message || ''),
+        primaryLabel: 'OK',
+        primaryTo: null,
+        secondaryLabel: null,
+        secondaryTo: null,
+      });
+    } catch (e) {
+      console.error('analyzeByType error:', e);
+      setGate({
+        title: 'Type-specific analysis failed',
+        message: e?.message || 'Request failed.',
+        primaryLabel: 'OK',
+        primaryTo: null,
+        secondaryLabel: null,
+        secondaryTo: null,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Analyze document using extracted text
   const handleAnalyzeDocument = async () => {
     if (!selectedDocument || !pdfTextContent || !docHash) return;
@@ -938,6 +992,7 @@ const DocumentViewer = () => {
         <div className="flex flex-col">
           <AnalysisToolbox
             onAnalyzeDocument={handleAnalyzeDocument}
+            onAnalyzeByType={handleAnalyzeByType}
             onExplainSelection={handleExplainSelection}
             onHighlightRisks={handleHighlightRisks}
             onTranslateToPlainEnglish={handleTranslateToPlainEnglish}

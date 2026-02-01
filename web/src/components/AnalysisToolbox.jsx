@@ -5,6 +5,7 @@ import React from 'react';
  */
 const AnalysisToolbox = ({
   onAnalyzeDocument,
+  onAnalyzeByType,
   onExplainSelection,
   onHighlightRisks,
   onTranslateToPlainEnglish,
@@ -26,6 +27,13 @@ const AnalysisToolbox = ({
           className="w-full bg-gray-600 text-white px-4 py-2.5 text-sm rounded hover:bg-gray-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed text-left"
         >
           {isLoading ? 'Analyzing...' : 'Analyze Document'}
+        </button>
+        <button
+          onClick={onAnalyzeByType}
+          disabled={isDisabled}
+          className="w-full bg-gray-600 text-white px-4 py-2.5 text-sm rounded hover:bg-gray-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed text-left"
+        >
+          Type-specific analysis (beta)
         </button>
         <button
           onClick={onExplainSelection}

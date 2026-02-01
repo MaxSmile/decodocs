@@ -93,8 +93,11 @@ Rules:
 ### B) analyzeByType callable
 Input:
 - `docHash`
-- `effectiveTypeId` (resolved server-side)
 - extracted text
+
+Server behavior:
+- resolves `effectiveTypeId` server-side (override → detected)
+- loads the validation spec for the type (via `validationSlug` mapping)
 
 Behavior:
 - loads the relevant validation spec (server-side) by `typeId`
