@@ -23,6 +23,11 @@ This document defines how Stripe configuration is supplied and how subscription 
 - `webhookSecret`: string (Stripe signature secret `whsec_...`) **server-side only**
 - `mockWebhookSecret`: string (optional; protects mock webhook in non-emulator)
 
+Checkout/Portal URLs (recommended):
+- `successUrl`: string (e.g. `https://decodocs.com/profile?stripe=success`)
+- `cancelUrl`: string (e.g. `https://decodocs.com/pricing?stripe=cancel`)
+- `portalReturnUrl`: string (e.g. `https://decodocs.com/profile`)
+
 > Note: access to `admin/stripe` must be restricted (Firestore rules) so only admins / Functions can read it.
 
 ## User subscription state storage

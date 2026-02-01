@@ -38,9 +38,17 @@ export default function PricingPage() {
       return;
     }
 
-    // Checkout is implemented server-side (Stripe) and keyed to puid/uid.
-    // If the function isn't deployed yet, we degrade gracefully.
-    setNotice('Redirecting to checkout is not available in this environment yet. If you want, I can wire Stripe checkout next.');
+    try {
+      const { getFunctions, httpsCallable } = await import('firebase/functions');
+      const fns = getFunctions();
+      const createSession = httpsCallable(fns, 'stripeCreateCheckoutSession');
+      const resp = await createSession({ billing });
+      const url = resp?.data?.url;
+      if (!url) throw new Error('No checkout URL returned');
+      window.location.assign(url);
+    } catch (e) {
+      setNotice(`Could not start Stripe checkout: ${e?.message || e}`);
+    }
   };
 
   const goToSignIn = () => navigate('/sign-in');
