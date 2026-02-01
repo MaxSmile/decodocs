@@ -7,6 +7,10 @@
   - Pro: unlimited
   - scanned/OCR-required PDFs are Pro-only
   - docHash ledger stored in Firestore `docshashes` (forever)
+- Web: DocumentViewer now shows a non-blocking gating modal (no alert()):
+  - scanned PDF → redirect to `/pricing`
+  - anonymous token limit → redirect to `/sign-in`
+  - free daily limit → redirect to `/pricing`
 - DocumentEditor: removed alert-based placeholders for Save/Download/Print.
   - Save now stores a local draft (signatures + annotations) in `localStorage`.
   - Download now downloads the original PDF when available.

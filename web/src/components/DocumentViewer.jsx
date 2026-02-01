@@ -31,6 +31,7 @@ const DocumentViewer = () => {
   const [docHash, setDocHash] = useState(null);
   const [loadingMessage, setLoadingMessage] = useState('');
   const [pdfLibLoaded, setPdfLibLoaded] = useState(false);
+  const [gate, setGate] = useState(null); // { title, message, primaryLabel, primaryTo, secondaryLabel, secondaryTo }
   const fileInputRef = useRef(null);
   const { documentId, fileName } = useParams();
   const location = useLocation();
@@ -233,16 +234,16 @@ const DocumentViewer = () => {
 
   // Preflight check before analysis
   const runPreflightCheck = async () => {
-    if (!pdfTextContent || !numPages) return { ok: true, classification: 'FREE_OK' };
+    if (!pdfTextContent || !numPages) return { ok: true, classification: 'OK' };
 
     // In mock mode, return success immediately
     if (isMockMode) {
-      return { ok: true, classification: 'FREE_OK' };
+      return { ok: true, classification: 'OK' };
     }
 
     if (!functions) {
       console.error('Firebase functions not available. Returning default response.');
-      return { ok: true, classification: 'FREE_OK' };
+      return { ok: true, classification: 'OK' };
     }
 
     try {
@@ -264,7 +265,7 @@ const DocumentViewer = () => {
       return result.data;
     } catch (error) {
       console.error('Preflight check error:', error);
-      return { ok: true, classification: 'FREE_OK' };
+      return { ok: true, classification: 'OK' };
     }
   };
 
@@ -283,22 +284,19 @@ const DocumentViewer = () => {
       const preflightResult = await runPreflightCheck();
 
       if (!preflightResult.ok) {
-        if (
-          preflightResult.code === 'SCAN_DETECTED_PRO_REQUIRED' ||
-          preflightResult.code === 'AI_BUDGET_EXCEEDED_PRO_REQUIRED'
-        ) {
-          alert(`This document requires deeper analysis, available on Pro. ${preflightResult.message}`);
-          return;
-        } else {
-          console.error('Preflight check failed:', preflightResult);
-          throw new Error(preflightResult.message || 'Preflight check failed');
-        }
+        console.error('Preflight check failed:', preflightResult);
+        throw new Error(preflightResult.message || 'Preflight check failed');
       }
 
-      if (preflightResult.classification !== 'FREE_OK') {
-        alert(
-          `This document requires deeper analysis, available on Pro. ${preflightResult.reasons?.map((r) => r.message).join(', ') || ''}`
-        );
+      if (preflightResult.classification === 'PRO_REQUIRED') {
+        setGate({
+          title: 'Pro required',
+          message: preflightResult.reasons?.map((r) => r.message).join(' ') || 'This document requires Pro features (OCR / deeper processing).',
+          primaryLabel: 'Upgrade to Pro',
+          primaryTo: '/pricing',
+          secondaryLabel: 'Cancel',
+          secondaryTo: null,
+        });
         return;
       }
 
@@ -347,6 +345,7 @@ const DocumentViewer = () => {
       }
 
       if (result.data.ok) {
+        setGate(null);
         const mappedAnalysis = {
           summary: result.data.result.plainExplanation,
           keyPoints: [],
@@ -367,15 +366,45 @@ const DocumentViewer = () => {
 
         updateAnnotationsFromAnalysis(mappedAnalysis);
       } else {
-        if (
-          result.data.code === 'SCAN_DETECTED_PRO_REQUIRED' ||
-          result.data.code === 'AI_BUDGET_EXCEEDED_PRO_REQUIRED'
-        ) {
-          alert(`This document requires deeper analysis, available on Pro. ${result.data.message}`);
-        } else {
-          console.error('Analysis failed:', result.data);
-          throw new Error(result.data.message || 'Analysis failed');
+        const code = result.data.code;
+        if (code === 'SCAN_DETECTED_PRO_REQUIRED') {
+          setGate({
+            title: 'Scanned PDF (OCR requires Pro)',
+            message: result.data.message || 'This PDF appears to be scanned. OCR is available on Pro.',
+            primaryLabel: 'Upgrade to Pro',
+            primaryTo: '/pricing',
+            secondaryLabel: 'Cancel',
+            secondaryTo: null,
+          });
+          return;
         }
+
+        if (code === 'ANON_TOKEN_LIMIT') {
+          setGate({
+            title: 'Limit reached',
+            message: result.data.message || 'Anonymous token limit reached. Create a free account to continue.',
+            primaryLabel: 'Create free account',
+            primaryTo: '/sign-in',
+            secondaryLabel: 'Cancel',
+            secondaryTo: null,
+          });
+          return;
+        }
+
+        if (code === 'FREE_TOKEN_LIMIT') {
+          setGate({
+            title: 'Daily limit reached',
+            message: result.data.message || 'Daily token limit reached. Upgrade to Pro to continue.',
+            primaryLabel: 'Upgrade to Pro',
+            primaryTo: '/pricing',
+            secondaryLabel: 'Cancel',
+            secondaryTo: null,
+          });
+          return;
+        }
+
+        console.error('Analysis failed:', result.data);
+        throw new Error(result.data.message || 'Analysis failed');
       }
     } catch (error) {
       console.error('Error analyzing document:', error);
@@ -563,6 +592,66 @@ const DocumentViewer = () => {
 
   return (
     <Layout>
+      {gate && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(15, 23, 42, 0.45)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 2000,
+            padding: 16,
+          }}
+          onClick={() => setGate(null)}
+        >
+          <div
+            style={{
+              background: '#fff',
+              borderRadius: 14,
+              border: '1px solid #e2e8f0',
+              maxWidth: 520,
+              width: '100%',
+              padding: 18,
+              boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ fontWeight: 900, fontSize: 16, color: '#0f172a' }}>{gate.title}</div>
+            <div style={{ marginTop: 10, color: '#475569', lineHeight: 1.6 }}>{gate.message}</div>
+            <div style={{ marginTop: 14, display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+              {gate.secondaryLabel && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setGate(null);
+                    if (gate.secondaryTo) navigate(gate.secondaryTo);
+                  }}
+                  style={{ padding: '10px 12px', borderRadius: 12, border: '1px solid #e2e8f0', background: '#fff', fontWeight: 900, cursor: 'pointer' }}
+                >
+                  {gate.secondaryLabel}
+                </button>
+              )}
+              {gate.primaryLabel && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setGate(null);
+                    if (gate.primaryTo) navigate(gate.primaryTo);
+                  }}
+                  style={{ padding: '10px 12px', borderRadius: 12, border: '1px solid #0f172a', background: '#0f172a', color: '#fff', fontWeight: 900, cursor: 'pointer' }}
+                >
+                  {gate.primaryLabel}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-1 min-h-0 h-[calc(100vh-120px)]">
         {/* PDF Viewer Section */}
         <div className="flex-1 flex flex-col p-5 border-r border-gray-300 min-w-0">
