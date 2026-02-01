@@ -1,6 +1,7 @@
 # DecoDocs - Current Status & Next Steps
 
-## Recent changes (2026-02-01)
+## Recent changes (2026-02-02)
+- Web: pricing/sign-in/profile/legal pages now use the standard app `Layout` (consistent header/footer).
 - Backend: replaced MVP “free vs pro by AI calls/doc” with tiered token budgets:
   - Anonymous: 20k tokens per uid
   - Free: 40k tokens/day (UTC)

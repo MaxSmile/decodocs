@@ -10,6 +10,7 @@ import ContactPage from './components/ContactPage.jsx';
 import PricingPage from './components/PricingPage.jsx';
 import SignInPage from './components/SignInPage.jsx';
 import ProfilePage from './components/ProfilePage.jsx';
+import Layout from './components/Layout.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 import AuthErrorNotification from './components/AuthErrorNotification.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
@@ -108,46 +109,70 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/app" element={<HomePage />} />
-            <Route path="/sign" element={
-              <div className="App">
-                <SignPage />
-              </div>
-            } />
-            <Route path="/about" element={
-              <div className="App">
-                <AboutPage />
-              </div>
-            } />
-            <Route path="/privacy" element={
-              <div className="App">
-                <PrivacyPage />
-              </div>
-            } />
-            <Route path="/terms" element={
-              <div className="App">
-                <TermsPage />
-              </div>
-            } />
-            <Route path="/contact" element={
-              <div className="App">
-                <ContactPage />
-              </div>
-            } />
-            <Route path="/pricing" element={
-              <div className="App">
-                <PricingPage />
-              </div>
-            } />
-            <Route path="/sign-in" element={
-              <div className="App">
-                <SignInPage />
-              </div>
-            } />
-            <Route path="/profile" element={
-              <div className="App">
-                <ProfilePage />
-              </div>
-            } />
+            <Route
+              path="/sign"
+              element={
+                <Layout>
+                  <SignPage />
+                </Layout>
+              }
+            />
+            <Route
+              path="/about"
+              element={
+                <Layout>
+                  <AboutPage />
+                </Layout>
+              }
+            />
+            <Route
+              path="/privacy"
+              element={
+                <Layout>
+                  <PrivacyPage />
+                </Layout>
+              }
+            />
+            <Route
+              path="/terms"
+              element={
+                <Layout>
+                  <TermsPage />
+                </Layout>
+              }
+            />
+            <Route
+              path="/contact"
+              element={
+                <Layout>
+                  <ContactPage />
+                </Layout>
+              }
+            />
+            <Route
+              path="/pricing"
+              element={
+                <Layout>
+                  <PricingPage />
+                </Layout>
+              }
+            />
+            <Route
+              path="/sign-in"
+              element={
+                <Layout>
+                  <SignInPage />
+                </Layout>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <Layout>
+                  <ProfilePage />
+                </Layout>
+              }
+            />
             <Route path="/view/:documentId?" element={
               <div className="App">
                 <DocumentViewer />
