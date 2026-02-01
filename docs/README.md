@@ -42,6 +42,9 @@ Source of truth for the user-facing auth UX + states:
 Email/password setup details:
 - [AUTH_EMAIL_PASSWORD.md](AUTH_EMAIL_PASSWORD.md)
 
+Google One Tap (GIS):
+- [AUTH_GOOGLE_ONE_TAP.md](AUTH_GOOGLE_ONE_TAP.md)
+
 Key idea: we resolve all provider identities to a server-side **puid** and enforce limits/entitlements per puid.
 
 ## Stripe

@@ -3,10 +3,14 @@ import { Link } from 'react-router-dom';
 
 import logo from '../../assets/DecoDocsLogo.svg';
 import Footer from './Footer.jsx';
+import GoogleOneTap from '../auth/GoogleOneTap.jsx';
 
 const Layout = ({ onOpenPdf, children }) => {
   return (
     <div className="min-h-screen bg-[#f7f6f2] text-slate-900">
+      {/* One Tap only runs when configured + user is anonymous */}
+      <GoogleOneTap />
+
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute -top-32 -right-20 h-72 w-72 rounded-full bg-[#d8e6ff] blur-3xl opacity-60 animate-float-slow" />

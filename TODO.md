@@ -32,7 +32,7 @@ This file mirrors `decodocs-repo/docs/ROADMAP.md` and lists actionable engineeri
       - Add “reset password” email flow and success messaging
     - Acceptance criteria:
       - A user can create an account, sign in, sign out, and reset password from the UI.
-  - [ ] Implement Google sign-in (Firebase Auth) + Google Identity Services “One Tap”
+  - [x] Implement Google sign-in (Firebase Auth) + Google Identity Services “One Tap”
     - Tasks:
       - Enable Google provider in Firebase Console
       - Add “Continue with Google” button using Firebase `GoogleAuthProvider`
@@ -92,7 +92,7 @@ This file mirrors `decodocs-repo/docs/ROADMAP.md` and lists actionable engineeri
     - Acceptance criteria:
       - Tests run in CI without real provider credentials (mocked or emulator-based).
 - [x] Make environment setup unambiguous: one canonical place to define required `.env` variables and how to run locally
- - [ ] Implement Google Identity Services (GIS) in the web app for Google sign-in and token management
+ - [x] Implement Google Identity Services (GIS) in the web app for Google sign-in and token management
  - [x] Configure Firebase Hosting 301 redirects so `https://decodocs-site.web.app` and `https://decodocs-site.firebaseapp.com` permanently redirect to `https://decodocs.com` (via `firebase.json` hosting settings)
 - [ ] Testing:
   - [x] Expand Playwright: cover "auth failure still renders PDF", and "analysis buttons gated until authenticated"
