@@ -113,23 +113,28 @@ B) User emails a PDF directly (optional MVP: convert into envelope internally)
 ### 4.1 Pro capabilities
 - OCR enabled (scanned PDFs supported)
 - Persistent storage (**Upload**) enabled
-- Exportable report
-- History
-- Higher limits
+- Higher limits (unlimited AI for now)
+- 5GB storage quota on Contabo VPS
+
+> Note: “exportable report/history” are not assumed unless explicitly requested as product features.
 
 ### 4.2 Pro limits (baseline)
-- `page_count <= 100`
-- `estimated_tokens <= 150_000`
-- `pdf_size_bytes <= 50MB` (configurable)
-- OCR monthly caps:
-  - `ocr_pages_monthly_soft_cap` (config)
-  - throttle after cap, no silent overages
+Pro is **unlimited AI for now** (until we have abuse experience and introduce fair-use caps).
+
+We still enforce hard safety limits (configurable):
+- `pdf_size_bytes` hard max
+- `page_count` hard max
+
+OCR:
+- allowed for Pro
+- future: introduce OCR page soft caps if/when needed
 
 ### 4.3 Identity & entitlement
-- Sender email must be linked to a Pro subscription:
-  - Option A: "login once" + verify email
-  - Option B: magic-link verification per sender
-- If entitlement missing => treat as Free.
+- Identity is Firebase Auth; entitlement is resolved server-side.
+- Pro requires Stripe subscription active.
+- We resolve all identities to a server-side **puid** (primary user identifier); entitlements are enforced per puid.
+
+If entitlement missing => treat as Free.
 
 ### 4.4 Pro processing modes
 - **Open (ephemeral)**: user wants no storage even though Pro

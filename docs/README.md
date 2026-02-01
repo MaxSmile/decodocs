@@ -12,7 +12,8 @@ Welcome to the DecoDocs application documentation. This guide covers the archite
 - [API Endpoints](#api-endpoints)
 - [Deployment](#deployment)
 - [Development Setup](#development-setup)
-- [Subscription Tiers](#subscription-tiers)
+- [Subscription / Entitlements](#subscription--entitlements)
+- [Auth Linking](#auth-linking)
 - [Email-to-Sign Flow](#email-to-sign-flow)
 
 ## Overview
@@ -26,6 +27,13 @@ The source of truth for user types, limits, and gating is:
 - **Anonymous** (Firebase Anonymous): very small AI budget, no OCR, no storage
 - **Free** (non-anonymous Firebase auth): larger AI budget, no OCR, no storage
 - **Pro** (non-anonymous + Stripe active): unlimited AI (for now), OCR enabled, 5GB storage (Contabo VPS)
+
+## Auth Linking
+
+Source of truth for provider linking and primary user identity:
+- [AUTH_LINKING.md](AUTH_LINKING.md)
+
+Key idea: we resolve all provider identities to a server-side **puid** and enforce limits/entitlements per puid.
 
 ## Email-to-Sign Flow
 

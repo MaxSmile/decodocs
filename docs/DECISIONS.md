@@ -36,12 +36,20 @@
   - Free = any non-anonymous Firebase Auth provider without an active subscription
   - Pro = non-anonymous + Stripe subscription active
 - AI access is available to all tiers, but with limits:
-  - Anonymous: 20k tokens per Firebase `uid`-session
-  - Free: 40k tokens/day per `uid`
+  - Anonymous: **20k tokens per Firebase uid** (same uid == same auth session)
+  - Free: **40k tokens/day per uid**
   - Pro: unlimited (until abuse policy is introduced)
 - OCR/scanned PDFs require Pro (Free/Anonymous must not use a vision model)
-- Pro includes 5GB storage hosted on Contabo VPS (custom storage)
+- Pro includes **5GB** storage hosted on Contabo VPS (custom storage)
 - We store `docHash` metadata for all users in Firestore `docshashes` collection with **forever** retention (explicitly documented)
+
+## Identity Linking (Auth)
+- Firebase Auth providers supported: anonymous, email, google, apple, microsoft
+- Linking is universal: users may link multiple providers over time.
+- We treat all provider identities as aliases of a **puid (primary user identifier)**, resolved server-side.
+- All counting and enforcement is per **puid** (usage, docHash, Stripe entitlement, storage quota).
+- puid is **not exposed** to the client UI; it is an internal Functions/backend concept.
+- See: docs/AUTH_LINKING.md
 
 ## Optional / Later
 - wallet-based electronic signature is optional and not MVP

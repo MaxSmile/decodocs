@@ -17,8 +17,10 @@ This document is the **source of truth** for:
 - Storage with us: **none** (browser-only)
 
 **Limits**
-- **20,000 tokens per auth session (per Firebase `uid`)**
-  - Practically: the same anonymous `uid` persists until the user clears site data or we explicitly sign them out.
+- **20,000 tokens per Firebase uid** (same uid == same Firebase auth session)
+
+> Note: Internally, enforcement will be done against **puid** (primary user identifier) once provider-linking is introduced.
+> See docs/AUTH_LINKING.md.
 
 ### 1.2 Free
 **Definition:** Firebase Auth user that is **not** anonymous (Google/Email/Microsoft/Apple/etc) AND does **not** have an active subscription.
