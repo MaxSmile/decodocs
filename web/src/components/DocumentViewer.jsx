@@ -5,6 +5,7 @@ import { getFunctions, httpsCallable } from 'firebase/functions';
 import { analyzeByTypeCall } from '../services/typeAnalysisService.js';
 import { detectDocumentTypeCall, getDocumentTypeStateCall, saveDocTypeOverrideCall } from '../services/documentTypeService.js';
 import { preflightCheckCall } from '../services/preflightService.js';
+import { analyzeTextCall } from '../services/analyzeTextService.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import Layout from './Layout.jsx';
 import PDFControls from './PDFControls.jsx';
@@ -519,27 +520,29 @@ const DocumentViewer = () => {
         });
         result = { data: await response.json() };
       } else {
-        const analyzeText = httpsCallable(functions, 'analyzeText');
-        result = await analyzeText({
-        docHash,
-        stats: {
-          pageCount: numPages,
-          charsPerPage,
-          totalChars,
-          languageHint: 'en',
-        },
-        text: {
-          format: 'paged',
-          value: pdfTextContent,
-          pageTextIndex: pages.map((text, idx) => ({
-            page: idx + 1,
-            start: 0,
-            end: text.length,
-          })),
-        },
-          options: {
-            tasks: ['explain', 'caveats', 'inconsistencies'],
-            targetLanguage: null,
+        result = await analyzeTextCall({
+          functions,
+          payload: {
+            docHash,
+            stats: {
+              pageCount: numPages,
+              charsPerPage,
+              totalChars,
+              languageHint: 'en',
+            },
+            text: {
+              format: 'paged',
+              value: pdfTextContent,
+              pageTextIndex: pages.map((text, idx) => ({
+                page: idx + 1,
+                start: 0,
+                end: text.length,
+              })),
+            },
+            options: {
+              tasks: ['explain', 'caveats', 'inconsistencies'],
+              targetLanguage: null,
+            },
           },
         });
       }
