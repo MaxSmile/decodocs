@@ -9,7 +9,7 @@ import PDFDisplay from './PDFDisplay.jsx';
 import AnalysisToolbox from './AnalysisToolbox.jsx';
 import AnalysisResults from './AnalysisResults.jsx';
 import DocumentTypeSelector from './DocumentTypeSelector.jsx';
-import { DOCUMENT_TYPES } from '../lib/documentTypes.js';
+import { useDocumentTypes } from '../hooks/useDocumentTypes.js';
 import { usePDFRenderer } from '../hooks/usePDFRenderer.js';
 import { computeSHA256, extractPdfText } from '../utils/pdfUtils.js';
 
@@ -103,7 +103,8 @@ const DocumentViewer = () => {
     }
   }, [pdfDoc, pageNumber, pageScale, highlights, clauseMarkers, riskBadges]);
 
-  const resolveType = (id) => DOCUMENT_TYPES.find((t) => t.id === id) || null;
+  const { types: documentTypes } = useDocumentTypes();
+  const resolveType = (id) => documentTypes.find((t) => t.id === id) || null;
   const effectiveDocTypeId = overrideDocTypeId || detectedDocTypeId;
   const effectiveDocType = resolveType(effectiveDocTypeId);
   const detectedDocType = resolveType(detectedDocTypeId);

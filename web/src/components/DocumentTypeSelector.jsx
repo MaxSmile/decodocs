@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { DOCUMENT_TYPES, DOC_CATEGORIES, findDocumentTypes } from '../lib/documentTypes.js';
+import { useDocumentTypes } from '../hooks/useDocumentTypes.js';
 
-const groupLabel = (cat) => {
+const groupLabel = (cat, DOC_CATEGORIES) => {
   if (cat === DOC_CATEGORIES.BUSINESS_LEGAL) return 'Business & legal';
   if (cat === DOC_CATEGORIES.GENERAL) return 'General documents';
   if (cat === DOC_CATEGORIES.UNREADABLE) return 'Unreadable / special cases';
@@ -18,6 +18,8 @@ export default function DocumentTypeSelector({
   const [activeIndex, setActiveIndex] = useState(0);
   const inputRef = useRef(null);
 
+  const { types, find, categories: DOC_CATEGORIES, source } = useDocumentTypes();
+
   useEffect(() => {
     if (!open) return;
     setQuery('');
@@ -26,10 +28,10 @@ export default function DocumentTypeSelector({
   }, [open]);
 
   const results = useMemo(() => {
-    const r = findDocumentTypes(query);
+    const r = find(query);
     // If empty query, keep it bounded to avoid overwhelming the modal.
-    return query ? r.slice(0, 30) : DOCUMENT_TYPES.slice(0, 25);
-  }, [query]);
+    return query ? r.slice(0, 30) : types.slice(0, 25);
+  }, [query, find, types]);
 
   const grouped = useMemo(() => {
     const m = new Map();
@@ -152,7 +154,10 @@ export default function DocumentTypeSelector({
           {grouped.map(([cat, items]) => (
             <div key={cat} style={{ marginBottom: 14 }}>
               <div style={{ fontWeight: 900, color: '#0f172a', fontSize: 13, marginBottom: 8 }}>
-                {groupLabel(cat)}
+                {groupLabel(cat, DOC_CATEGORIES)}
+                <span style={{ marginLeft: 8, color: '#94a3b8', fontWeight: 800 }}>
+                  ({source})
+                </span>
               </div>
               <div style={{ display: 'grid', gap: 8 }}>
                 {items.map((t) => {
