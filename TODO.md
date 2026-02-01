@@ -152,12 +152,14 @@ This file mirrors `decodocs-repo/docs/ROADMAP.md` and lists actionable engineeri
 - [ ] Implement **fine-grained document type detection** for BUSINESS_LEGAL docs (initial 10–20 types).
 - [ ] Add user override persistence (server-side per puid+docHash) + surface the detected vs overridden type in UI.
 - [ ] Define prompt-pack output schemas (JSON) for:
-  - [ ] Company policies / governance docs (mandatory rules, vague language, conflicts, ownership/enforcement)
-  - [ ] SOPs / guides (steps, prerequisites, ambiguous instructions, responsibility gaps, contradictions)
+  - [x] Company policies / governance docs (mandatory rules, vague language, conflicts, ownership/enforcement) — docs/validation/company-policy.md
+  - [x] SOPs / guides (steps, prerequisites, ambiguous instructions, responsibility gaps, contradictions) — docs/validation/sop-procedure.md
   - [ ] Informational docs (claims vs evidence, logic gaps)
   - [ ] Decision/evaluation docs (assumptions, missing data)
   - [ ] Representation docs (CV/bio: inconsistencies, omissions)
-  - [ ] Invoices (totals/tax/entity checks; cross-check vs PO/contract if provided)
+  - [x] Invoices (totals/tax/entity checks; cross-check vs PO/contract if provided) — docs/validation/invoice.md
+  - [x] Job offer / offer letter — docs/validation/job-offer.md
+  - [x] Associations constitution/charter — docs/validation/association-constitution.md
 - [ ] Wire UI action sets based on intake+type (show different next actions depending on classification).
 - [ ] Docs: keep `docs/DOCUMENT_TYPE_SYSTEM.md` as the source of truth.
 

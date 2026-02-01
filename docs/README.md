@@ -45,6 +45,9 @@ Stripe webhook + admin config:
 How we classify uploads (intake + type) and route actions:
 - [DOCUMENT_TYPE_SYSTEM.md](DOCUMENT_TYPE_SYSTEM.md)
 
+Type-specific validation criteria:
+- [validation/README.md](validation/README.md)
+
 ## Email-to-Sign Flow
 
 For detailed technical specifications about the email-to-sign functionality, see [EMAIL_TO_SIGN_FLOW.md](EMAIL_TO_SIGN_FLOW.md).

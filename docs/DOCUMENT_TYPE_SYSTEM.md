@@ -49,6 +49,13 @@ UI must show the detected category and allow user override.
 - Associations constitution / charter / bylaws
 - Company first minutes / incorporation resolutions
 
+## Validation criteria library
+
+For each supported type, DecoDocs maintains explicit validation criteria docs:
+- `docs/validation/*`
+
+Prompts must implement these criteria (criteria are not hidden inside prompts).
+
 ## Routing: actions/prompt packs
 
 ### UNREADABLE
