@@ -69,7 +69,7 @@ Management prevents chaos and loss of knowledge.
 - share documents with clients
 - send for signature
 - sign documents
-- track status and history
+- track status and (optionally) saved documents
 - keep signed versions and proof
 - set reminders for deadlines and payments
 

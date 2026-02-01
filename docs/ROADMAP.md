@@ -30,7 +30,7 @@ heavier analysis depth.
 ### Specified/Planned (documented, not fully implemented)
 - Email-to-sign flow
 - Cloud storage integrations (Drive/OneDrive/iCloud)
-- Full signing workflow + verification/audit exports
+- Full signing workflow + verification/audit (exports are not assumed unless explicitly requested)
 
 ---
 
@@ -85,7 +85,7 @@ Reduce friction of "getting the document in" without increasing storage liabilit
 ### Scope (user stories)
 - As a user, I can connect Google Drive / OneDrive and pick a file to analyze (explicit, user-initiated).
 - As a Free user, I can **open** a cloud file ephemerally (no storage by default).
-- As a Pro user, I can optionally **save/upload** (explicit action) for history/export.
+- As a Pro user, I can optionally **save/upload** (explicit action) into DecoDocs storage (5GB quota).
 - As a user, I can revoke access and the app stops using stored tokens immediately.
 
 ### Google Drive
@@ -192,7 +192,7 @@ Out of the initial analysis MVP scope, but enabled by prior steps.
 ### Planned Features
 - Append-only signatures in envelope
 - Signature integrity checks
-- Timeline & audit export
+- Timeline & audit (export is not assumed unless explicitly requested)
 - Advanced signing workflows
 - Legal compliance features
 

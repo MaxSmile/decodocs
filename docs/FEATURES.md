@@ -173,25 +173,14 @@
 
 ## Implementation Timeline
 
-### Q1 2025
-- User authentication system
-- Document history and dashboard
-- Basic subscription management
+> Note: this file contains some older planning notes. The authoritative roadmap is in `docs/ROADMAP.md`.
 
-### Q2 2025
-- OCR integration for scanned documents
-- Multi-language support
-- Advanced risk analysis features
-
-### Q3 2025
-- Collaboration features
-- Team accounts
-- API access for enterprise customers
-
-### Q4 2025
-- Advanced analytics
-- Custom integrations
-- Enterprise features
+### Near-term (2026)
+- Firebase auth providers + universal linking (puid)
+- Stripe subscription + customer portal integration
+- OCR for Pro users
+- Pro storage (5GB) on Contabo VPS
+- Cloud drive connectors for Free users (Google Drive / OneDrive / iCloud)
 
 ## Risk Assessment
 

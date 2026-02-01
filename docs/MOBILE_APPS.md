@@ -216,7 +216,7 @@ This document outlines the technical specifications for the DecoDocs mobile appl
 ### Offline Capabilities
 - Cached UI components
 - Pending analysis queue
-- Result history (if Pro)
+- Optional saved documents (Pro, 5GB quota)
 - Reconnection handling
 
 ## Testing Strategy
