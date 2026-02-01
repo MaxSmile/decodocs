@@ -167,16 +167,16 @@ This file mirrors `decodocs-repo/docs/ROADMAP.md` and lists actionable engineeri
   - [x] keep override persistence server-side in Functions
 
 ### AI integration tasks (classification + type-specific validation)
-- [ ] Add callable `detectDocumentType` (cheap):
+- [x] Add callable `detectDocumentType` (cheap):
   - returns intakeCategory + typeId + confidence + reasons
   - persists to `doc_classifications/{docHash}`
-- [ ] Add callable `getDocumentTypeState`:
+- [x] Add callable `getDocumentTypeState`:
   - returns detected + override + effective type
-- [ ] Add callable `analyzeByType`:
-  - resolves effective type server-side
-  - uses validation spec JSON to guide extraction/validation
-  - returns structured JSON matching the per-type schema
-- [ ] Docs: `docs/CLASSIFICATIONS_INTEGRATION.md` is the integration plan.
+- [~] Add callable `analyzeByType`:
+  - [x] resolves effective type server-side
+  - [x] loads validation spec JSON server-side (via static `document-types.index.json` + `validation/*.json`)
+  - [ ] runs LLM extraction/validation server-side using the spec + returns structured JSON per-type
+- [x] Docs: `docs/CLASSIFICATIONS_INTEGRATION.md` is the integration plan.
 
 ### Validation schema authoring (docs)
 - [ ] Define prompt-pack output schemas (JSON) for:
