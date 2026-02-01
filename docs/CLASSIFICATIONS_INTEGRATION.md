@@ -109,6 +109,7 @@ Behavior:
 
 Important:
 - Typeahead index is static and public.
+- Functions can also fetch the same static index/specs (e.g., from Hosting/CDN or GitHub raw) to resolve `validationSlug` + criteria.
 - Validation specs can be public too (fine), but AI execution remains server-side.
 
 ## Operational notes
