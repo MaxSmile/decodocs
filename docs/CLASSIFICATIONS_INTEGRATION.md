@@ -63,7 +63,8 @@ Effective typeId = override if present else detected.
 ### 2) Showing classification
 In DocumentViewer:
 - show:
-  - detected type + confidence (if available)
+  - detected intakeCategory (GENERAL/BUSINESS_LEGAL/UNREADABLE) + confidence (if available)
+  - detected type label
   - overridden type (if user changed)
 
 ### 3) Action routing (UI)

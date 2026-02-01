@@ -38,6 +38,7 @@ const DocumentViewer = () => {
   const [gate, setGate] = useState(null); // { title, message, primaryLabel, primaryTo, secondaryLabel, secondaryTo }
   const [typeSelectorOpen, setTypeSelectorOpen] = useState(false);
   const [detectedDocTypeId, setDetectedDocTypeId] = useState('legal_contract_generic');
+  const [detectedMeta, setDetectedMeta] = useState(null); // { intakeCategory, confidence, model, updatedAt }
   const [overrideDocTypeId, setOverrideDocTypeId] = useState(null);
   const [pendingOverride, setPendingOverride] = useState(null);
   const fileInputRef = useRef(null);
@@ -125,6 +126,14 @@ const DocumentViewer = () => {
 
       if (data?.overrideTypeId) setOverrideDocTypeId(data.overrideTypeId);
       if (data?.detected?.typeId) setDetectedDocTypeId(data.detected.typeId);
+      if (data?.detected) {
+        setDetectedMeta({
+          intakeCategory: data.detected.intakeCategory || null,
+          confidence: typeof data.detected.confidence === 'number' ? data.detected.confidence : null,
+          model: data.detected.model || null,
+          updatedAt: data.detected.updatedAt || null,
+        });
+      }
     } catch (e) {
       // eslint-disable-next-line no-console
       console.warn('Failed to load server document type state', e);
@@ -139,6 +148,12 @@ const DocumentViewer = () => {
       const resp = await detect({ docHash: docHashValue, stats, text });
       const data = resp?.data || {};
       if (data?.typeId) setDetectedDocTypeId(data.typeId);
+      setDetectedMeta({
+        intakeCategory: data.intakeCategory || null,
+        confidence: typeof data.confidence === 'number' ? data.confidence : null,
+        model: 'heuristic-v1',
+        updatedAt: null,
+      });
     } catch (e) {
       // eslint-disable-next-line no-console
       console.warn('Failed to detect document type', e);
@@ -968,12 +983,23 @@ const DocumentViewer = () => {
                   fontWeight: 900,
                   color: '#0f172a',
                   fontSize: 13,
+                  flexWrap: 'wrap',
                 }}
               >
                 <span style={{ color: '#64748b', fontWeight: 800 }}>Type:</span>
                 <span>{effectiveDocType?.label || 'Unknown'}</span>
                 {overrideDocTypeId && (
                   <span style={{ color: '#64748b', fontWeight: 800 }}>(overridden)</span>
+                )}
+                {detectedMeta?.intakeCategory && (
+                  <span style={{ color: '#64748b', fontWeight: 800 }}>
+                    · {detectedMeta.intakeCategory}
+                  </span>
+                )}
+                {typeof detectedMeta?.confidence === 'number' && (
+                  <span style={{ color: '#94a3b8', fontWeight: 800 }}>
+                    ({Math.round(detectedMeta.confidence * 100)}%)
+                  </span>
                 )}
               </div>
               <button
