@@ -185,9 +185,14 @@ const DocumentViewer = () => {
     } catch (error) {
       console.error('Error loading test PDF:', error);
       setLoadingMessage('');
-      if (typeof window !== 'undefined' && window.alert) {
-        window.alert(`Error loading test PDF: ${error.message}`);
-      }
+      setGate({
+        title: 'Could not load PDF',
+        message: error?.message || 'Failed to load test PDF.',
+        primaryLabel: 'OK',
+        primaryTo: null,
+        secondaryLabel: null,
+        secondaryTo: null,
+      });
     } finally {
       setIsLoading(false);
     }
