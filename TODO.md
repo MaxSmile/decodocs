@@ -8,7 +8,7 @@ This file mirrors `decodocs-repo/docs/ROADMAP.md` and lists actionable engineeri
 - [x] Brand polish: ensure "DecoDocs" and "Snap Sign Pty Ltd" are consistent across UI + docs (no legacy names)
 - [ ] Replace placeholder Sign page with a clear "Signing MVP checklist" (show number of remaining tasks + CTA to analyze PDF + join waitlist)
   - Checklist (v1): signature placement UI, signer identity/consent, audit trail, doc hashing/integrity, signature appearance, signed PDF export, verification view, send-for-signing flow, storage/retention, legal/terms UX
-- [ ] Add a visible "Free vs Pro" gating UX: explain *why* buttons are disabled + what upgrades unlock
+- [x] Add a visible "Free vs Pro" gating UX: explain *why* buttons are disabled + what upgrades unlock
 - [ ] Harden analysis flow: loading/error/empty states for analysis results; avoid partial UI renders
 - [ ] **Authentication: add comprehensive sign-in options (Email, Google + One Tap, Microsoft, Apple)**: support real accounts (and upgrading from anonymous) so users can unlock Pro, storage, and cross-device continuity.
   - [ ] Define the exact auth UX + states (no ambiguity)

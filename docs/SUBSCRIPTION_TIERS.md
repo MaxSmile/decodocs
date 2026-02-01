@@ -108,6 +108,16 @@ When a user hits a gate, the UI should distinguish:
 - **Anonymous → Register** (to get the Free tier limits)
 - **Free → Upgrade to Pro** (for OCR, better model, unlimited AI, 5GB storage)
 
+Also: when actions are *disabled* (not just blocked after a click), the UI must explain *why* and provide a clear next step.
+
+### 6.1 Disabled-state messaging (required)
+
+Common disabled reasons and preferred CTA:
+- **No document loaded:** “Open a PDF to enable analysis tools.” → CTA: **Open PDF**
+- **Not signed in:** “Sign in to enable AI analysis (Free).” → CTA: **Sign in** + optional “See Free vs Pro”
+- **Pro required (preflight):** “This document needs Pro features (OCR / deeper processing).” → CTA: **Upgrade to Pro**
+- **Loading:** “Working…” → CTA: none
+
 Examples:
 - Anonymous limit reached: “Create a free account to continue (higher daily AI limit).”
 - Free OCR attempt: “OCR is available on Pro (includes 5GB storage).”
