@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { getIdToken } from 'firebase/auth';
 import { getFunctions, httpsCallable } from 'firebase/functions';
+import { analyzeByTypeCall } from '../services/typeAnalysisService.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import Layout from './Layout.jsx';
 import PDFControls from './PDFControls.jsx';
@@ -426,9 +427,7 @@ const DocumentViewer = () => {
         return;
       }
 
-      const analyzeByType = httpsCallable(functions, 'analyzeByType');
-      const resp = await analyzeByType({ docHash, text: pdfTextContent });
-      const data = resp?.data || {};
+      const data = (await analyzeByTypeCall({ functions, docHash, text: pdfTextContent })) || {};
 
       // Store something useful in the results panel.
       const typeSpecific = {

@@ -71,6 +71,9 @@ This will start the React development server on `http://localhost:3000`.
 
 #### Code Structure
 
+As the codebase grows, prefer moving Firebase callable wrappers and other API glue into `web/src/services/*`.
+This keeps large components (especially `DocumentViewer`) from turning into hard-to-maintain “god components”.
+
 ```
 web/
 ├── public/                 # Static assets
@@ -79,6 +82,7 @@ web/
 │   │   ├── HomePage.js
 │   │   ├── DocumentViewer.js
 │   │   └── DocumentEditor.js
+│   ├── services/           # API/callable wrappers (Firebase functions, etc.)
 │   ├── __tests__/          # Unit tests
 │   ├── setupProxy.js       # Development proxy
 │   ├── setupTests.js       # Test setup
