@@ -30,52 +30,49 @@ This test plan focuses on the central value proposition of DecoDocs: **Document 
 
 | ID | Feature / Component | Action / State | Expected Observable Result | Pass/Fail |
 |----|---------------------|----------------|----------------------------|-----------|
-| **ING-01** | **Initial State** | Navigate to `/view`. | `div.pdf-placeholder` is visible containing text: *"No PDF selected. Click 'Open PDF' to load a document."* | |
-| **ING-02** | **File Selection** | Click `button.open-pdf-btn` ("Open Different PDF"). | System file picker dialog opens. | |
-| **ING-03** | **Loading State** | Select a valid PDF file. | `div.pdf-loading` visible text: *"Loading PDF..."* initiates immediately. | |
-| **ING-04** | **Render Success** | Wait for load completion. | `canvas` element inside `div.pdf-display` is visible and has height > 0. Placeholder and Loading divs are hidden. | |
-| **ING-05** | **File Name Display** | Check header controls. | `span.current-file` displays the exact filename of the uploaded PDF. | |
-| **ING-06** | **Zoom Controls** | Click "Zoom In" button in `div.pdf-zoom`. | `span` text updates (e.g., "150%"). `canvas` width/height attributes increase. | |
-| **ING-07** | **Pagination** | Load multi-page PDF. Click "Next ›". | "Page X of Y" updates. `canvas` re-renders (brief flickr or content change). | |
+| **ING-01** | **Initial State** | Navigate to `/view`. | The PDF placeholder is visible containing text like: *"No PDF selected..."* | |
+| **ING-02** | **File Selection** | Click "Open Different PDF". | System file picker dialog opens. | |
+| **ING-03** | **Loading State** | Select a valid PDF file. | Loading indicator appears (spinner / "Loading PDF..."). | |
+| **ING-04** | **Render Success** | Wait for load completion. | A `<canvas>` is visible and renders the PDF. Placeholder is hidden. | |
+| **ING-05** | **File Name Display** | Check header controls. | UI shows the selected filename. | |
+| **ING-06** | **Zoom Controls** | Click "Zoom In". | Zoom % increases and canvas re-renders. | |
+| **ING-07** | **Pagination** | Load multi-page PDF. Click "Next ›". | "Page X of Y" updates and canvas content changes. | |
 
 ---
 
-### 3.2 feature: Toolbox & Analysis Triggering
+### 3.2 Feature: Toolbox & Analysis Triggering
 
 *Pre-condition: Document loaded (ING-04 passed).*
 
 | ID | Feature / Component | Action / State | Expected Observable Result | Pass/Fail |
 |----|---------------------|----------------|----------------------------|-----------|
-| **BTN-01** | **Auth Enforcement** | **As Guest**: Observe Toolbox buttons. | All buttons in `div.toolbox-buttons` are **DISABLED**. | |
-| **BTN-02** | **Auth Enablement** | **As Authenticated User**: Observe Toolbox buttons. | "Analyze Document", "Highlight Risks", etc. are **ENABLED**. | |
-| **ANL-01** | **Analyze Trigger** | Click **"Analyze Document"**. | Button text changes to *"Analyzing..."*. Button becomes disabled. | |
-| **ANL-02** | **Analysis Completion** | Wait for API response (~5s). | Button text reverts to "Analyze Document". `div.analysis-results` panel appears in the DOM. | |
+| **BTN-01** | **Disabled-state UX (Guest)** | As unauthenticated user, open a PDF and inspect the toolbox. | Buttons are disabled and a visible message explains *why* + provides CTAs: **Sign in** and **See Free vs Pro**. | |
+| **BTN-02** | **Enabled-state UX (Authenticated)** | As authenticated user, open a PDF and inspect the toolbox. | Analysis buttons become enabled. | |
+| **ANL-01** | **Analyze Trigger** | Click **"Type-specific analysis (recommended)"** (or legacy analysis). | Results panel immediately shows a **loading** state (spinner / "Analyzing…"). | |
+| **ANL-02** | **Analysis Completion** | Wait for API response. | Results panel transitions to **success** (summary/risk list) OR shows a **gate/error** message (e.g. Pro required / token limit). | |
 
 ---
 
-### 3.3 Feature: Results Visualization
+### 3.3 Feature: Results Visualization (Hardened states)
 
-*Pre-condition: Analysis completed (ANL-02 passed).*
+*Pre-condition: Document loaded (ING-04 passed).*
 
-| ID | Feature / Component | Action / State | Expected Observable Result | Pass/Fail |
-|----|---------------------|----------------|----------------------------|-----------|
-| **RES-01** | **Analysis Panel** | Check `div.analysis-results`. | Header `h4` *"Analysis Results"* is visible. | |
-| **RES-02** | **Summary Section** | Check `div.summary-section`. | Contains `h5` *"Document Summary"* and a non-empty `p` tag. | |
-| **RES-03** | **Risk List** | Check `div.risks-section`. | Contains at least one `div.risk-item`. | |
-| **RES-04** | **Risk Item UI** | Inspect a `div.risk-item`. | Has `span.risk-level` (e.g., "HIGH"). Border color matches badge color (Red/Orange/Yellow). | |
-| **RES-05** | **Recommendations** | Check `div.recommendations-section`. | Contains `ul` with at least one `li.recommendation-item`. | |
+| ID | State | Action / State | Expected Observable Result | Pass/Fail |
+|----|-------|----------------|----------------------------|-----------|
+| **RES-00** | **Empty** | After opening a PDF but before analysis. | Results panel is present and shows an empty-state message (e.g. "No analysis yet"). | |
+| **RES-01** | **Loading** | Trigger analysis. | Results panel shows a loading spinner/message; partial/stale content is not shown as a “success”. | |
+| **RES-02** | **Success** | On successful analysis. | Panel shows "Analysis Results" header + a non-empty summary; risks/recommendations appear when returned. | |
+| **RES-03** | **Error / Gate** | Use a scanned PDF or exceed plan limits. | Panel shows a clear error/gate message (and optional CTA via modal to `/pricing` or `/sign-in`). | |
 
 ---
 
-### 3.4 Feature: Canvas Annotations (Visual Overlay)
+### 3.4 Feature: Canvas Annotations (Optional / implementation-dependent)
 
-*Pre-condition: Analysis completed (ANL-02 passed).*
+This is optional because overlays can vary as rendering code evolves.
 
-| ID | Feature / Component | Action / State | Expected Observable Result | Pass/Fail |
-|----|---------------------|----------------|----------------------------|-----------|
-| **OVL-01** | **Risk Badges** | Inspect `div` container `annotationsRef`. | Contains children with class `risk-badge`. Text content matches levels (e.g., "HIGH"). | |
-| **OVL-02** | **Badge Interaction** | Click a `div.risk-badge`. | Browser `alert()` opens with Risk Description and Explanation. | |
-| **OVL-03** | **Highlights** | Check for text highlights. | `div.highlight-overlay` elements exist with `backgroundColor` (yellowish rgba). | |
+| ID | Feature | Action / State | Expected Observable Result | Pass/Fail |
+|----|---------|----------------|----------------------------|-----------|
+| **OVL-01** | **Risk badges / highlights** | After successful analysis. | Visual overlays may appear; absence should not block core workflow as long as results panel renders correctly. | |
 
 ---
 

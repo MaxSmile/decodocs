@@ -143,7 +143,7 @@ This file mirrors `decodocs-repo/docs/ROADMAP.md` and lists actionable engineeri
 ## Documentation Hygiene (Always On)
 - [x] Keep dates current across docs (avoid timelines stuck in 2025 when it's 2026+)
 - [ ] Ensure roadmap claims match the code (mark items "specified" vs "implemented")
-- [ ] Update test plans when selectors/UX change (`docs/test-plans/`)
+- [x] Update test plans when selectors/UX change (`docs/test-plans/`)
 
 ## New Todos
 
