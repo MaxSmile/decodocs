@@ -26,7 +26,7 @@ These should be cached aggressively:
 - Callables:
   - `detectDocumentType` (intake + type) — implemented (heuristic v1)
   - `getDocumentTypeState` (detected + override) — implemented
-  - `analyzeByType` (type-specific pack selection) — implemented as a **stub** (returns effectiveType + loads validation spec). Next step: wire LLM extraction/validation.
+  - `analyzeByType` (type-specific pack selection) — implemented as **heuristic placeholder** (returns effectiveType + loads validation spec + simple checks). Next step: wire LLM extraction/validation.
 
 ## Data model (Firestore)
 
