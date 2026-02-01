@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "generatedAt": "2026-02-01T08:38:17.226Z",
+  "items": [
+    {
+      "id": "association-constitution",
+      "file": "validation/association-constitution.json"
+    },
+    {
+      "id": "company-policy",
+      "file": "validation/company-policy.json"
+    },
+    {
+      "id": "invoice",
+      "file": "validation/invoice.json"
+    },
+    {
+      "id": "job-offer",
+      "file": "validation/job-offer.json"
+    },
+    {
+      "id": "sop-procedure",
+      "file": "validation/sop-procedure.json"
+    }
+  ]
+}

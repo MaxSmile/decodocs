@@ -21,7 +21,8 @@
     "test:unit": "vitest --run",
     "test:e2e": "playwright test playwright-tests/",
     "test:debug": "vitest --reporter=verbose",
-    "test:coverage": "vitest --coverage"
+    "test:coverage": "vitest --coverage",
+    "classifications:build": "node ./scripts/generate-classifications.mjs"
   },
   "eslintConfig": {
     "extends": [

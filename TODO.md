@@ -153,12 +153,14 @@ This file mirrors `decodocs-repo/docs/ROADMAP.md` and lists actionable engineeri
 - [x] Add user override persistence (server-side per puid+docHash) + surface the detected vs overridden type in UI.
 
 ### Static classification/validation JSON artifacts (public)
-- [ ] Create static folder: `web/public/classifications/`
-  - [ ] `document-types.index.json` (flat list for typeahead: id, label, category, synonyms, parentId)
-  - [ ] `validation/<typeId>.json` (type-specific criteria + schema)
-- [ ] Write a small build script to generate JSON from docs:
+- [x] Create static folder: `web/public/classifications/`
+  - [x] `document-types.index.json` (flat list for typeahead: id, label, category, synonyms, parentId)
+  - [x] `validation/*.json` (type-specific criteria + schema — currently named by doc slug)
+  - [x] `validation.index.json` (index of validation artifacts)
+- [x] Write a small build script to generate JSON from docs:
   - Input: `docs/validation/*.md` and `web/src/lib/documentTypes.js`
   - Output: `web/public/classifications/document-types.index.json` + `web/public/classifications/validation/*.json`
+  - Script: `web/scripts/generate-classifications.mjs` (npm: `classifications:build`)
 - [ ] Make web UI load these files dynamically (cacheable), instead of bundling large registries:
   - load index for typeahead
   - lazy-load validation details on selection

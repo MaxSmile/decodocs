@@ -1,0 +1,261 @@
+{
+  "version": 1,
+  "generatedAt": "2026-02-01T08:38:17.207Z",
+  "types": [
+    {
+      "id": "unreadable_broken",
+      "label": "Unreadable / broken file",
+      "category": "UNREADABLE",
+      "synonyms": [
+        "corrupt",
+        "broken",
+        "invalid pdf",
+        "cannot open",
+        "damaged"
+      ],
+      "parentId": null
+    },
+    {
+      "id": "unreadable_encrypted",
+      "label": "Password-protected / encrypted",
+      "category": "UNREADABLE",
+      "synonyms": [
+        "encrypted",
+        "password",
+        "protected"
+      ],
+      "parentId": null
+    },
+    {
+      "id": "unreadable_empty",
+      "label": "Empty / blank document",
+      "category": "UNREADABLE",
+      "synonyms": [
+        "blank",
+        "empty",
+        "no text"
+      ],
+      "parentId": null
+    },
+    {
+      "id": "general_letter",
+      "label": "Letter (general / personal)",
+      "category": "GENERAL",
+      "synonyms": [
+        "letter",
+        "correspondence",
+        "personal letter"
+      ],
+      "parentId": null
+    },
+    {
+      "id": "general_police_letter",
+      "label": "Police letter / notice",
+      "category": "GENERAL",
+      "synonyms": [
+        "police",
+        "notice",
+        "infringement",
+        "fine",
+        "offence"
+      ],
+      "parentId": null
+    },
+    {
+      "id": "general_presentation",
+      "label": "Presentation / pitch deck",
+      "category": "GENERAL",
+      "synonyms": [
+        "deck",
+        "slides",
+        "presentation",
+        "pitch"
+      ],
+      "parentId": null
+    },
+    {
+      "id": "general_marketing",
+      "label": "Flyer / advertisement / marketing",
+      "category": "GENERAL",
+      "synonyms": [
+        "flyer",
+        "ad",
+        "advertisement",
+        "brochure",
+        "marketing"
+      ],
+      "parentId": null
+    },
+    {
+      "id": "general_book",
+      "label": "Book / long-form text",
+      "category": "GENERAL",
+      "synonyms": [
+        "book",
+        "chapter",
+        "novel",
+        "story",
+        "longform"
+      ],
+      "parentId": null
+    },
+    {
+      "id": "general_notes",
+      "label": "Notes / diary / journal",
+      "category": "GENERAL",
+      "synonyms": [
+        "notes",
+        "diary",
+        "journal",
+        "private notes"
+      ],
+      "parentId": null
+    },
+    {
+      "id": "general_schedule",
+      "label": "Schedule / timetable",
+      "category": "GENERAL",
+      "synonyms": [
+        "schedule",
+        "timetable",
+        "calendar",
+        "rota"
+      ],
+      "parentId": null
+    },
+    {
+      "id": "general_resume_cv",
+      "label": "Resume / CV",
+      "category": "GENERAL",
+      "synonyms": [
+        "resume",
+        "cv",
+        "curriculum vitae",
+        "work experience",
+        "education",
+        "skills"
+      ],
+      "parentId": null
+    },
+    {
+      "id": "legal_job_offer",
+      "label": "Job offer / offer letter",
+      "category": "BUSINESS_LEGAL",
+      "synonyms": [
+        "offer letter",
+        "job offer",
+        "employment offer",
+        "compensation",
+        "salary",
+        "starting date"
+      ],
+      "parentId": null
+    },
+    {
+      "id": "legal_contract_generic",
+      "label": "Contract / agreement (general)",
+      "category": "BUSINESS_LEGAL",
+      "synonyms": [
+        "agreement",
+        "contract",
+        "terms",
+        "conditions"
+      ],
+      "parentId": null
+    },
+    {
+      "id": "legal_employment_contract",
+      "label": "Employment contract",
+      "category": "BUSINESS_LEGAL",
+      "synonyms": [
+        "employment",
+        "employee",
+        "employer",
+        "salary",
+        "position"
+      ],
+      "parentId": null
+    },
+    {
+      "id": "legal_nda",
+      "label": "NDA / confidentiality agreement",
+      "category": "BUSINESS_LEGAL",
+      "synonyms": [
+        "nda",
+        "non-disclosure",
+        "confidentiality"
+      ],
+      "parentId": null
+    },
+    {
+      "id": "legal_lease_residential",
+      "label": "Residential lease / tenancy agreement",
+      "category": "BUSINESS_LEGAL",
+      "synonyms": [
+        "lease",
+        "tenancy",
+        "rent",
+        "bond",
+        "landlord",
+        "tenant"
+      ],
+      "parentId": null
+    },
+    {
+      "id": "legal_lease_commercial",
+      "label": "Commercial lease",
+      "category": "BUSINESS_LEGAL",
+      "synonyms": [
+        "commercial lease",
+        "premises",
+        "outgoings"
+      ],
+      "parentId": null
+    },
+    {
+      "id": "business_invoice",
+      "label": "Invoice",
+      "category": "BUSINESS_LEGAL",
+      "synonyms": [
+        "invoice",
+        "tax invoice",
+        "payment due"
+      ],
+      "parentId": null
+    },
+    {
+      "id": "business_purchase_order",
+      "label": "Purchase order",
+      "category": "BUSINESS_LEGAL",
+      "synonyms": [
+        "purchase order",
+        "po",
+        "order"
+      ],
+      "parentId": null
+    },
+    {
+      "id": "policy_privacy",
+      "label": "Privacy policy",
+      "category": "BUSINESS_LEGAL",
+      "synonyms": [
+        "privacy policy",
+        "personal information",
+        "data collection"
+      ],
+      "parentId": null
+    },
+    {
+      "id": "policy_terms",
+      "label": "Terms of service / website terms",
+      "category": "BUSINESS_LEGAL",
+      "synonyms": [
+        "terms of service",
+        "terms",
+        "conditions",
+        "website terms"
+      ],
+      "parentId": null
+    }
+  ]
+}
