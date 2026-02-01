@@ -91,7 +91,7 @@ This file mirrors `decodocs-repo/docs/ROADMAP.md` and lists actionable engineeri
         - anonymous → link → authenticated, and analysis gating disappears
     - Acceptance criteria:
       - Tests run in CI without real provider credentials (mocked or emulator-based).
-- [ ] Make environment setup unambiguous: one canonical place to define required `.env` variables and how to run locally
+- [x] Make environment setup unambiguous: one canonical place to define required `.env` variables and how to run locally
  - [ ] Implement Google Identity Services (GIS) in the web app for Google sign-in and token management
  - [ ] Configure Firebase Hosting 301 redirects so `https://decodocs-site.web.app` and `https://decodocs-site.firebaseapp.com` permanently redirect to `https://decodocs.com` (via `firebase.json` hosting settings)
 - [ ] Testing:

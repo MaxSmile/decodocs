@@ -16,58 +16,76 @@ Before starting development, ensure you have the following installed:
 
 ## Environment Setup
 
-### Config strategy (decision)
-- **Avoid `.env` files**.
-- Firebase client config should come from a dedicated firebaseConfig module (or equivalent), not environment variables.
-- Non-client constants should live in Firestore (admin-controlled):
-  - e.g. `admin_constants` collection/docs
-- Plan an admin panel for managing these constants:
-  - staging: `decadocs-admin.web.app`
-  - production: `admin.decodocs.com`
+### Canonical local setup (source of truth)
 
-### 1. Clone the Repository
+This repo is designed to run locally with **either**:
+- real Firebase project config (default), **or**
+- Firebase emulators (recommended for local dev / CI)
+
+### Config strategy (current state)
+- We **do not commit** `.env` files.
+- The web app has a safe default Firebase config (project `snapsign-au`), and supports overriding via **Vite env vars** (`VITE_*`) when needed.
+- For local dev without real credentials, use:
+  - Firebase Auth emulator (`VITE_USE_FIREBASE_EMULATOR=true`), or
+  - `window.MOCK_AUTH=true` (test/dev helper)
+
+### 1) Clone the repository
 
 ```bash
 git clone [repository-url]
-cd snapsign-au
+cd SnapSign-AU/decodocs
 ```
 
-### 2. Install Dependencies
+### 2) Install dependencies
 
-#### Frontend Dependencies
+#### Web app
 ```bash
-cd decodocs-repo/web
+cd web
 npm install
 ```
 
-#### Backend Dependencies
+#### Firebase Functions
 ```bash
 cd ../functions
 npm install
 ```
 
-> Note: we avoid committing `.env` files. Local-only secrets/config should be managed via Firebase tooling/emulators, and non-secret feature constants should come from Firestore admin-controlled documents.
+### 3) Optional environment variables (web)
+
+Create a local `.env.local` **only if you need overrides** (do not commit it):
+
+- `VITE_USE_FIREBASE_EMULATOR=true` — use the Auth emulator at `http://localhost:9099`
+- `VITE_FIREBASE_API_KEY=...`
+- `VITE_FIREBASE_AUTH_DOMAIN=...`
+- `VITE_FIREBASE_PROJECT_ID=...`
+- `VITE_FIREBASE_STORAGE_BUCKET=...`
+- `VITE_FIREBASE_MESSAGING_SENDER_ID=...`
+- `VITE_FIREBASE_APP_ID=...`
+- `VITE_FIREBASE_MEASUREMENT_ID=...`
+
+If you do not set these, the app uses the baked-in defaults in `web/src/context/AuthContext.jsx`.
+
+> Note: Only `VITE_*` variables are exposed to the web build. Keep secrets server-side.
 
 ## Development Workflow
 
 ### Frontend Development
 
-#### Starting the Development Server
+#### Starting the development server
 ```bash
-cd decodocs-repo/web
-npm start
+cd web
+npm run dev
 ```
 
-This will start the React development server on `http://localhost:3000`.
+This starts Vite on `http://localhost:3000`.
 
-#### Available Scripts
+#### Available scripts
 
-- `npm start` - Start development server with hot reloading
-- `npm run build` - Create production build
-- `npm test` - Run unit tests
-- `npm run test:unit` - Run only unit tests
-- `npm run test:e2e` - Run end-to-end tests
-- `npm run eject` - Eject from Create React App (irreversible)
+- `npm run dev` - Start dev server (Vite)
+- `npm run build` - Build production bundle into `web/decodocs.com/`
+- `npm run preview` - Preview production build locally
+- `npm run test:unit` - Run unit tests (Vitest)
+- `npm run test:e2e` - Run end-to-end tests (Playwright)
 
 #### Code Structure
 
@@ -99,13 +117,17 @@ web/
 
 ### Backend Development
 
-#### Starting the Functions Emulator
+#### Starting Firebase emulators
+
+From `decodocs/functions`:
 ```bash
-cd functions
-firebase emulators:start --only functions
+firebase emulators:start --only functions,auth
 ```
 
-This will start the Firebase Functions emulator on `http://localhost:5001`.
+- Functions emulator: `http://localhost:5001`
+- Auth emulator: `http://localhost:9099`
+
+Then, in another terminal, start the web app with `VITE_USE_FIREBASE_EMULATOR=true`.
 
 #### Available Commands
 
