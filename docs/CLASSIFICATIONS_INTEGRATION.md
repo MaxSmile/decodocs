@@ -97,8 +97,10 @@ Input:
 - extracted text
 
 Server behavior:
+- enforces per-tier token budgets (same policy as `analyzeText`)
 - resolves `effectiveTypeId` server-side (override → detected)
-- loads the validation spec for the type (via `validationSlug` mapping)
+- loads the validation spec for the type (via `validationSlug` from `document-types.index.json`)
+- records a `usage_events` entry (`event: analyzeByType`)
 
 Behavior:
 - loads the relevant validation spec (server-side) by `typeId`
