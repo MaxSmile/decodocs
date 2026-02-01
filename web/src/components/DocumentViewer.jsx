@@ -430,13 +430,14 @@ const DocumentViewer = () => {
       const resp = await analyzeByType({ docHash, text: pdfTextContent });
       const data = resp?.data || {};
 
-      // Store something useful in the results panel (even while analyzeByType is a stub).
+      // Store something useful in the results panel.
       const typeSpecific = {
         ok: !!data.ok,
         effectiveTypeId: data.effectiveTypeId || null,
         validationSlug: data.validationSlug || null,
         validationTitle: data.validationSpec?.title || null,
         message: data.message || null,
+        result: data.result || null,
       };
 
       setAnalysisResults((prev) => ({

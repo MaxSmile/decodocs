@@ -33,6 +33,36 @@ const AnalysisResults = ({ analysis }) => {
             <div><strong>effectiveTypeId:</strong> {analysis.typeSpecific.effectiveTypeId || '—'}</div>
             <div><strong>validationSlug:</strong> {analysis.typeSpecific.validationSlug || '—'}</div>
             <div><strong>validationTitle:</strong> {analysis.typeSpecific.validationTitle || '—'}</div>
+
+            {analysis.typeSpecific.result?.plainExplanation ? (
+              <div style={{ marginTop: 8 }}>
+                <strong>explanation:</strong>
+                <div>{analysis.typeSpecific.result.plainExplanation}</div>
+              </div>
+            ) : null}
+
+            {analysis.typeSpecific.result?.checks?.length ? (
+              <div style={{ marginTop: 8 }}>
+                <strong>checks:</strong>
+                <ul className="list-none p-0" style={{ marginTop: 6 }}>
+                  {analysis.typeSpecific.result.checks.map((c) => (
+                    <li key={c.id} className="mb-2 p-2 border border-gray-200 rounded">
+                      <div><strong>{c.ok ? 'OK' : 'FAIL'}:</strong> {c.message}</div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+
+            {analysis.typeSpecific.result?.extracted && Object.keys(analysis.typeSpecific.result.extracted).length ? (
+              <div style={{ marginTop: 8 }}>
+                <strong>extracted:</strong>
+                <pre style={{ marginTop: 6, background: '#f8fafc', border: '1px solid #e2e8f0', padding: 10, borderRadius: 10, overflow: 'auto' }}>
+                  {JSON.stringify(analysis.typeSpecific.result.extracted, null, 2)}
+                </pre>
+              </div>
+            ) : null}
+
             {analysis.typeSpecific.message ? (
               <div style={{ marginTop: 8 }}>
                 <strong>message:</strong>
