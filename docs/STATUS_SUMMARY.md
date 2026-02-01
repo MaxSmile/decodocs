@@ -23,18 +23,18 @@
   - `src/index.js` to avoid JSX
   - `src/components/DocumentUpload.js` to avoid JSX (component is still optional/unwired)
 
-## Current Status (January 2025)
+## Current Status (February 2026)
 
-### ✅ Phase 1 - MVP Successfully Launched
+### ✅ Phase 1 - Web MVP (Live, iterating)
 
-The DecoDocs application is now live and functional with:
+The DecoDocs application is live and functional with:
 
 #### Core Features
-- **PDF Support**: Full PDF document analysis capabilities
-- **Email-to-Sign Flow**: Stateless processing for Free tier users
-- **Tiered Pricing**: Clear Free vs Pro differentiation based on AI call budget
-- **Document Storage**: Available for Pro tier users with persistent storage
-- **HubSpot Integration**: Ready for integration (kill feature)
+- **PDF Support**: View + extract text + run AI analysis
+- **Email-to-sign flow**: specified (not assumed implemented unless explicitly built)
+- **Tiered entitlements**: Anonymous / Free / Pro, with token budgets + Pro-only OCR (see `SUBSCRIPTION_TIERS.md`)
+- **Storage**: Pro storage is specified; avoid implying availability unless the feature is enabled in production
+- **HubSpot**: documented setup guidance; not a product dependency
 
 #### Technical Infrastructure
 - **Frontend**: React-based application with routing (Home, Viewer, Editor)
@@ -51,16 +51,16 @@ The DecoDocs application is now live and functional with:
 ## Completed Documentation
 
 ### Technical Specifications
-1. **[SUBSCRIPTION_TIERS.md]** - Three-tier system (Free, Pro $5/mo, Premium)
-2. **[EMAIL_TO_SIGN_FLOW.md]** - Complete email processing specifications
+1. **[SUBSCRIPTION_TIERS.md]** - User types, entitlements, and limits
+2. **[EMAIL_TO_SIGN_FLOW.md]** - Email-to-sign flow specification
 3. **[CLOUD_INTEGRATIONS.md]** - Google Drive, OneDrive, iCloud technical specs
 4. **[MOBILE_APPS.md]** - iOS and Android mobile app specifications
-5. **[ROADMAP.md]** - Complete phased development roadmap
-6. **[API.md]** - Full API endpoint documentation
+5. **[ROADMAP.md]** - Phased development roadmap
+6. **[API.md]** - API documentation
 7. **[ARCHITECTURE.md]** - System architecture overview
-8. **[DEVELOPMENT.md]** - Development guidelines
+8. **[DEVELOPMENT.md]** - Development guide
 9. **[DEPLOYMENT.md]** - Deployment procedures
-10. **[FEATURES.md]** - Feature specifications and roadmap
+10. **[FEATURES.md]** - Features & roadmap notes
 
 ## Next Steps - Phase 2: Cloud Storage Integrations
 

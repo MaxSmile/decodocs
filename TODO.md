@@ -141,7 +141,7 @@ This file mirrors `decodocs-repo/docs/ROADMAP.md` and lists actionable engineeri
 - [ ] Decide storage policy for signed artifacts (retention, export, deletion)
 
 ## Documentation Hygiene (Always On)
-- [ ] Keep dates current across docs (avoid timelines stuck in 2025 when it's 2026+)
+- [x] Keep dates current across docs (avoid timelines stuck in 2025 when it's 2026+)
 - [ ] Ensure roadmap claims match the code (mark items "specified" vs "implemented")
 - [ ] Update test plans when selectors/UX change (`docs/test-plans/`)
 
