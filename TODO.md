@@ -96,7 +96,7 @@ This file mirrors `decodocs-repo/docs/ROADMAP.md` and lists actionable engineeri
  - [x] Configure Firebase Hosting 301 redirects so `https://decodocs-site.web.app` and `https://decodocs-site.firebaseapp.com` permanently redirect to `https://decodocs.com` (via `firebase.json` hosting settings)
 - [ ] Testing:
   - [x] Expand Playwright: cover "auth failure still renders PDF", and "analysis buttons gated until authenticated"
-  - [ ] Add CI-friendly `npm run test:unit` + `npm run test:e2e` runbook for the web app
+  - [x] Add CI-friendly `npm run test:unit` + `npm run test:e2e` runbook for the web app
 
 ## Phase 2 - Cloud Storage Integrations (Target: Q2 2026)
 - [ ] Define the "Open vs Upload" contract (Free vs Pro) as a spec:

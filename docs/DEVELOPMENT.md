@@ -221,25 +221,33 @@ exports.myFunction = functions.https.onRequest(async (req, res) => {
 
 ## Testing
 
+See `docs/TESTING.md` for the CI-friendly runbook.
+
 ### Unit Testing
 
-Unit tests are written using Jest and React Testing Library.
+Unit tests are written using **Vitest** and React Testing Library.
 
-#### Running Unit Tests
+Run once (CI-friendly):
 ```bash
-npm test
-# or to run only unit tests
+cd web
 npm run test:unit
 ```
 
-#### Writing Unit Tests
+Watch mode (local dev):
+```bash
+cd web
+npm test
+```
 
-Tests should be placed in the `src/__tests__/` directory with the naming pattern `ComponentName.test.js`.
+### E2E Testing
 
-Example test structure:
-```javascript
-import React from 'react';
-import { render, screen } from '@testing-library/react';
+E2E tests are written using **Playwright**.
+
+```bash
+cd web
+npm run test:e2e
+```
+
 import MyComponent from '../components/MyComponent';
 
 describe('MyComponent', () => {
