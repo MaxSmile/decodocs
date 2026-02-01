@@ -146,6 +146,21 @@ This file mirrors `decodocs-repo/docs/ROADMAP.md` and lists actionable engineeri
 - [ ] Update test plans when selectors/UX change (`docs/test-plans/`)
 
 ## New Todos
+
+### Document typing + prompt packs (needed for real-world uploads)
+- [ ] Implement **intake category detection** (UNREADABLE / GENERAL / BUSINESS_LEGAL) and persist per `docHash`.
+- [ ] Implement **fine-grained document type detection** for BUSINESS_LEGAL docs (initial 10–20 types).
+- [ ] Add user override persistence (server-side per puid+docHash) + surface the detected vs overridden type in UI.
+- [ ] Define prompt-pack output schemas (JSON) for:
+  - [ ] Company policies / governance docs (mandatory rules, vague language, conflicts, ownership/enforcement)
+  - [ ] SOPs / guides (steps, prerequisites, ambiguous instructions, responsibility gaps, contradictions)
+  - [ ] Informational docs (claims vs evidence, logic gaps)
+  - [ ] Decision/evaluation docs (assumptions, missing data)
+  - [ ] Representation docs (CV/bio: inconsistencies, omissions)
+  - [ ] Invoices (totals/tax/entity checks; cross-check vs PO/contract if provided)
+- [ ] Wire UI action sets based on intake+type (show different next actions depending on classification).
+- [ ] Docs: keep `docs/DOCUMENT_TYPE_SYSTEM.md` as the source of truth.
+
 - [ ] **Big Document Vector Management**: For big documents, RLM (Recursive Language Model) or other vector-based data management needs to be developed to efficiently handle large PDFs and document collections.
 - [ ] **Refactor: split large UI components (maintainability)**: Reduce “god components” by extracting hooks + subcomponents so PDF viewing, analysis actions, and presentation concerns are separated.
   - [ ] Refactor `decodocs-repo/web/src/components/DocumentViewer.jsx` into smaller units
