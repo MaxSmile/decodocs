@@ -60,7 +60,7 @@ test.describe('Local DecoDocs Application Flow', () => {
     await expect(page.locator('p')).toContainText('Decode documents. Act with confidence.');
     
     // Check footer has updated content
-    await expect(page.locator('footer p')).toContainText('SnapSign Pty Ltd');
+    await expect(page.locator('footer p')).toContainText('Snap Sign Pty Ltd');
     await expect(page.locator('footer p')).toContainText('ABN 72 679 570 757');
   });
 });

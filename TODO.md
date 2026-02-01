@@ -1,11 +1,11 @@
 # TODO (DecoDocs)
 
-_Last updated: January 29, 2026_
+_Last updated: February 2, 2026_
 
 This file mirrors `decodocs-repo/docs/ROADMAP.md` and lists actionable engineering + documentation tasks.
 
 ## Phase 1 - Web MVP Foundation (Live, Iterating)
-- [ ] Brand polish: ensure "DecoDocs" and "Snap Sign Pty Ltd" are consistent across UI + docs (no legacy names)
+- [x] Brand polish: ensure "DecoDocs" and "Snap Sign Pty Ltd" are consistent across UI + docs (no legacy names)
 - [ ] Replace placeholder Sign page with a clear "Signing MVP checklist" (show number of remaining tasks + CTA to analyze PDF + join waitlist)
   - Checklist (v1): signature placement UI, signer identity/consent, audit trail, doc hashing/integrity, signature appearance, signed PDF export, verification view, send-for-signing flow, storage/retention, legal/terms UX
 - [ ] Add a visible "Free vs Pro" gating UX: explain *why* buttons are disabled + what upgrades unlock

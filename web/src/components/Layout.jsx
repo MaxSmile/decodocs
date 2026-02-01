@@ -50,7 +50,7 @@ const Layout = ({ children, showHeader = true, showFooter = true }) => {
       {showFooter && (
         <footer className="text-center py-5 px-5 text-gray-600 border-t flex-shrink-0 bg-gray-50">
           <div className="max-w-6xl mx-auto flex flex-col items-center gap-2.5">
-            <p className="m-0 text-gray-600 text-sm">© SnapSign Pty Ltd</p>
+            <p className="m-0 text-gray-600 text-sm">© Snap Sign Pty Ltd</p>
             <p className="m-0 text-gray-600 text-sm">ABN 72 679 570 757</p>
             <div className="flex gap-6 flex-wrap justify-center">
               <Link to="/about" className="text-gray-600 no-underline text-sm hover:text-gray-800 transition-colors">

@@ -443,7 +443,7 @@ const DocumentEditor = () => {
       
       <footer className="standard-footer">
         <div className="footer-content">
-          <p>© SnapSign Pty Ltd</p>
+          <p>© Snap Sign Pty Ltd</p>
           <p>ABN 72 679 570 757</p>
           <div className="footer-links">
             <Link to="/about">About</Link>

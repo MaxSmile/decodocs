@@ -80,7 +80,7 @@ const AboutPage = () => {
               and privacy-first systems. We prioritize correctness, transparency, and long-term maintainability.
             </p>
             <div className="legal-block">
-              <p>SnapSign Pty Ltd</p>
+              <p>Snap Sign Pty Ltd</p>
               <p>ABN 72 679 570 757</p>
               <p>Australia</p>
             </div>
@@ -103,7 +103,7 @@ const AboutPage = () => {
       {/* Footer */}
       <footer className="about-footer">
         <div className="footer-content">
-          <p>© SnapSign Pty Ltd</p>
+          <p>© Snap Sign Pty Ltd</p>
           <p>ABN 72 679 570 757</p>
           <div className="footer-links">
             <Link to="/about">About</Link>

@@ -91,7 +91,7 @@ test.describe('DecoDocs Application Flow', () => {
     await expect(footer.locator('a:has-text("About")')).toBeVisible();
     
     // Check copyright information
-    await expect(page.locator('.footer-bottom p', { hasText: '© SnapSign Pty Ltd' })).toBeVisible();
+    await expect(page.locator('.footer-bottom p', { hasText: '© Snap Sign Pty Ltd' })).toBeVisible();
     await expect(page.locator('.footer-bottom p', { hasText: 'ABN 72 679 570 757' })).toBeVisible();
   });
 });

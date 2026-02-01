@@ -8,7 +8,7 @@
 
 Project: DecoDocs
 Website: https://decodocs.com/
-Company: SnapSign Pty Ltd (Australia)
+Company: Snap Sign Pty Ltd (Australia)
 ABN: 72 679 570 757
 Contact: mailto:contact@snapsign.com
 
