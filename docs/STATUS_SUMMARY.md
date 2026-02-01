@@ -6,6 +6,9 @@
   - Download now downloads the original PDF when available.
   - Print opens the PDF in a new tab and triggers browser print.
 - DocumentEditor: removed undefined “Lock Document (Coming Soon)” placeholder.
+- Tooling cleanup: removed JSX-in-`.js` parsing issues (coverage tooling), by rewriting:
+  - `src/index.js` to avoid JSX
+  - `src/components/DocumentUpload.js` to avoid JSX (component is still optional/unwired)
 
 ## Current Status (January 2025)
 
