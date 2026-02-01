@@ -22,18 +22,37 @@ const DocumentEditor = () => {
       const url = URL.createObjectURL(location.state.document.file);
       setPdfUrl(url);
     } else if (documentId) {
-      // In a real app, you would fetch the document by ID
-      // For now, we'll simulate having a document
+      // In a real app, you would fetch the document by ID.
+      // For now, we keep a lightweight placeholder doc record.
       const mockDoc = {
         id: documentId,
         name: `Document_${documentId}.pdf`,
         size: 102400,
         type: 'application/pdf',
-        file: null // Would be populated from storage in real app
+        file: null,
       };
       setSelectedDocument(mockDoc);
     }
   }, [documentId, location]);
+
+  // Load local draft (signatures/annotations) if present.
+  useEffect(() => {
+    if (!selectedDocument) return;
+
+    try {
+      const idPart = selectedDocument?.id || documentId || 'unknown';
+      const namePart = selectedDocument?.name || 'document';
+      const key = `decodocs:draft:${idPart}:${namePart}`;
+      const raw = localStorage.getItem(key);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed?.signatures)) setSignatures(parsed.signatures);
+      if (Array.isArray(parsed?.annotations)) setAnnotations(parsed.annotations);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn('Failed to load local draft', e);
+    }
+  }, [selectedDocument, documentId]);
 
   const handleFileUpload = (event) => {
     const files = Array.from(event.target.files);
@@ -55,16 +74,85 @@ const DocumentEditor = () => {
     }
   };
 
-  const handleSaveDocument = () => {
-    alert('Document saved successfully!');
+  const getLocalDraftKey = () => {
+    const idPart = selectedDocument?.id || documentId || 'unknown';
+    const namePart = selectedDocument?.name || 'document';
+    return `decodocs:draft:${idPart}:${namePart}`;
   };
 
-  const handleDownload = () => {
-    alert('Download functionality would be implemented here.');
+  const handleSaveDocument = () => {
+    if (!selectedDocument) return;
+
+    const payload = {
+      savedAt: new Date().toISOString(),
+      document: {
+        id: selectedDocument.id || documentId || null,
+        name: selectedDocument.name || null,
+      },
+      signatures,
+      annotations,
+    };
+
+    try {
+      localStorage.setItem(getLocalDraftKey(), JSON.stringify(payload));
+      // Minimal UX: avoid alert placeholders; show a short inline notice via the browser.
+      // eslint-disable-next-line no-console
+      console.log('Draft saved locally');
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to save draft locally', e);
+    }
+  };
+
+  const handleDownload = async () => {
+    try {
+      if (!pdfUrl && !selectedDocument?.file) return;
+
+      const filename = selectedDocument?.name || `document_${selectedDocument?.id || documentId || 'download'}.pdf`;
+
+      let blob;
+      if (selectedDocument?.file instanceof File) {
+        blob = selectedDocument.file;
+      } else {
+        const resp = await fetch(pdfUrl);
+        if (!resp.ok) throw new Error(`Failed to download PDF (${resp.status})`);
+        blob = await resp.blob();
+      }
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error('Download failed', e);
+    }
   };
 
   const handlePrint = () => {
-    alert('Print functionality would be implemented here.');
+    if (!pdfUrl) return;
+
+    // Print the PDF by opening it in a new tab/window.
+    // (Printing an embedded iframe reliably across browsers is inconsistent.)
+    const w = window.open(pdfUrl, '_blank', 'noopener,noreferrer');
+    if (!w) return;
+
+    const tryPrint = () => {
+      try {
+        w.focus();
+        w.print();
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error('Print failed', e);
+      }
+    };
+
+    // Give the browser a moment to load the PDF renderer.
+    w.addEventListener('load', () => setTimeout(tryPrint, 250));
   };
 
   const toggleSignMode = () => {
@@ -268,13 +356,13 @@ const DocumentEditor = () => {
           <div className="editor-controls">
             <h4>Editor Controls</h4>
             <div className="editor-buttons">
-              <button onClick={handleSaveDocument} className="save-btn">
-                Save Document
+              <button onClick={handleSaveDocument} className="save-btn" disabled={!selectedDocument}>
+                Save (local)
               </button>
-              <button onClick={handleDownload} className="download-btn">
+              <button onClick={handleDownload} className="download-btn" disabled={!pdfUrl && !selectedDocument?.file}>
                 Download
               </button>
-              <button onClick={handlePrint} className="print-btn">
+              <button onClick={handlePrint} className="print-btn" disabled={!pdfUrl}>
                 Print
               </button>
             </div>
@@ -336,14 +424,7 @@ const DocumentEditor = () => {
                 />
                 <label htmlFor="enable-comments">Enable Signing Tools</label>
               </div>
-              <div className="tool-option">
-                <input 
-                  type="checkbox" 
-                  id="lock-document" 
-                  disabled
-                />
-                <label htmlFor="lock-document">Lock Document (Coming Soon)</label>
-              </div>
+              {/* Document locking is not defined yet; avoid shipping “Coming Soon” placeholders. */}
             </div>
           </div>
           

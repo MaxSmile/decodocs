@@ -1,5 +1,12 @@
 # DecoDocs - Current Status & Next Steps
 
+## Recent changes (2026-02-01)
+- DocumentEditor: removed alert-based placeholders for Save/Download/Print.
+  - Save now stores a local draft (signatures + annotations) in `localStorage`.
+  - Download now downloads the original PDF when available.
+  - Print opens the PDF in a new tab and triggers browser print.
+- DocumentEditor: removed undefined “Lock Document (Coming Soon)” placeholder.
+
 ## Current Status (January 2025)
 
 ### ✅ Phase 1 - MVP Successfully Launched
