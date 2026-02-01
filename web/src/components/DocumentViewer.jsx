@@ -3,6 +3,7 @@ import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { getIdToken } from 'firebase/auth';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { analyzeByTypeCall } from '../services/typeAnalysisService.js';
+import { detectDocumentTypeCall, getDocumentTypeStateCall, saveDocTypeOverrideCall } from '../services/documentTypeService.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import Layout from './Layout.jsx';
 import PDFControls from './PDFControls.jsx';
@@ -120,10 +121,7 @@ const DocumentViewer = () => {
   const loadServerTypeState = async (docHashValue) => {
     if (!functions || isMockMode) return;
     try {
-      const getState = httpsCallable(functions, 'getDocumentTypeState');
-      if (typeof getState !== 'function') return;
-      const resp = await getState({ docHash: docHashValue });
-      const data = resp?.data || {};
+      const data = (await getDocumentTypeStateCall({ functions, docHash: docHashValue })) || {};
 
       if (data?.overrideTypeId) setOverrideDocTypeId(data.overrideTypeId);
       if (data?.detected?.typeId) setDetectedDocTypeId(data.detected.typeId);
@@ -144,15 +142,12 @@ const DocumentViewer = () => {
   const runServerDetection = async ({ docHashValue, stats, text }) => {
     if (!functions || isMockMode) return;
     try {
-      const detect = httpsCallable(functions, 'detectDocumentType');
-      if (typeof detect !== 'function') return;
-      const resp = await detect({ docHash: docHashValue, stats, text });
-      const data = resp?.data || {};
+      const data = (await detectDocumentTypeCall({ functions, docHash: docHashValue, stats, text })) || {};
       if (data?.typeId) setDetectedDocTypeId(data.typeId);
       setDetectedMeta({
         intakeCategory: data.intakeCategory || null,
         confidence: typeof data.confidence === 'number' ? data.confidence : null,
-        model: 'heuristic-v1',
+        model: data.model || 'heuristic-v1',
         updatedAt: null,
       });
     } catch (e) {
@@ -172,8 +167,7 @@ const DocumentViewer = () => {
     if (!functions || isMockMode) return;
 
     try {
-      const save = httpsCallable(functions, 'saveDocTypeOverride');
-      await save({ docHash: docHashValue, typeId });
+      await saveDocTypeOverrideCall({ functions, docHash: docHashValue, typeId });
     } catch (e) {
       // eslint-disable-next-line no-console
       console.warn('Failed to persist doc type override', e);
