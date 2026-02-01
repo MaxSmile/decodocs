@@ -7,6 +7,9 @@ import AboutPage from './components/AboutPage.jsx';
 import PrivacyPage from './components/PrivacyPage.jsx';
 import TermsPage from './components/TermsPage.jsx';
 import ContactPage from './components/ContactPage.jsx';
+import PricingPage from './components/PricingPage.jsx';
+import SignInPage from './components/SignInPage.jsx';
+import ProfilePage from './components/ProfilePage.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 import AuthErrorNotification from './components/AuthErrorNotification.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
@@ -128,6 +131,21 @@ function App() {
             <Route path="/contact" element={
               <div className="App">
                 <ContactPage />
+              </div>
+            } />
+            <Route path="/pricing" element={
+              <div className="App">
+                <PricingPage />
+              </div>
+            } />
+            <Route path="/sign-in" element={
+              <div className="App">
+                <SignInPage />
+              </div>
+            } />
+            <Route path="/profile" element={
+              <div className="App">
+                <ProfilePage />
               </div>
             } />
             <Route path="/view/:documentId?" element={

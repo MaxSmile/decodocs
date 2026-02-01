@@ -39,12 +39,15 @@ heavier analysis depth.
 ### UX decisions (gating + account)
 - Upgrade prompts:
   - if tokens are over limit OR scanned/OCR-required doc is opened by non-Pro → show **upgrade popup**
-  - upgrade action → redirect to **`/pricing`** (styled similarly to HeyGen)
+  - upgrade action → redirect to **`/pricing`** (mirror **https://heygen.com/pricing** layout)
 - Add **`/profile`** route:
   - shows user profile data
   - shows subscription state
   - entrypoint to manage subscription
   - access to Stripe payment receipts
+- Add **`/sign-in`** route:
+  - provider linking (anonymous/email/google/apple/microsoft)
+  - used by `/pricing` “Continue for free” CTA
 
 ### Goal
 Ship a reliable, privacy-forward web experience for PDF understanding, with clear plan enforcement and predictable UI
