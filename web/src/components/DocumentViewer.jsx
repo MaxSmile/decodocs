@@ -12,7 +12,7 @@ import DocumentTypeSelector from './DocumentTypeSelector.jsx';
 import { useDocumentTypes } from '../hooks/useDocumentTypes.js';
 import { useValidationSpec } from '../hooks/useValidationSpec.js';
 import { usePDFRenderer } from '../hooks/usePDFRenderer.js';
-import { computeSHA256, extractPdfText } from '../utils/pdfUtils.js';
+import { computeSHA256, extractPdfTextAllPages } from '../utils/pdfUtils.js';
 
 // Use local worker from public folder to ensure stability in tests and offline
 
@@ -28,6 +28,7 @@ const DocumentViewer = () => {
   const [pageScale, setPageScale] = useState(1.5);
   const [selectedDocument, setSelectedDocument] = useState(null);
   const [pdfTextContent, setPdfTextContent] = useState('');
+  const [docStats, setDocStats] = useState(null); // { pageCount, charsPerPage, totalChars }
   const [highlights, setHighlights] = useState([]);
   const [clauseMarkers, setClauseMarkers] = useState([]);
   const [riskBadges, setRiskBadges] = useState([]);
@@ -114,6 +115,36 @@ const DocumentViewer = () => {
   const validationSlug = effectiveDocType?.validationSlug || null;
   const validation = useValidationSpec(validationSlug);
 
+  const loadServerTypeState = async (docHashValue) => {
+    if (!functions || isMockMode) return;
+    try {
+      const getState = httpsCallable(functions, 'getDocumentTypeState');
+      if (typeof getState !== 'function') return;
+      const resp = await getState({ docHash: docHashValue });
+      const data = resp?.data || {};
+
+      if (data?.overrideTypeId) setOverrideDocTypeId(data.overrideTypeId);
+      if (data?.detected?.typeId) setDetectedDocTypeId(data.detected.typeId);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn('Failed to load server document type state', e);
+    }
+  };
+
+  const runServerDetection = async ({ docHashValue, stats, text }) => {
+    if (!functions || isMockMode) return;
+    try {
+      const detect = httpsCallable(functions, 'detectDocumentType');
+      if (typeof detect !== 'function') return;
+      const resp = await detect({ docHash: docHashValue, stats, text });
+      const data = resp?.data || {};
+      if (data?.typeId) setDetectedDocTypeId(data.typeId);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn('Failed to detect document type', e);
+    }
+  };
+
   const persistOverride = async (docHashValue, typeId) => {
     try {
       localStorage.setItem(`decodocs:doctype:${docHashValue}`, String(typeId));
@@ -155,6 +186,9 @@ const DocumentViewer = () => {
         // ignore
       }
 
+      // Load detected+override state from Functions (best-effort).
+      await loadServerTypeState(docHashValue);
+
       const lib = window.pdfjsLib;
       const pdf = await lib.getDocument({
         data: arrayBuffer,
@@ -168,8 +202,22 @@ const DocumentViewer = () => {
       setNumPages(pdf.numPages);
 
       setLoadingMessage(`Extracting text from ${fileNameForDisplay}...`);
-      const extractedText = await extractPdfText(pdf);
+      const extractedText = await extractPdfTextAllPages(pdf);
       setPdfTextContent(extractedText);
+
+      // Stats used by server-side detection + preflight.
+      const pages = extractedText.split('\f').filter((p) => p !== undefined);
+      const charsPerPage = pages.slice(0, pdf.numPages).map((p) => String(p || '').trim().length);
+      const stats = {
+        pageCount: pdf.numPages,
+        charsPerPage,
+        totalChars: extractedText.replace(/\f/g, '').length,
+        pdfSizeBytes: arrayBuffer.byteLength,
+      };
+      setDocStats(stats);
+
+      // Seed server-side detection (cheap). This will populate doc_classifications/{docHash}.
+      runServerDetection({ docHashValue, stats, text: extractedText });
 
       setPageNumber(1);
       setLoadingMessage('');
@@ -207,6 +255,9 @@ const DocumentViewer = () => {
         // ignore
       }
 
+      // Load detected+override state from Functions (best-effort).
+      await loadServerTypeState(docHashValue);
+
       const pdfjsLib = window.pdfjsLib;
       const pdf = await pdfjsLib.getDocument({
         data: arrayBuffer,
@@ -228,8 +279,20 @@ const DocumentViewer = () => {
       });
 
       setLoadingMessage(`Extracting text from ${fileName}...`);
-      const extractedText = await extractPdfText(pdf);
+      const extractedText = await extractPdfTextAllPages(pdf);
       setPdfTextContent(extractedText);
+
+      const pages = extractedText.split('\f').filter((p) => p !== undefined);
+      const charsPerPage = pages.slice(0, pdf.numPages).map((p) => String(p || '').trim().length);
+      const stats = {
+        pageCount: pdf.numPages,
+        charsPerPage,
+        totalChars: extractedText.replace(/\f/g, '').length,
+        pdfSizeBytes: arrayBuffer.byteLength,
+      };
+      setDocStats(stats);
+
+      runServerDetection({ docHashValue, stats, text: extractedText });
 
       setPageNumber(1);
       setLoadingMessage('');

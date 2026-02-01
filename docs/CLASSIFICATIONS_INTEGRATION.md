@@ -51,6 +51,9 @@ Effective typeId = override if present else detected.
 ### 1) Typeahead / override UI
 - Load `document-types.index.json` on app start (or lazily on opening selector)
 - Search purely client-side (no AI, no server)
+- On doc load:
+  - call `getDocumentTypeState({ docHash })` (best-effort) to hydrate detected+override
+  - call `detectDocumentType({ docHash, stats, text })` (best-effort) after text extraction to seed `doc_classifications/{docHash}`
 - When user picks a type:
   - show confirmation modal (“quick validation popup”)
   - on confirm:
