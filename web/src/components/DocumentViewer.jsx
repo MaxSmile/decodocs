@@ -17,6 +17,7 @@ import { useDocumentTypes } from '../hooks/useDocumentTypes.js';
 import { useValidationSpec } from '../hooks/useValidationSpec.js';
 import { usePDFRenderer } from '../hooks/usePDFRenderer.js';
 import { computeSHA256, extractPdfTextAllPages } from '../utils/pdfUtils.js';
+import { buildDocStats } from '../utils/docStats.js';
 
 // Use local worker from public folder to ensure stability in tests and offline
 
@@ -218,14 +219,7 @@ const DocumentViewer = () => {
       setPdfTextContent(extractedText);
 
       // Stats used by server-side detection + preflight.
-      const pages = extractedText.split('\f').filter((p) => p !== undefined);
-      const charsPerPage = pages.slice(0, pdf.numPages).map((p) => String(p || '').trim().length);
-      const stats = {
-        pageCount: pdf.numPages,
-        charsPerPage,
-        totalChars: extractedText.replace(/\f/g, '').length,
-        pdfSizeBytes: arrayBuffer.byteLength,
-      };
+      const stats = buildDocStats({ pageCount: pdf.numPages, extractedText, pdfSizeBytes: arrayBuffer.byteLength });
       setDocStats(stats);
 
       // Seed server-side detection (cheap). This will populate doc_classifications/{docHash}.
@@ -294,14 +288,7 @@ const DocumentViewer = () => {
       const extractedText = await extractPdfTextAllPages(pdf);
       setPdfTextContent(extractedText);
 
-      const pages = extractedText.split('\f').filter((p) => p !== undefined);
-      const charsPerPage = pages.slice(0, pdf.numPages).map((p) => String(p || '').trim().length);
-      const stats = {
-        pageCount: pdf.numPages,
-        charsPerPage,
-        totalChars: extractedText.replace(/\f/g, '').length,
-        pdfSizeBytes: arrayBuffer.byteLength,
-      };
+      const stats = buildDocStats({ pageCount: pdf.numPages, extractedText, pdfSizeBytes: arrayBuffer.byteLength });
       setDocStats(stats);
 
       runServerDetection({ docHashValue, stats, text: extractedText });
