@@ -41,6 +41,24 @@ const AnalysisResults = ({ analysis }) => {
               </div>
             ) : null}
 
+            {analysis.typeSpecific.usage ? (
+              <div style={{ marginTop: 8 }}>
+                <strong>usage:</strong>
+                <div>
+                  estimatedTokens: {analysis.typeSpecific.usage.estimatedTokens ?? '—'}
+                  {' · '}
+                  remainingTokens: {analysis.typeSpecific.usage.remainingTokens ?? '—'}
+                </div>
+              </div>
+            ) : null}
+
+            {analysis.typeSpecific.ok === false && (analysis.typeSpecific.code || analysis.typeSpecific.requiredTier) ? (
+              <div style={{ marginTop: 8, color: '#991b1b' }}>
+                <strong>blocked:</strong> {analysis.typeSpecific.code || '—'}
+                {analysis.typeSpecific.requiredTier ? ` (required: ${analysis.typeSpecific.requiredTier})` : ''}
+              </div>
+            ) : null}
+
             {analysis.typeSpecific.result?.checks?.length ? (
               <div style={{ marginTop: 8 }}>
                 <strong>checks:</strong>

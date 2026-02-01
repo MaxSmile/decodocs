@@ -417,6 +417,9 @@ const DocumentViewer = () => {
         validationTitle: data.validationSpec?.title || null,
         message: data.message || null,
         result: data.result || null,
+        usage: data.usage || null,
+        requiredTier: data.requiredTier || null,
+        code: data.code || null,
       };
 
       setAnalysisResults((prev) => ({
