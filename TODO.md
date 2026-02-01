@@ -150,7 +150,20 @@ This file mirrors `decodocs-repo/docs/ROADMAP.md` and lists actionable engineeri
 ### Document typing + prompt packs (needed for real-world uploads)
 - [ ] Implement **intake category detection** (UNREADABLE / GENERAL / BUSINESS_LEGAL) and persist per `docHash`.
 - [ ] Implement **fine-grained document type detection** for BUSINESS_LEGAL docs (initial 10–20 types).
-- [ ] Add user override persistence (server-side per puid+docHash) + surface the detected vs overridden type in UI.
+- [x] Add user override persistence (server-side per puid+docHash) + surface the detected vs overridden type in UI.
+
+### Static classification/validation JSON artifacts (public)
+- [ ] Create static folder: `web/public/classifications/`
+  - [ ] `document-types.index.json` (flat list for typeahead: id, label, category, synonyms, parentId)
+  - [ ] `validation/<typeId>.json` (type-specific criteria + schema)
+- [ ] Write a small build script to generate JSON from docs:
+  - Input: `docs/validation/*.md` and `web/src/lib/documentTypes.js`
+  - Output: `web/public/classifications/document-types.index.json` + `web/public/classifications/validation/*.json`
+- [ ] Make web UI load these files dynamically (cacheable), instead of bundling large registries:
+  - load index for typeahead
+  - lazy-load validation details on selection
+
+### Validation schema authoring (docs)
 - [ ] Define prompt-pack output schemas (JSON) for:
   - [x] Company policies / governance docs (mandatory rules, vague language, conflicts, ownership/enforcement) — docs/validation/company-policy.md
   - [x] SOPs / guides (steps, prerequisites, ambiguous instructions, responsibility gaps, contradictions) — docs/validation/sop-procedure.md
