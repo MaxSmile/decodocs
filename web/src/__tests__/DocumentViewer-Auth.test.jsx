@@ -129,7 +129,7 @@ describe('DocumentViewer - Auth Integration', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('Analyze Document')).toBeDisabled();
+      expect(screen.getByText('Legacy analysis (generic)')).toBeDisabled();
       expect(screen.getByText('Explain Selection')).toBeDisabled();
       expect(screen.getByText('Highlight Risks')).toBeDisabled();
       expect(screen.getByText('Translate to Plain English')).toBeDisabled();
@@ -155,7 +155,7 @@ describe('DocumentViewer - Auth Integration', () => {
 
     await waitFor(() => {
       // Buttons exist and are in the document
-      expect(screen.getByText('Analyze Document')).toBeInTheDocument();
+      expect(screen.getByText('Legacy analysis (generic)')).toBeInTheDocument();
       expect(screen.getByText('Explain Selection')).toBeInTheDocument();
       expect(screen.getByText('Highlight Risks')).toBeInTheDocument();
     });

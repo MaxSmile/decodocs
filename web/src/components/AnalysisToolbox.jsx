@@ -22,18 +22,18 @@ const AnalysisToolbox = ({
       </h3>
       <div className="flex flex-col gap-2.5 mb-5">
         <button
-          onClick={onAnalyzeDocument}
-          disabled={isDisabled}
-          className="w-full bg-gray-600 text-white px-4 py-2.5 text-sm rounded hover:bg-gray-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed text-left"
-        >
-          {isLoading ? 'Analyzing...' : 'Analyze Document'}
-        </button>
-        <button
           onClick={onAnalyzeByType}
           disabled={isDisabled}
           className="w-full bg-gray-600 text-white px-4 py-2.5 text-sm rounded hover:bg-gray-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed text-left"
         >
-          Type-specific analysis (beta)
+          {isLoading ? 'Analyzing...' : 'Type-specific analysis (recommended)'}
+        </button>
+        <button
+          onClick={onAnalyzeDocument}
+          disabled={isDisabled}
+          className="w-full bg-gray-600 text-white px-4 py-2.5 text-sm rounded hover:bg-gray-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed text-left"
+        >
+          Legacy analysis (generic)
         </button>
         <button
           onClick={onExplainSelection}
