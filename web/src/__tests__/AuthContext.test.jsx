@@ -11,14 +11,30 @@ vi.mock('firebase/app', () => ({
   getApp: vi.fn(() => ({ name: 'test-app' })),
 }));
 
-vi.mock('firebase/auth', () => ({
-  getAuth: vi.fn(() => ({ name: 'test-auth' })),
-  signInAnonymously: vi.fn(() =>
-    Promise.resolve({
-      user: { uid: 'test-uid-12345' },
-    })
-  ),
-}));
+vi.mock('firebase/auth', async (importOriginal) => {
+  const actual = await importOriginal();
+
+  return {
+    ...actual,
+    getAuth: vi.fn(() => ({ name: 'test-auth' })),
+    onAuthStateChanged: vi.fn((_auth, onNext, _onError) => {
+      // Simulate no existing session so AuthProvider signs in anonymously.
+      onNext(null);
+      return () => {};
+    }),
+    signInAnonymously: vi.fn(() =>
+      Promise.resolve({
+        user: { uid: 'test-uid-12345', isAnonymous: true },
+      })
+    ),
+    // Stubs for AuthContext helper methods
+    signInWithPopup: vi.fn(),
+    signInWithEmailAndPassword: vi.fn(),
+    createUserWithEmailAndPassword: vi.fn(),
+    sendPasswordResetEmail: vi.fn(),
+    signOut: vi.fn(),
+  };
+});
 
 // Test component to access auth context
 const TestComponent = () => {

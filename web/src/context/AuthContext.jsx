@@ -1,6 +1,18 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth, signInAnonymously, connectAuthEmulator } from 'firebase/auth';
+import {
+  getAuth,
+  signInAnonymously,
+  connectAuthEmulator,
+  onAuthStateChanged,
+  signInWithPopup,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+  signOut,
+  GoogleAuthProvider,
+  OAuthProvider,
+} from 'firebase/auth';
 
 /**
  * AuthContext provides auth state management with error handling
@@ -77,62 +89,113 @@ try {
 
 export const AuthProvider = ({ children }) => {
   const [authState, setAuthState] = useState({
-    status: 'pending', // pending, authenticated, error
+    status: 'pending', // pending | authenticated | unauthenticated | error
     user: null,
     error: null,
   });
 
   useEffect(() => {
-    const initAuth = async () => {
-      // Test Mode Mock
-      if (window.MOCK_AUTH) {
-        // window.MOCK_AUTH_USER can be set to null to simulate logged-out state
-        // If undefined, defaults to a valid user
-        const mockUser = window.MOCK_AUTH_USER === undefined 
-          ? { uid: 'test-user', isAnonymous: true } 
-          : window.MOCK_AUTH_USER;
+    // Test Mode Mock
+    if (window.MOCK_AUTH) {
+      // window.MOCK_AUTH_USER can be set to null to simulate logged-out state
+      // If undefined, defaults to a valid user
+      const mockUser = window.MOCK_AUTH_USER === undefined ? { uid: 'test-user', isAnonymous: true } : window.MOCK_AUTH_USER;
 
-        setAuthState({
-          status: mockUser ? 'authenticated' : 'unauthenticated',
-          user: mockUser,
-          error: null
-        });
-        return;
+      setAuthState({
+        status: mockUser ? 'authenticated' : 'unauthenticated',
+        user: mockUser,
+        error: null,
+      });
+      return;
+    }
+
+    if (!auth) {
+      setAuthState({
+        status: 'error',
+        user: null,
+        error: new Error('Firebase Auth not available'),
+      });
+      console.error('Firebase Auth not available');
+      return;
+    }
+
+    // Keep authState in sync with Firebase. If there is no user session,
+    // we immediately create an anonymous session (privacy-first default).
+    const unsub = onAuthStateChanged(
+      auth,
+      async (user) => {
+        if (!user) {
+          try {
+            const userCredential = await signInAnonymously(auth);
+            setAuthState({ status: 'authenticated', user: userCredential.user, error: null });
+          } catch (error) {
+            console.error('Authentication error:', error);
+            setAuthState({ status: 'error', user: null, error });
+          }
+          return;
+        }
+
+        setAuthState({ status: 'authenticated', user, error: null });
+      },
+      (error) => {
+        console.error('Authentication observer error:', error);
+        setAuthState({ status: 'error', user: null, error });
       }
+    );
 
-      if (!auth) {
-        setAuthState({
-          status: 'error',
-          user: null,
-          error: new Error('Firebase Auth not available'),
-        });
-        console.error('Firebase Auth not available');
-        return;
-      }
-
-      try {
-        const userCredential = await signInAnonymously(auth);
-        setAuthState({
-          status: 'authenticated',
-          user: userCredential.user,
-          error: null,
-        });
-      } catch (error) {
-        console.error('Authentication error:', error);
-        // Treat auth failure as a soft error - app continues to work
-        setAuthState({
-          status: 'error',
-          user: null,
-          error,
-        });
-      }
-    };
-
-    initAuth();
+    return () => unsub();
   }, []);
 
+  const signInWithGoogle = async () => {
+    if (!auth) throw new Error('Auth is not available');
+    return signInWithPopup(auth, new GoogleAuthProvider());
+  };
+
+  const signInWithMicrosoft = async () => {
+    if (!auth) throw new Error('Auth is not available');
+    return signInWithPopup(auth, new OAuthProvider('microsoft.com'));
+  };
+
+  const signInWithApple = async () => {
+    if (!auth) throw new Error('Auth is not available');
+    return signInWithPopup(auth, new OAuthProvider('apple.com'));
+  };
+
+  const signInWithEmail = async (email, password) => {
+    if (!auth) throw new Error('Auth is not available');
+    return signInWithEmailAndPassword(auth, email, password);
+  };
+
+  const signUpWithEmail = async (email, password) => {
+    if (!auth) throw new Error('Auth is not available');
+    return createUserWithEmailAndPassword(auth, email, password);
+  };
+
+  const resetPassword = async (email) => {
+    if (!auth) throw new Error('Auth is not available');
+    return sendPasswordResetEmail(auth, email);
+  };
+
+  const signOutUser = async () => {
+    if (!auth) return;
+    await signOut(auth);
+  };
+
   return (
-    <AuthContext.Provider value={{ authState, app, auth }}>
+    <AuthContext.Provider
+      value={{
+        authState,
+        app,
+        auth,
+        signInWithGoogle,
+        signInWithMicrosoft,
+        signInWithApple,
+        signInWithEmail,
+        signUpWithEmail,
+        resetPassword,
+        signOutUser,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

@@ -6,7 +6,6 @@ import {
   EmailAuthProvider,
   linkWithPopup,
   linkWithCredential,
-  signInWithPopup,
   signOut,
 } from 'firebase/auth';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -23,7 +22,17 @@ const Card = ({ children }) => (
 );
 
 export default function SignInPage() {
-  const { authState, auth } = useAuth();
+  const {
+    authState,
+    auth,
+    signInWithGoogle,
+    signInWithMicrosoft,
+    signInWithApple,
+    signInWithEmail,
+    signUpWithEmail,
+    resetPassword,
+    signOutUser,
+  } = useAuth();
   const navigate = useNavigate();
   const q = useQuery();
 
@@ -36,7 +45,7 @@ export default function SignInPage() {
 
   const intent = q.get('intent');
 
-  const runProvider = async (provider) => {
+  const runProvider = async (provider, directSignIn) => {
     setStatus({ kind: 'loading', message: 'Opening sign-in…' });
 
     try {
@@ -46,8 +55,11 @@ export default function SignInPage() {
       // Linking is universal: providers become aliases under the same identity.
       if (auth.currentUser) {
         await linkWithPopup(auth.currentUser, provider);
+      } else if (directSignIn) {
+        await directSignIn();
       } else {
-        await signInWithPopup(auth, provider);
+        // Fallback: should rarely happen because AuthProvider creates an anonymous user.
+        throw new Error('No active session. Refresh and try again.');
       }
 
       setStatus({ kind: 'ok', message: 'Signed in. Your accounts are linked.' });
@@ -68,15 +80,15 @@ export default function SignInPage() {
     }
   };
 
-  const linkEmailPassword = async (mode) => {
-    setStatus({ kind: 'loading', message: mode === 'signup' ? 'Creating account…' : 'Signing in…' });
+  const linkEmailPassword = async () => {
+    setStatus({ kind: 'loading', message: 'Linking email…' });
 
     try {
       if (!auth) throw new Error('Auth is not available');
       if (!auth.currentUser) throw new Error('No active session. Refresh and try again.');
       if (!email || !password) throw new Error('Email and password are required.');
 
-      // We always link email/password to the current user.
+      // We link email/password to the current user.
       // For anonymous users, this upgrades them to a permanent account.
       const credential = EmailAuthProvider.credential(email, password);
       await linkWithCredential(auth.currentUser, credential);
@@ -86,16 +98,55 @@ export default function SignInPage() {
     } catch (e) {
       const code = e?.code || '';
       if (code === 'auth/email-already-in-use') {
-        setStatus({ kind: 'error', message: 'Email already exists. Use “Sign out” then sign in with that email, and link providers from /profile.' });
+        setStatus({
+          kind: 'error',
+          message:
+            'Email already exists. Use “Sign out”, then sign in with that email, and link providers from /profile.',
+        });
         return;
       }
+      setStatus({ kind: 'error', message: e?.message || 'Email linking failed.' });
+    }
+  };
+
+  const doEmailSignIn = async () => {
+    setStatus({ kind: 'loading', message: 'Signing in…' });
+    try {
+      if (!email || !password) throw new Error('Email and password are required.');
+      await signInWithEmail(email, password);
+      setStatus({ kind: 'ok', message: 'Signed in.' });
+      navigate('/profile');
+    } catch (e) {
       setStatus({ kind: 'error', message: e?.message || 'Email sign-in failed.' });
     }
   };
 
+  const doEmailSignUp = async () => {
+    setStatus({ kind: 'loading', message: 'Creating account…' });
+    try {
+      if (!email || !password) throw new Error('Email and password are required.');
+      if (String(password).length < 10) throw new Error('Password must be at least 10 characters.');
+      await signUpWithEmail(email, password);
+      setStatus({ kind: 'ok', message: 'Account created and signed in.' });
+      navigate('/profile');
+    } catch (e) {
+      setStatus({ kind: 'error', message: e?.message || 'Email sign-up failed.' });
+    }
+  };
+
+  const doResetPassword = async () => {
+    setStatus({ kind: 'loading', message: 'Sending reset email…' });
+    try {
+      if (!email) throw new Error('Enter your email first.');
+      await resetPassword(email);
+      setStatus({ kind: 'ok', message: 'Password reset email sent (if the account exists).' });
+    } catch (e) {
+      setStatus({ kind: 'error', message: e?.message || 'Password reset failed.' });
+    }
+  };
+
   const doSignOut = async () => {
-    if (!auth) return;
-    await signOut(auth);
+    await (signOutUser ? signOutUser() : auth ? signOut(auth) : Promise.resolve());
     setStatus({ kind: 'ok', message: 'Signed out. Refreshing…' });
     window.location.reload();
   };
@@ -115,21 +166,21 @@ export default function SignInPage() {
           <div style={{ marginTop: 12, display: 'grid', gap: 10 }}>
             <button
               type="button"
-              onClick={() => runProvider(new GoogleAuthProvider())}
+              onClick={() => runProvider(new GoogleAuthProvider(), signInWithGoogle)}
               style={{ padding: '10px 12px', borderRadius: 12, border: '1px solid #e2e8f0', background: '#fff', fontWeight: 800, cursor: 'pointer' }}
             >
               Continue with Google
             </button>
             <button
               type="button"
-              onClick={() => runProvider(new OAuthProvider('apple.com'))}
+              onClick={() => runProvider(new OAuthProvider('apple.com'), signInWithApple)}
               style={{ padding: '10px 12px', borderRadius: 12, border: '1px solid #e2e8f0', background: '#fff', fontWeight: 800, cursor: 'pointer' }}
             >
               Continue with Apple
             </button>
             <button
               type="button"
-              onClick={() => runProvider(new OAuthProvider('microsoft.com'))}
+              onClick={() => runProvider(new OAuthProvider('microsoft.com'), signInWithMicrosoft)}
               style={{ padding: '10px 12px', borderRadius: 12, border: '1px solid #e2e8f0', background: '#fff', fontWeight: 800, cursor: 'pointer' }}
             >
               Continue with Microsoft
@@ -153,24 +204,53 @@ export default function SignInPage() {
               type="password"
               style={{ padding: 10, borderRadius: 12, border: '1px solid #e2e8f0' }}
             />
-            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+
+            <div style={{ display: 'grid', gap: 10 }}>
               <button
                 type="button"
-                onClick={() => linkEmailPassword('signup')}
-                style={{ padding: '10px 12px', borderRadius: 12, border: '1px solid #0f172a', background: '#0f172a', color: '#fff', fontWeight: 900, cursor: 'pointer', flex: 1 }}
+                onClick={linkEmailPassword}
+                style={{ padding: '10px 12px', borderRadius: 12, border: '1px solid #0f172a', background: '#0f172a', color: '#fff', fontWeight: 900, cursor: 'pointer' }}
               >
-                Link Email
+                Link email to current session
               </button>
-              <button
-                type="button"
-                onClick={doSignOut}
-                style={{ padding: '10px 12px', borderRadius: 12, border: '1px solid #e2e8f0', background: '#fff', fontWeight: 900, cursor: 'pointer' }}
-              >
-                Sign out
-              </button>
+
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={doEmailSignIn}
+                  style={{ padding: '10px 12px', borderRadius: 12, border: '1px solid #e2e8f0', background: '#fff', fontWeight: 900, cursor: 'pointer', flex: 1 }}
+                >
+                  Sign in with email
+                </button>
+                <button
+                  type="button"
+                  onClick={doEmailSignUp}
+                  style={{ padding: '10px 12px', borderRadius: 12, border: '1px solid #e2e8f0', background: '#fff', fontWeight: 900, cursor: 'pointer', flex: 1 }}
+                >
+                  Create account
+                </button>
+              </div>
+
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={doResetPassword}
+                  style={{ padding: '10px 12px', borderRadius: 12, border: '1px solid #e2e8f0', background: '#fff', fontWeight: 900, cursor: 'pointer' }}
+                >
+                  Reset password
+                </button>
+                <button
+                  type="button"
+                  onClick={doSignOut}
+                  style={{ padding: '10px 12px', borderRadius: 12, border: '1px solid #e2e8f0', background: '#fff', fontWeight: 900, cursor: 'pointer' }}
+                >
+                  Sign out
+                </button>
+              </div>
             </div>
+
             <div style={{ color: '#64748b', fontSize: 13, lineHeight: 1.5 }}>
-              This links email/password to your current session (anonymous or not). If the email already exists, sign out and sign in fresh.
+              Recommended password minimum: 10 chars. If an email already exists and linking fails, sign out then sign in using that email.
             </div>
           </div>
         </Card>

@@ -39,6 +39,9 @@ Source of truth for provider linking and primary user identity:
 Source of truth for the user-facing auth UX + states:
 - [AUTH_UX.md](AUTH_UX.md)
 
+Email/password setup details:
+- [AUTH_EMAIL_PASSWORD.md](AUTH_EMAIL_PASSWORD.md)
+
 Key idea: we resolve all provider identities to a server-side **puid** and enforce limits/entitlements per puid.
 
 ## Stripe

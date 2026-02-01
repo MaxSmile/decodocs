@@ -22,7 +22,7 @@ This file mirrors `decodocs-repo/docs/ROADMAP.md` and lists actionable engineeri
       - Signed-out session (optional)
     - Acceptance criteria:
       - User can start anonymous, then link to Email/Google/Microsoft/Apple without losing the current document context.
-  - [ ] Implement Email/Password auth (Firebase Auth)
+  - [x] Implement Email/Password auth (Firebase Auth)
     - Tasks:
       - Enable Email/Password provider in Firebase Console for project `snapsign-au`
       - Add UI: “Continue with email” → (create account / sign in / reset password)
