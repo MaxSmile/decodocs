@@ -4,6 +4,7 @@ import { getIdToken } from 'firebase/auth';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { analyzeByTypeCall } from '../services/typeAnalysisService.js';
 import { detectDocumentTypeCall, getDocumentTypeStateCall, saveDocTypeOverrideCall } from '../services/documentTypeService.js';
+import { preflightCheckCall } from '../services/preflightService.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import Layout from './Layout.jsx';
 import PDFControls from './PDFControls.jsx';
@@ -380,8 +381,8 @@ const DocumentViewer = () => {
       const charsPerPage = pages.map((page) => page.length);
       const totalChars = pages.reduce((sum, page) => sum + page.length, 0);
 
-      const preflightCheck = httpsCallable(functions, 'preflightCheck');
-      const result = await preflightCheck({
+      const data = await preflightCheckCall({
+        functions,
         docHash,
         stats: {
           pageCount: numPages,
@@ -391,7 +392,7 @@ const DocumentViewer = () => {
         },
       });
 
-      return result.data;
+      return data;
     } catch (error) {
       console.error('Preflight check error:', error);
       return { ok: true, classification: 'OK' };
