@@ -1,6 +1,12 @@
 # DecoDocs - Current Status & Next Steps
 
 ## Recent changes (2026-02-01)
+- Backend: replaced MVP “free vs pro by AI calls/doc” with tiered token budgets:
+  - Anonymous: 20k tokens per uid
+  - Free: 40k tokens/day (UTC)
+  - Pro: unlimited
+  - scanned/OCR-required PDFs are Pro-only
+  - docHash ledger stored in Firestore `docshashes` (forever)
 - DocumentEditor: removed alert-based placeholders for Save/Download/Print.
   - Save now stores a local draft (signatures + annotations) in `localStorage`.
   - Download now downloads the original PDF when available.
