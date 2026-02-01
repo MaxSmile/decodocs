@@ -8,6 +8,8 @@ import PDFControls from './PDFControls.jsx';
 import PDFDisplay from './PDFDisplay.jsx';
 import AnalysisToolbox from './AnalysisToolbox.jsx';
 import AnalysisResults from './AnalysisResults.jsx';
+import DocumentTypeSelector from './DocumentTypeSelector.jsx';
+import { DOCUMENT_TYPES } from '../lib/documentTypes.js';
 import { usePDFRenderer } from '../hooks/usePDFRenderer.js';
 import { computeSHA256, extractPdfText } from '../utils/pdfUtils.js';
 
@@ -32,6 +34,10 @@ const DocumentViewer = () => {
   const [loadingMessage, setLoadingMessage] = useState('');
   const [pdfLibLoaded, setPdfLibLoaded] = useState(false);
   const [gate, setGate] = useState(null); // { title, message, primaryLabel, primaryTo, secondaryLabel, secondaryTo }
+  const [typeSelectorOpen, setTypeSelectorOpen] = useState(false);
+  const [detectedDocTypeId, setDetectedDocTypeId] = useState('legal_contract_generic');
+  const [overrideDocTypeId, setOverrideDocTypeId] = useState(null);
+  const [pendingOverride, setPendingOverride] = useState(null);
   const fileInputRef = useRef(null);
   const { documentId, fileName } = useParams();
   const location = useLocation();
@@ -97,6 +103,30 @@ const DocumentViewer = () => {
     }
   }, [pdfDoc, pageNumber, pageScale, highlights, clauseMarkers, riskBadges]);
 
+  const resolveType = (id) => DOCUMENT_TYPES.find((t) => t.id === id) || null;
+  const effectiveDocTypeId = overrideDocTypeId || detectedDocTypeId;
+  const effectiveDocType = resolveType(effectiveDocTypeId);
+  const detectedDocType = resolveType(detectedDocTypeId);
+
+  const persistOverride = async (docHashValue, typeId) => {
+    try {
+      localStorage.setItem(`decodocs:doctype:${docHashValue}`, String(typeId));
+    } catch {
+      // ignore
+    }
+
+    // Persist server-side per puid (users are isolated)
+    if (!functions || isMockMode) return;
+
+    try {
+      const save = httpsCallable(functions, 'saveDocTypeOverride');
+      await save({ docHash: docHashValue, typeId });
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn('Failed to persist doc type override', e);
+    }
+  };
+
   // Load PDF from Blob/File object
   const loadPdfFromBlob = async (fileBlob) => {
     if (!window.pdfjsLib || !fileBlob) return;
@@ -110,6 +140,14 @@ const DocumentViewer = () => {
       console.log('PDF Buffer Size:', arrayBuffer.byteLength);
       const docHashValue = await computeSHA256(arrayBuffer);
       setDocHash(docHashValue);
+
+      // Load per-user override (local) immediately; server-side override is stored per puid.
+      try {
+        const ov = localStorage.getItem(`decodocs:doctype:${docHashValue}`);
+        if (ov) setOverrideDocTypeId(ov);
+      } catch {
+        // ignore
+      }
 
       const lib = window.pdfjsLib;
       const pdf = await lib.getDocument({
@@ -155,6 +193,13 @@ const DocumentViewer = () => {
       const arrayBuffer = await response.arrayBuffer();
       const docHashValue = await computeSHA256(arrayBuffer);
       setDocHash(docHashValue);
+
+      try {
+        const ov = localStorage.getItem(`decodocs:doctype:${docHashValue}`);
+        if (ov) setOverrideDocTypeId(ov);
+      } catch {
+        // ignore
+      }
 
       const pdfjsLib = window.pdfjsLib;
       const pdf = await pdfjsLib.getDocument({
@@ -643,7 +688,17 @@ const DocumentViewer = () => {
               {gate.primaryLabel && (
                 <button
                   type="button"
-                  onClick={() => {
+                  onClick={async () => {
+                    // Special case: confirm document type override
+                    if (gate._kind === 'confirm-override' && pendingOverride && docHash) {
+                      const typeId = pendingOverride.id;
+                      setOverrideDocTypeId(typeId);
+                      await persistOverride(docHash, typeId);
+                      setPendingOverride(null);
+                      setGate(null);
+                      return;
+                    }
+
                     setGate(null);
                     if (gate.primaryTo) navigate(gate.primaryTo);
                   }}
@@ -656,6 +711,26 @@ const DocumentViewer = () => {
           </div>
         </div>
       )}
+
+      <DocumentTypeSelector
+        open={typeSelectorOpen}
+        detectedType={detectedDocType}
+        onClose={() => setTypeSelectorOpen(false)}
+        onPick={(t) => {
+          setTypeSelectorOpen(false);
+          // Quick validation: if user means to override, confirm before applying.
+          setPendingOverride(t);
+          setGate({
+            title: 'Confirm document type',
+            message: `Set document type to “${t.label}”? This will change the actions/checks we show for this document.`,
+            primaryLabel: 'Confirm',
+            primaryTo: null,
+            secondaryLabel: 'Cancel',
+            secondaryTo: null,
+            _kind: 'confirm-override',
+          });
+        }}
+      />
 
       <div className="flex flex-1 min-h-0 h-[calc(100vh-120px)]">
         {/* PDF Viewer Section */}
@@ -673,6 +748,39 @@ const DocumentViewer = () => {
             onZoomOut={zoomOut}
             fileInputRef={fileInputRef}
           />
+
+          {/* Document type chip + override */}
+          {docHash && (
+            <div style={{ marginTop: 10, display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+              <div
+                style={{
+                  display: 'inline-flex',
+                  gap: 8,
+                  alignItems: 'center',
+                  padding: '6px 10px',
+                  borderRadius: 999,
+                  border: '1px solid #e2e8f0',
+                  background: '#fff',
+                  fontWeight: 900,
+                  color: '#0f172a',
+                  fontSize: 13,
+                }}
+              >
+                <span style={{ color: '#64748b', fontWeight: 800 }}>Type:</span>
+                <span>{effectiveDocType?.label || 'Unknown'}</span>
+                {overrideDocTypeId && (
+                  <span style={{ color: '#64748b', fontWeight: 800 }}>(overridden)</span>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => setTypeSelectorOpen(true)}
+                style={{ padding: '6px 10px', borderRadius: 999, border: '1px solid #e2e8f0', background: '#fff', fontWeight: 900, cursor: 'pointer' }}
+              >
+                Change
+              </button>
+            </div>
+          )}
 
           <PDFDisplay
             pdfDoc={pdfDoc}

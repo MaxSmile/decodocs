@@ -11,6 +11,9 @@
   - scanned PDF → redirect to `/pricing`
   - anonymous token limit → redirect to `/sign-in`
   - free daily limit → redirect to `/pricing`
+- Web: DocumentViewer shows detected document type + allows per-user override via searchable selector.
+  - override requires confirmation (quick validation popup)
+  - override stored locally and persisted server-side per puid+docHash
 - DocumentEditor: removed alert-based placeholders for Save/Download/Print.
   - Save now stores a local draft (signatures + annotations) in `localStorage`.
   - Download now downloads the original PDF when available.
