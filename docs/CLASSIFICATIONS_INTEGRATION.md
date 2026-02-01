@@ -23,10 +23,10 @@ These should be cached aggressively:
 ### Server (Functions)
 - `saveDocTypeOverride` callable (already exists)
 - `getEntitlement`, `preflightCheck`, `analyzeText` (exist)
-- New callables to add:
-  - `detectDocumentType` (intake + type)
-  - `getDocumentTypeState` (detected + override)
-  - `analyzeByType` (type-specific pack selection)
+- Callables:
+  - `detectDocumentType` (intake + type) — implemented (heuristic v1)
+  - `getDocumentTypeState` (detected + override) — implemented
+  - `analyzeByType` (type-specific pack selection) — TBD
 
 ## Data model (Firestore)
 
