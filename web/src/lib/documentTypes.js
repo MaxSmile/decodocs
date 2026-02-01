@@ -76,6 +76,13 @@ export const DOCUMENT_TYPES = [
     synonyms: ['schedule', 'timetable', 'calendar', 'rota'],
   },
   {
+    id: 'general_sop_procedure',
+    label: 'SOP / procedure',
+    category: DOC_CATEGORIES.GENERAL,
+    synonyms: ['sop', 'procedure', 'runbook', 'work instruction', 'instructions', 'guide'],
+    validationSlug: 'sop-procedure',
+  },
+  {
     id: 'general_resume_cv',
     label: 'Resume / CV',
     category: DOC_CATEGORIES.GENERAL,
@@ -88,6 +95,7 @@ export const DOCUMENT_TYPES = [
     label: 'Job offer / offer letter',
     category: DOC_CATEGORIES.BUSINESS_LEGAL,
     synonyms: ['offer letter', 'job offer', 'employment offer', 'compensation', 'salary', 'starting date'],
+    validationSlug: 'job-offer',
   },
 
   // --- BUSINESS / LEGAL ---
@@ -126,6 +134,7 @@ export const DOCUMENT_TYPES = [
     label: 'Invoice',
     category: DOC_CATEGORIES.BUSINESS_LEGAL,
     synonyms: ['invoice', 'tax invoice', 'payment due'],
+    validationSlug: 'invoice',
   },
   {
     id: 'business_purchase_order',
@@ -138,6 +147,7 @@ export const DOCUMENT_TYPES = [
     label: 'Privacy policy',
     category: DOC_CATEGORIES.BUSINESS_LEGAL,
     synonyms: ['privacy policy', 'personal information', 'data collection'],
+    validationSlug: 'company-policy',
   },
   {
     id: 'policy_terms',

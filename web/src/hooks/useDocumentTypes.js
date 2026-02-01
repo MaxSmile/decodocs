@@ -15,6 +15,12 @@ export function useDocumentTypes() {
         if (!resp.ok) throw new Error(`Failed to load document types: ${resp.status}`);
         const json = await resp.json();
         const types = Array.isArray(json?.types) ? json.types : null;
+        // ensure expected optional fields exist
+        if (types) {
+          for (const t of types) {
+            if (!('validationSlug' in t)) t.validationSlug = null;
+          }
+        }
         if (!types) throw new Error('Invalid document-types.index.json');
         if (!cancelled) setRemoteTypes(types);
       } catch {

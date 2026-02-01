@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-02-01T08:38:17.207Z",
+  "generatedAt": "2026-02-01T09:24:56.767Z",
   "types": [
     {
       "id": "unreadable_broken",
@@ -13,7 +13,8 @@
         "cannot open",
         "damaged"
       ],
-      "parentId": null
+      "parentId": null,
+      "validationSlug": null
     },
     {
       "id": "unreadable_encrypted",
@@ -24,7 +25,8 @@
         "password",
         "protected"
       ],
-      "parentId": null
+      "parentId": null,
+      "validationSlug": null
     },
     {
       "id": "unreadable_empty",
@@ -35,7 +37,8 @@
         "empty",
         "no text"
       ],
-      "parentId": null
+      "parentId": null,
+      "validationSlug": null
     },
     {
       "id": "general_letter",
@@ -46,7 +49,8 @@
         "correspondence",
         "personal letter"
       ],
-      "parentId": null
+      "parentId": null,
+      "validationSlug": null
     },
     {
       "id": "general_police_letter",
@@ -59,7 +63,8 @@
         "fine",
         "offence"
       ],
-      "parentId": null
+      "parentId": null,
+      "validationSlug": null
     },
     {
       "id": "general_presentation",
@@ -71,7 +76,8 @@
         "presentation",
         "pitch"
       ],
-      "parentId": null
+      "parentId": null,
+      "validationSlug": null
     },
     {
       "id": "general_marketing",
@@ -84,7 +90,8 @@
         "brochure",
         "marketing"
       ],
-      "parentId": null
+      "parentId": null,
+      "validationSlug": null
     },
     {
       "id": "general_book",
@@ -97,7 +104,8 @@
         "story",
         "longform"
       ],
-      "parentId": null
+      "parentId": null,
+      "validationSlug": null
     },
     {
       "id": "general_notes",
@@ -109,7 +117,8 @@
         "journal",
         "private notes"
       ],
-      "parentId": null
+      "parentId": null,
+      "validationSlug": null
     },
     {
       "id": "general_schedule",
@@ -121,7 +130,23 @@
         "calendar",
         "rota"
       ],
-      "parentId": null
+      "parentId": null,
+      "validationSlug": null
+    },
+    {
+      "id": "general_sop_procedure",
+      "label": "SOP / procedure",
+      "category": "GENERAL",
+      "synonyms": [
+        "sop",
+        "procedure",
+        "runbook",
+        "work instruction",
+        "instructions",
+        "guide"
+      ],
+      "parentId": null,
+      "validationSlug": "sop-procedure"
     },
     {
       "id": "general_resume_cv",
@@ -135,7 +160,8 @@
         "education",
         "skills"
       ],
-      "parentId": null
+      "parentId": null,
+      "validationSlug": null
     },
     {
       "id": "legal_job_offer",
@@ -149,7 +175,8 @@
         "salary",
         "starting date"
       ],
-      "parentId": null
+      "parentId": null,
+      "validationSlug": "job-offer"
     },
     {
       "id": "legal_contract_generic",
@@ -161,7 +188,8 @@
         "terms",
         "conditions"
       ],
-      "parentId": null
+      "parentId": null,
+      "validationSlug": null
     },
     {
       "id": "legal_employment_contract",
@@ -174,7 +202,8 @@
         "salary",
         "position"
       ],
-      "parentId": null
+      "parentId": null,
+      "validationSlug": null
     },
     {
       "id": "legal_nda",
@@ -185,7 +214,8 @@
         "non-disclosure",
         "confidentiality"
       ],
-      "parentId": null
+      "parentId": null,
+      "validationSlug": null
     },
     {
       "id": "legal_lease_residential",
@@ -199,7 +229,8 @@
         "landlord",
         "tenant"
       ],
-      "parentId": null
+      "parentId": null,
+      "validationSlug": null
     },
     {
       "id": "legal_lease_commercial",
@@ -210,7 +241,8 @@
         "premises",
         "outgoings"
       ],
-      "parentId": null
+      "parentId": null,
+      "validationSlug": null
     },
     {
       "id": "business_invoice",
@@ -221,7 +253,8 @@
         "tax invoice",
         "payment due"
       ],
-      "parentId": null
+      "parentId": null,
+      "validationSlug": "invoice"
     },
     {
       "id": "business_purchase_order",
@@ -232,7 +265,8 @@
         "po",
         "order"
       ],
-      "parentId": null
+      "parentId": null,
+      "validationSlug": null
     },
     {
       "id": "policy_privacy",
@@ -243,7 +277,8 @@
         "personal information",
         "data collection"
       ],
-      "parentId": null
+      "parentId": null,
+      "validationSlug": "company-policy"
     },
     {
       "id": "policy_terms",
@@ -255,7 +290,8 @@
         "conditions",
         "website terms"
       ],
-      "parentId": null
+      "parentId": null,
+      "validationSlug": null
     }
   ]
 }

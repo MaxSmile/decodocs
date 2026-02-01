@@ -161,10 +161,10 @@ This file mirrors `decodocs-repo/docs/ROADMAP.md` and lists actionable engineeri
   - Input: `docs/validation/*.md` and `web/src/lib/documentTypes.js`
   - Output: `web/public/classifications/document-types.index.json` + `web/public/classifications/validation/*.json`
   - Script: `web/scripts/generate-classifications.mjs` (npm: `classifications:build`)
-- [ ] Make web UI load these files dynamically (cacheable), instead of bundling large registries:
-  - load index for typeahead
-  - lazy-load validation details on selection
-  - keep override persistence server-side in Functions
+- [~] Make web UI load these files dynamically (cacheable), instead of bundling large registries:
+  - [x] load index for typeahead (document-types.index.json)
+  - [x] lazy-load validation details on selection (validationSlug → /classifications/validation/*.json)
+  - [x] keep override persistence server-side in Functions
 
 ### AI integration tasks (classification + type-specific validation)
 - [ ] Add callable `detectDocumentType` (cheap):

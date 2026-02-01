@@ -10,6 +10,7 @@ import AnalysisToolbox from './AnalysisToolbox.jsx';
 import AnalysisResults from './AnalysisResults.jsx';
 import DocumentTypeSelector from './DocumentTypeSelector.jsx';
 import { useDocumentTypes } from '../hooks/useDocumentTypes.js';
+import { useValidationSpec } from '../hooks/useValidationSpec.js';
 import { usePDFRenderer } from '../hooks/usePDFRenderer.js';
 import { computeSHA256, extractPdfText } from '../utils/pdfUtils.js';
 
@@ -108,6 +109,10 @@ const DocumentViewer = () => {
   const effectiveDocTypeId = overrideDocTypeId || detectedDocTypeId;
   const effectiveDocType = resolveType(effectiveDocTypeId);
   const detectedDocType = resolveType(detectedDocTypeId);
+
+  const [criteriaOpen, setCriteriaOpen] = useState(false);
+  const validationSlug = effectiveDocType?.validationSlug || null;
+  const validation = useValidationSpec(validationSlug);
 
   const persistOverride = async (docHashValue, typeId) => {
     try {
@@ -733,6 +738,70 @@ const DocumentViewer = () => {
         }}
       />
 
+      {criteriaOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(15, 23, 42, 0.45)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 2100,
+            padding: 16,
+          }}
+          onClick={() => setCriteriaOpen(false)}
+        >
+          <div
+            style={{
+              background: '#fff',
+              borderRadius: 14,
+              border: '1px solid #e2e8f0',
+              maxWidth: 820,
+              width: '100%',
+              padding: 18,
+              boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+              maxHeight: '80vh',
+              overflow: 'auto',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+              <div>
+                <div style={{ fontWeight: 900, fontSize: 16, color: '#0f172a' }}>Validation criteria</div>
+                <div style={{ marginTop: 6, color: '#475569' }}>
+                  Type: <strong>{effectiveDocType?.label || 'Unknown'}</strong>
+                  {validationSlug ? <span style={{ color: '#94a3b8' }}> ({validationSlug})</span> : null}
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setCriteriaOpen(false)}
+                style={{ background: 'none', border: 'none', fontSize: 22, cursor: 'pointer', color: '#0f172a', padding: 0, lineHeight: 1 }}
+                aria-label="Close"
+              >
+                ×
+              </button>
+            </div>
+
+            <div style={{ marginTop: 12 }}>
+              {validation.status === 'loading' && <div style={{ color: '#475569' }}>Loading…</div>}
+              {validation.status === 'error' && <div style={{ color: '#991b1b' }}>Could not load criteria.</div>}
+              {validation.status === 'ready' && (
+                <>
+                  <div style={{ fontWeight: 900, color: '#0f172a', marginBottom: 8 }}>{validation.spec?.title}</div>
+                  <pre style={{ whiteSpace: 'pre-wrap', margin: 0, color: '#0f172a', fontSize: 13, lineHeight: 1.6 }}>
+                    {validation.spec?.markdown}
+                  </pre>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-1 min-h-0 h-[calc(100vh-120px)]">
         {/* PDF Viewer Section */}
         <div className="flex-1 flex flex-col p-5 border-r border-gray-300 min-w-0">
@@ -779,6 +848,15 @@ const DocumentViewer = () => {
                 style={{ padding: '6px 10px', borderRadius: 999, border: '1px solid #e2e8f0', background: '#fff', fontWeight: 900, cursor: 'pointer' }}
               >
                 Change
+              </button>
+              <button
+                type="button"
+                onClick={() => setCriteriaOpen(true)}
+                disabled={!validationSlug}
+                style={{ padding: '6px 10px', borderRadius: 999, border: '1px solid #e2e8f0', background: '#fff', fontWeight: 900, cursor: validationSlug ? 'pointer' : 'not-allowed', opacity: validationSlug ? 1 : 0.5 }}
+                title={validationSlug ? 'View validation criteria' : 'No criteria spec for this type yet'}
+              >
+                Criteria
               </button>
             </div>
           )}

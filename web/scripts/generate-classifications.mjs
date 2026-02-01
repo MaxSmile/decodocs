@@ -69,6 +69,7 @@ const main = async () => {
       category: t.category,
       synonyms: t.synonyms || [],
       parentId: t.parentId || null,
+      validationSlug: t.validationSlug || null,
     })),
   });
 
