@@ -365,19 +365,16 @@ const DocumentViewer = () => {
     }
 
     try {
-      const pages = pdfTextContent.split('\f');
-      const charsPerPage = pages.map((page) => page.length);
-      const totalChars = pages.reduce((sum, page) => sum + page.length, 0);
+      const stats = buildDocStats({
+        pageCount: numPages,
+        extractedText: pdfTextContent,
+        pdfSizeBytes: selectedDocument?.size || 0,
+      });
 
       const data = await preflightCheckCall({
         functions,
         docHash,
-        stats: {
-          pageCount: numPages,
-          charsPerPage,
-          totalChars,
-          pdfSizeBytes: selectedDocument?.size || 0,
-        },
+        stats,
       });
 
       return data;
@@ -488,9 +485,14 @@ const DocumentViewer = () => {
         return;
       }
 
+      const stats = buildDocStats({
+        pageCount: numPages,
+        extractedText: pdfTextContent,
+        pdfSizeBytes: selectedDocument?.size || 0,
+      });
+
       const pages = pdfTextContent.split('\f');
-      const charsPerPage = pages.map((page) => page.length);
-      const totalChars = pages.reduce((sum, page) => sum + page.length, 0);
+      const { charsPerPage, totalChars } = stats;
 
       let result;
       if (isMockMode) {
