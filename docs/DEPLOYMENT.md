@@ -137,26 +137,26 @@ The `firebase.json` file in the project root contains the deployment configurati
 
 ### Domain and Redirect Strategy
 
-The DecoDocs web app is hosted on Firebase Hosting under the `decodocs` target, which serves:
+The DecoDocs web app is hosted on Firebase Hosting under the `decodocs-site` hosting site, which serves:
 - `https://decodocs-site.web.app`
 - `https://decodocs-site.firebaseapp.com`
 
-In production, these Firebase domains are **not the primary brand URL**. Instead, they must issue a **permanent redirect (301)** to the canonical domain:
+In production, these Firebase domains are **not the primary brand URL**. Instead, they should issue a **permanent redirect (301)** to the canonical domain:
 
 - `https://decodocs.com`
 
-This redirect behavior is configured in `firebase.json` using a `redirects` block under the `decodocs` hosting target, for example:
+This redirect behavior is configured in the root `firebase.json` under the `hosting` entry where `site` is `decodocs-site`, for example:
 
 ```json
 {
   "hosting": [
     {
-      "target": "decodocs",
-      "public": "decodocs-repo/web/dist",
+      "site": "decodocs-site",
+      "public": "decodocs/web/decodocs.com",
       "redirects": [
         {
           "source": "**",
-          "destination": "https://decodocs.com",
+          "destination": "https://decodocs.com/:splat",
           "type": 301
         }
       ]
@@ -168,10 +168,12 @@ This redirect behavior is configured in `firebase.json` using a `redirects` bloc
 Once deployed with:
 
 ```bash
-firebase deploy --only hosting:decodocs
+firebase deploy --only hosting:decodocs-site
 ```
 
-any request to `decodocs-site.web.app` or `decodocs-site.firebaseapp.com` will be permanently redirected to `https://decodocs.com`, while `decodocs.com` itself can be mapped via Firebase Hosting custom domains to the same `decodocs` target.
+any request to `decodocs-site.web.app` or `decodocs-site.firebaseapp.com` will be permanently redirected to `https://decodocs.com/...`.
+
+Note: only enable this redirect once `decodocs.com` is serving the app (e.g., via a custom domain on a different hosting site or a non-redirecting config), otherwise you may redirect the canonical domain back to itself.
 
 ### Environment Variables
 
