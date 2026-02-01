@@ -5,6 +5,15 @@ _Last updated: February 2, 2026_
 This file mirrors `decodocs-repo/docs/ROADMAP.md` and lists actionable engineering + documentation tasks.
 
 ## Phase 1 - Web MVP Foundation (Live, Iterating)
+
+### UI Quality & Consistency (High priority refactor)
+- [ ] **Unify layouts**: define one canonical `AppLayout` (header/footer/nav) and use it across all routes (Home, Pricing, Sign-in, Profile, Viewer, Editor, About/Terms/Privacy/Contact)
+  - Decide: keep landing style vs app style; remove the “two different products” feel
+- [ ] Add **DecoDocs logo + consistent nav** to the canonical layout (match landing brand)
+- [ ] Remove/retire legacy/duplicate pages and styles (e.g. older `web/src/pages/*` vs `web/src/components/*`) to reduce confusion
+- [ ] Reduce inline-style sprawl: migrate repeated inline styles into shared components (Card/Button/Section) or Tailwind classes
+- [ ] Standardize typography + spacing tokens (one design system, even if lightweight)
+
 - [x] Brand polish: ensure "DecoDocs" and "Snap Sign Pty Ltd" are consistent across UI + docs (no legacy names)
 - [x] Replace placeholder Sign page with a clear "Signing MVP checklist" (show number of remaining tasks + CTA to analyze PDF + join waitlist)
   - Checklist (v1): signature placement UI, signer identity/consent, audit trail, doc hashing/integrity, signature appearance, signed PDF export, verification view, send-for-signing flow, storage/retention, legal/terms UX
