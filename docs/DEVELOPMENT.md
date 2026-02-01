@@ -83,6 +83,10 @@ web/
 │   │   ├── DocumentViewer.js
 │   │   └── DocumentEditor.js
 │   ├── services/           # API/callable wrappers (Firebase functions, etc.)
+│   │   ├── analyzeTextService.js
+│   │   ├── preflightService.js
+│   │   ├── documentTypeService.js
+│   │   └── typeAnalysisService.js
 │   ├── __tests__/          # Unit tests
 │   ├── setupProxy.js       # Development proxy
 │   ├── setupTests.js       # Test setup
