@@ -26,6 +26,23 @@ const AnalysisResults = ({ analysis }) => {
         </div>
       )}
 
+      {analysis.typeSpecific && (
+        <div className="mb-4">
+          <h5 className="mt-0 text-gray-700 font-semibold mb-2">Type-specific (beta)</h5>
+          <div className="text-gray-700" style={{ whiteSpace: 'pre-wrap' }}>
+            <div><strong>effectiveTypeId:</strong> {analysis.typeSpecific.effectiveTypeId || '—'}</div>
+            <div><strong>validationSlug:</strong> {analysis.typeSpecific.validationSlug || '—'}</div>
+            <div><strong>validationTitle:</strong> {analysis.typeSpecific.validationTitle || '—'}</div>
+            {analysis.typeSpecific.message ? (
+              <div style={{ marginTop: 8 }}>
+                <strong>message:</strong>
+                <div>{analysis.typeSpecific.message}</div>
+              </div>
+            ) : null}
+          </div>
+        </div>
+      )}
+
       {analysis.recommendations && analysis.recommendations.length > 0 && (
         <div>
           <h5 className="mt-0 text-gray-700 font-semibold mb-2">Recommendations</h5>

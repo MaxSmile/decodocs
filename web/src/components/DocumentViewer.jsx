@@ -415,13 +415,30 @@ const DocumentViewer = () => {
       const resp = await analyzeByType({ docHash, text: pdfTextContent });
       const data = resp?.data || {};
 
+      // Store something useful in the results panel (even while analyzeByType is a stub).
+      const typeSpecific = {
+        ok: !!data.ok,
+        effectiveTypeId: data.effectiveTypeId || null,
+        validationSlug: data.validationSlug || null,
+        validationTitle: data.validationSpec?.title || null,
+        message: data.message || null,
+      };
+
+      setAnalysisResults((prev) => ({
+        ...prev,
+        [selectedDocument.id]: {
+          ...(prev[selectedDocument.id] || {}),
+          typeSpecific,
+        },
+      }));
+
       setGate({
         title: 'Type-specific analysis (beta)',
         message:
-          `effectiveTypeId: ${data.effectiveTypeId || 'null'}\n` +
-          `validationSlug: ${data.validationSlug || 'null'}\n\n` +
-          (data.validationSpec?.title ? `Spec: ${data.validationSpec.title}\n\n` : '') +
-          (data.message || ''),
+          `effectiveTypeId: ${typeSpecific.effectiveTypeId || 'null'}\n` +
+          `validationSlug: ${typeSpecific.validationSlug || 'null'}\n\n` +
+          (typeSpecific.validationTitle ? `Spec: ${typeSpecific.validationTitle}\n\n` : '') +
+          (typeSpecific.message || ''),
         primaryLabel: 'OK',
         primaryTo: null,
         secondaryLabel: null,
