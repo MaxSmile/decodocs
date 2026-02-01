@@ -35,6 +35,11 @@ Source of truth for provider linking and primary user identity:
 
 Key idea: we resolve all provider identities to a server-side **puid** and enforce limits/entitlements per puid.
 
+## Stripe
+
+Stripe webhook + admin config:
+- [STRIPE.md](STRIPE.md)
+
 ## Email-to-Sign Flow
 
 For detailed technical specifications about the email-to-sign functionality, see [EMAIL_TO_SIGN_FLOW.md](EMAIL_TO_SIGN_FLOW.md).
