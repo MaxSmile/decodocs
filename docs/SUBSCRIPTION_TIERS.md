@@ -1,134 +1,112 @@
-# SnapSign / DecoDocs — Subscription Tiers (Technical Spec)
+# DecoDocs — User Types, Entitlements, and Limits (Technical Spec)
 
-## Core Terminology
+This document is the **source of truth** for:
+- how we classify users (Anonymous / Free / Pro)
+- which features are gated
+- how AI budgets are enforced
+- where entitlements and abuse-prevention metadata live
 
-### PDF open
-- User selects a PDF for one-time analysis
-- File is processed ephemerally and not stored
+## 1) User Types (Authoritative)
 
-### PDF upload
-- File is persisted on server-side storage
-- Available only for paid tiers
+### 1.1 Anonymous
+**Definition:** Firebase Auth user where `auth.token.firebase.sign_in_provider == "anonymous"`.
 
-This distinction is intentional and user-visible.
+**Capabilities**
+- AI analysis: **allowed** (very small budget)
+- OCR / vision model: **not allowed**
+- Storage with us: **none** (browser-only)
 
-## Cost Principles
+**Limits**
+- **20,000 tokens per auth session (per Firebase `uid`)**
+  - Practically: the same anonymous `uid` persists until the user clears site data or we explicitly sign them out.
 
-We charge only for real costs:
-- LLM inference
-- OCR
-- Persistent storage
-- Multi-pass / recursive analysis
+### 1.2 Free
+**Definition:** Firebase Auth user that is **not** anonymous (Google/Email/Microsoft/Apple/etc) AND does **not** have an active subscription.
 
-Everything else is free.
+**Capabilities**
+- AI analysis: **allowed** (bigger budget)
+- OCR / vision model: **not allowed**
+- Storage with us: **none** (browser-only)
+- Cloud connectors (later): user can connect Google Drive / OneDrive / iCloud as external sources (no storage on our side).
 
-## Tier 1 — FREE (Forever)
+**Limits**
+- **40,000 tokens per day (per Firebase `uid`)**
 
-### Purpose
-Trust-first, stateless analysis.
+### 1.3 Pro
+**Definition:** Non-anonymous Firebase Auth user AND Stripe subscription is **active**.
 
-### User-visible features
-- PDF open (text-based only)
-- Plain-language explanation
-- Highlight risky / unusual clauses
-- On-screen results only
-- No account required
+**Capabilities**
+- AI analysis: **unlimited** (until we observe abuse, then we introduce fair-use)
+- Better model: **yes** (vs Free/Anonymous)
+- OCR / scanned PDF support: **yes**
+- Storage with us: **5 GB per user**
 
-### Hard technical limits
-- File type: PDF
-- Processing mode: open (ephemeral)
-- Scan detection: If >15–20% pages lack extractable text → blocked
-- Max pages: 15
-- Max extracted tokens: 20,000
-- LLM passes: 1
-- Language: original document only
-- Storage: none
+## 2) Feature Gating Rules
 
-### Disabled
-- OCR
-- Translation
-- Annex deep analysis
-- Export
-- History
-- Re-run
-- Cross-section consistency
+### 2.1 AI analysis
+- Anonymous: allowed within **20k tokens per uid-session**
+- Free: allowed within **40k tokens/day**
+- Pro: unlimited
 
-### Abuse prevention
-- IP rate limits
-- Token ceiling enforced preflight
-- Short-lived content hash (non-persistent)
+### 2.2 OCR / scanned PDFs
+- We detect scanned PDFs.
+- **Free and Anonymous do not get OCR** (no vision model).
+- Pro gets OCR.
 
-## Tier 2 — PRO ($5 / month)
+### 2.3 Storage
+- Anonymous: none
+- Free: none (browser-only)
+- Pro: **5 GB** stored with us
 
-### Purpose
-Serious individual use.
+## 3) Entitlements Source of Truth
 
-### User-visible features
-- Everything in Free
-- Scanned PDFs (OCR)
-- Translation
-- Exportable report
-- Document history
-- PDF upload (stored)
+### 3.1 Identity
+- Firebase Auth is the identity provider.
+- Server-side code must verify Firebase ID tokens and derive:
+  - `uid`
+  - `isAnonymous`
 
-### Technical limits
-- Processing modes:
-  - open (ephemeral)
-  - upload (persistent)
-- OCR: enabled
-- Max pages: 100
-- Max tokens: 150,000
-- LLM passes: up to 3
-- Storage:
-  - Up to 1 GB total
-  - Retention: user-controlled
+### 3.2 Subscription status
+- Stripe is the source of truth for **Pro** subscription state.
+- Server-side code determines:
+  - `subscriptionActive: boolean`
 
-### Fair use
-- Monthly token budget (soft cap)
-- OCR page cap
-- Graceful degradation, no silent overages
+### 3.3 Canonical user record
+We keep a minimal record for **all** users (including Anonymous), because any user can later become Free/Pro.
 
-## Tier 3 — PREMIUM (Business)
+## 4) Abuse Prevention / Deduplication Metadata (docHash)
 
-### Purpose
-Complex, high-risk documents.
+### 4.1 What we store
+We store document hashes to:
+- reduce anonymous abuse / repeated submissions
+- support usage accounting keyed to a stable doc identifier
 
-### User-visible features
-- Everything in Pro
-- Large PDFs & annexes
-- Multi-document sets
-- Cross-document checks
-- Version comparison
-- Audit trail
-- Team access
+At minimum, we store:
+- `docHash` (content hash)
+- `uid`
+- timestamps / counters (e.g., lastSeenAt, totalTokensUsed)
 
-### Technical capabilities
-- Advanced chunking
-- Retrieval-based deep reads
-- Recursive / iterative analysis
-- Definition & obligation graphs
+### 4.2 Where we store it
+- Firestore collection: **`docshashes`**
 
-### Storage
-- Extended retention
-- Access controls
+### 4.3 Retention
+- **Forever** (explicit product/security decision; document this in Privacy/Policy).
 
-## Mandatory Preflight Analyzer
+## 5) Pro Storage Backend
 
-Runs before any AI call:
+- Pro storage lives on **Contabo VPS** (custom setup).
+- Firestore remains the system of record for:
+  - identities/metadata
+  - docHash abuse-prevention ledger
+  - subscription/entitlement flags (as needed)
 
-1. Text extraction
-2. Page count
-3. Scan ratio
-4. Token estimation
-5. Complexity score
+## 6) Standard Gating UX Messages (copy guidance)
 
-### Routing result:
-- Free open
-- Pro open
-- Pro upload
-- Premium required
-- Block with explanation
+When a user hits a gate, the UI should distinguish:
+- **Anonymous → Register** (to get the Free tier limits)
+- **Free → Upgrade to Pro** (for OCR, better model, unlimited AI, 5GB storage)
 
-## Gating Message (Standard)
-
-> This document requires deeper analysis, available on the Pro plan.
+Examples:
+- Anonymous limit reached: “Create a free account to continue (higher daily AI limit).”
+- Free OCR attempt: “OCR is available on Pro (includes 5GB storage).”
+- Free AI limit reached: “Upgrade to Pro for unlimited analysis and OCR.”

@@ -28,7 +28,20 @@
 - no public buckets
 - no secrets in git
 - no long-lived signed URLs
-- Firestore optional, not a lock-in
+- Firestore is used for metadata/ledgers (e.g. docHash), but not required as the canonical file store
+
+## Entitlements / Tiers (Product + Technical)
+- 3 user types:
+  - Anonymous = Firebase Anonymous Auth
+  - Free = any non-anonymous Firebase Auth provider without an active subscription
+  - Pro = non-anonymous + Stripe subscription active
+- AI access is available to all tiers, but with limits:
+  - Anonymous: 20k tokens per Firebase `uid`-session
+  - Free: 40k tokens/day per `uid`
+  - Pro: unlimited (until abuse policy is introduced)
+- OCR/scanned PDFs require Pro (Free/Anonymous must not use a vision model)
+- Pro includes 5GB storage hosted on Contabo VPS (custom storage)
+- We store `docHash` metadata for all users in Firestore `docshashes` collection with **forever** retention (explicitly documented)
 
 ## Optional / Later
 - wallet-based electronic signature is optional and not MVP

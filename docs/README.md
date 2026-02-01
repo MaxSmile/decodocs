@@ -17,19 +17,15 @@ Welcome to the DecoDocs application documentation. This guide covers the archite
 
 ## Overview
 
-## Subscription Tiers
+## Subscription / Entitlements
 
-For detailed information about subscription tiers and their technical specifications, see [SUBSCRIPTION_TIERS.md](SUBSCRIPTION_TIERS.md).
+The source of truth for user types, limits, and gating is:
+- [SUBSCRIPTION_TIERS.md](SUBSCRIPTION_TIERS.md)
 
-### Core Concepts
-- **PDF Open**: Ephemeral processing without storage
-- **PDF Upload**: Persistent storage for paid tiers
-- **Tier Structure**: Free, Pro ($5/month), Premium (Business)
-
-### Key Features by Tier
-- **Free**: Stateless analysis, text-based PDFs only
-- **Pro**: OCR support, persistent storage, export features
-- **Premium**: Advanced analysis, multi-document handling, team features
+### Core model
+- **Anonymous** (Firebase Anonymous): very small AI budget, no OCR, no storage
+- **Free** (non-anonymous Firebase auth): larger AI budget, no OCR, no storage
+- **Pro** (non-anonymous + Stripe active): unlimited AI (for now), OCR enabled, 5GB storage (Contabo VPS)
 
 ## Email-to-Sign Flow
 
