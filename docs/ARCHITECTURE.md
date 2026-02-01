@@ -91,6 +91,13 @@ functions/
 └── node_modules/
 ```
 
+### Admin Configuration (planned)
+- Avoid client `.env` config for feature constants.
+- Use Firestore for admin-managed constants (e.g. `admin_constants`).
+- Provide a separate admin web app:
+  - staging: `decadocs-admin.web.app`
+  - production: `admin.decodocs.com`
+
 ### Service Layer
 
 #### AI Processing Service

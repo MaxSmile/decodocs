@@ -2,7 +2,10 @@
 
 ## Overview
 
-The DecoDocs API provides AI-powered document analysis services through Firebase Functions. All endpoints follow REST principles and return JSON responses.
+The DecoDocs API provides AI-powered document analysis services through Firebase Functions.
+
+- It is primarily designed for the DecoDocs web/mobile apps.
+- “External API” / MCP exposure may exist later, but for now the API is **internal-only**.
 
 ## Base URL
 
@@ -11,7 +14,13 @@ Development: `http://localhost:5001/[PROJECT-ID]/us-central1`
 
 ## Authentication
 
-Currently, all endpoints are publicly accessible. Authentication will be implemented in future versions for enhanced security and user management.
+- API is **internal-only** for now (not a public developer platform).
+- Auth is **Firebase Auth**.
+- We prefer **Firebase Callable Functions** (ID token verified server-side) over API keys.
+
+Tier behavior (high level):
+- Free API calls operate on **extracted text** (no OCR / no vision model).
+- Paid/Pro can upload PDFs for OCR / image recognition.
 
 ## Common Response Format
 

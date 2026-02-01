@@ -16,6 +16,15 @@ Before starting development, ensure you have the following installed:
 
 ## Environment Setup
 
+### Config strategy (decision)
+- **Avoid `.env` files**.
+- Firebase client config should come from a dedicated firebaseConfig module (or equivalent), not environment variables.
+- Non-client constants should live in Firestore (admin-controlled):
+  - e.g. `admin_constants` collection/docs
+- Plan an admin panel for managing these constants:
+  - staging: `decadocs-admin.web.app`
+  - production: `admin.decodocs.com`
+
 ### 1. Clone the Repository
 
 ```bash
@@ -36,6 +45,8 @@ npm install
 cd ../functions
 npm install
 ```
+
+> Note: we avoid committing `.env` files. Local-only secrets/config should be managed via Firebase tooling/emulators, and non-secret feature constants should come from Firestore admin-controlled documents.
 
 ## Development Workflow
 

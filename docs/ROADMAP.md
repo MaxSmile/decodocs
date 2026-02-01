@@ -36,6 +36,16 @@ heavier analysis depth.
 
 ## Phase 1 — Web MVP Foundation (Live, Iterating)
 
+### UX decisions (gating + account)
+- Upgrade prompts:
+  - if tokens are over limit OR scanned/OCR-required doc is opened by non-Pro → show **upgrade popup**
+  - upgrade action → redirect to **`/pricing`** (styled similarly to HeyGen)
+- Add **`/profile`** route:
+  - shows user profile data
+  - shows subscription state
+  - entrypoint to manage subscription
+  - access to Stripe payment receipts
+
 ### Goal
 Ship a reliable, privacy-forward web experience for PDF understanding, with clear plan enforcement and predictable UI
 states.
@@ -47,6 +57,9 @@ states.
 
 ### Technical Foundation
 - Firebase Hosting + Cloud Functions + Firestore usage tracking
+- Admin panel planned:
+  - staging: `decadocs-admin.web.app`
+  - production: `admin.decodocs.com`
 - Preflight document classification (size/scanned heuristics)
 - Tier model and call-budget enforcement (MVP)
 - Test coverage (unit + Playwright tests)

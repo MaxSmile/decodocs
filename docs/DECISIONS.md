@@ -35,6 +35,11 @@
   - Anonymous = Firebase Anonymous Auth
   - Free = any non-anonymous Firebase Auth provider without an active subscription
   - Pro = non-anonymous + Stripe subscription active
+- Stripe implementation principle: **don’t overcomplicate state mapping**.
+  - Stripe webhooks are authoritative.
+  - We set user Pro state on subscription activation webhook events.
+  - We revert to Free on subscription state-change webhook events.
+  - Backend always enforces entitlement server-side (tier is never trusted from the client).
 - AI access is available to all tiers, but with limits:
   - Anonymous: **20k tokens per Firebase uid** (same uid == same auth session)
   - Free: **40k tokens/day per uid**
