@@ -1,45 +1,82 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 
+import logo from '../assets/DecoDocsLogo.svg';
+import Footer from './landing/Footer.jsx';
+
 /**
- * Reusable Layout component for all pages
- * Provides consistent header, footer, and auth status banner
+ * Shared app layout.
+ *
+ * NOTE: This intentionally matches the landing design language (logo + light header)
+ * so pages don't feel like separate products.
  */
 const Layout = ({ children, showHeader = true, showFooter = true }) => {
   const { authState } = useAuth();
+  const location = useLocation();
   const firebaseError = authState.status === 'error' ? authState.error?.message : null;
 
+  const isHome = location.pathname === '/' || location.pathname === '/app';
+
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen bg-[#f7f6f2] text-slate-900 flex flex-col">
       {/* Header */}
       {showHeader && (
-        <header className="bg-gray-800 text-white px-5 py-4 flex-shrink-0">
-          <Link to="/" className="no-underline text-white">
-            <h1 className="text-3xl font-bold inline-block mr-5 m-0">DecoDocs</h1>
-            <p className="inline-block m-0">
-              <strong className="text-cyan-400 text-base">Decode documents. Act with confidence.</strong>
-            </p>
-          </Link>
+        <header className="sticky top-0 z-30 w-full border-b border-white/40 bg-white/70 backdrop-blur-xl">
+          <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
+            <Link to="/" className="flex items-center gap-3 text-lg font-semibold text-slate-900 no-underline">
+              <img src={logo} alt="DecoDocs" className="h-9 w-9" />
+              DecoDocs
+            </Link>
+
+            <nav className="hidden items-center gap-6 text-sm font-medium text-slate-600 md:flex">
+              {isHome ? (
+                <>
+                  <a className="hover:text-slate-900 transition" href="#how-it-works">How it works</a>
+                  <a className="hover:text-slate-900 transition" href="#features">Features</a>
+                  <a className="hover:text-slate-900 transition" href="#use-cases">Use cases</a>
+                  <a className="hover:text-slate-900 transition" href="#pricing">Pricing</a>
+                </>
+              ) : (
+                <>
+                  <Link className="hover:text-slate-900 transition no-underline text-slate-600" to="/view">App</Link>
+                  <Link className="hover:text-slate-900 transition no-underline text-slate-600" to="/pricing">Pricing</Link>
+                  <Link className="hover:text-slate-900 transition no-underline text-slate-600" to="/sign-in">Sign in</Link>
+                  <Link className="hover:text-slate-900 transition no-underline text-slate-600" to="/profile">Profile</Link>
+                </>
+              )}
+            </nav>
+
+            <div className="flex items-center gap-3">
+              <Link
+                to="/view"
+                className="hidden rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:border-slate-300 md:inline-flex no-underline"
+              >
+                Launch app
+              </Link>
+              <Link
+                to="/pricing"
+                className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-slate-900/20 transition hover:-translate-y-0.5 no-underline"
+              >
+                Pricing
+              </Link>
+            </div>
+          </div>
+
+          {/* Auth Status Banner (compact) */}
+          <div className="border-t border-white/40 bg-white/60 px-6 py-2 text-xs text-slate-600">
+            <div className="mx-auto w-full max-w-6xl">
+              {authState.status === 'authenticated' ? (
+                <span>Authenticated (AI features available)</span>
+              ) : firebaseError ? (
+                <span>AI calls disabled: "{firebaseError}" (viewer still works)</span>
+              ) : (
+                <span>Authenticating…</span>
+              )}
+            </div>
+          </div>
         </header>
       )}
-
-      {/* Auth Status Banner */}
-      <div
-        className={`px-5 py-2.5 text-center font-medium text-sm border-b flex-shrink-0 ${
-          authState.status === 'authenticated'
-            ? 'bg-green-50 text-green-800 border-green-300'
-            : 'bg-yellow-50 text-yellow-800 border-yellow-300'
-        }`}
-      >
-        {authState.status === 'authenticated' ? (
-          '✅ Firebase authenticated - AI features available'
-        ) : firebaseError ? (
-          `⚠️ AI calls disabled: "${firebaseError}". Document viewing features remain available.`
-        ) : (
-          '⚠️ Authenticating with Firebase...'
-        )}
-      </div>
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-h-0">
@@ -47,28 +84,7 @@ const Layout = ({ children, showHeader = true, showFooter = true }) => {
       </main>
 
       {/* Footer */}
-      {showFooter && (
-        <footer className="text-center py-5 px-5 text-gray-600 border-t flex-shrink-0 bg-gray-50">
-          <div className="max-w-6xl mx-auto flex flex-col items-center gap-2.5">
-            <p className="m-0 text-gray-600 text-sm">© Snap Sign Pty Ltd</p>
-            <p className="m-0 text-gray-600 text-sm">ABN 72 679 570 757</p>
-            <div className="flex gap-6 flex-wrap justify-center">
-              <Link to="/about" className="text-gray-600 no-underline text-sm hover:text-gray-800 transition-colors">
-                About
-              </Link>
-              <Link to="/privacy" className="text-gray-600 no-underline text-sm hover:text-gray-800 transition-colors">
-                Privacy Policy
-              </Link>
-              <Link to="/terms" className="text-gray-600 no-underline text-sm hover:text-gray-800 transition-colors">
-                Terms of Service
-              </Link>
-              <Link to="/contact" className="text-gray-600 no-underline text-sm hover:text-gray-800 transition-colors">
-                Contact
-              </Link>
-            </div>
-          </div>
-        </footer>
-      )}
+      {showFooter ? <Footer /> : null}
     </div>
   );
 };
