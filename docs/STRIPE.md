@@ -47,15 +47,25 @@ Checkout/Portal URLs (recommended):
 
 ## Webhook handling
 
-### Webhook behavior
-- On subscription activation / state change events:
-  - Functions update `users/{puid}.subscription.*`
-  - `isPro=true` when the subscription is active
-  - `isPro=false` when Stripe reports a non-active state
+### Real webhook endpoint
+Firebase Functions endpoint:
+- `POST /stripeWebhook`
+
+Behavior:
+- Verifies Stripe signature using `admin/stripe.webhookSecret` (`whsec_...`).
+- Updates `users/{puid}.subscription.*` and `isPro`.
+- We treat Stripe as authoritative: if Stripe says inactive → we set `isPro=false`.
+
+Events handled (MVP):
+- `customer.subscription.created`
+- `customer.subscription.updated`
+- `customer.subscription.deleted`
+- `checkout.session.completed` (captures `customerId`/`subscriptionId` early)
 
 ### Event → puid mapping
-For now, webhook payload must contain the user identity, typically via Stripe metadata:
-- `metadata.firebaseUid` (or later `metadata.puid`)
+We map events to users using metadata we attach during Checkout Session creation:
+- subscription metadata: `metadata.puid` and `metadata.firebaseUid`
+- checkout session: `client_reference_id = puid` and `metadata.puid/firebaseUid`
 
 ## Mock webhook (for development)
 
