@@ -193,7 +193,8 @@ This file mirrors `decodocs-repo/docs/ROADMAP.md` and lists actionable engineeri
 
 - [ ] **Big Document Vector Management**: For big documents, RLM (Recursive Language Model) or other vector-based data management needs to be developed to efficiently handle large PDFs and document collections.
 - [ ] **Refactor: split large UI components (maintainability)**: Reduce “god components” by extracting hooks + subcomponents so PDF viewing, analysis actions, and presentation concerns are separated.
-  - [ ] Refactor `decodocs-repo/web/src/components/DocumentViewer.jsx` into smaller units
+  - [~] Refactor `decodocs-repo/web/src/components/DocumentViewer.jsx` into smaller units
+    - [x] Extract Firebase callable wrappers into `web/src/services/*` (`analyzeText`, `preflightCheck`, `documentType*`, `analyzeByType`)
     - Why: this file mixes (1) PDF.js initialization/loading, (2) PDF render lifecycle, (3) Firebase callable orchestration, and (4) UI layout/wiring. It’s currently the largest UI module (~561 LOC).
     - Suggested extraction:
       - `usePdfJs()` / `usePdfLoader()` hook: PDF.js init + `loadPdfFromBlob` + `loadTestPdf`
