@@ -10,9 +10,16 @@ This file mirrors `decodocs-repo/docs/ROADMAP.md` and lists actionable engineeri
 - [ ] **Unify layouts**: define one canonical `AppLayout` (header/footer/nav) and use it across all routes (Home, Pricing, Sign-in, Profile, Viewer, Editor, About/Terms/Privacy/Contact)
   - Decide: keep landing style vs app style; remove the “two different products” feel
 - [ ] Add **DecoDocs logo + consistent nav** to the canonical layout (match landing brand)
-- [ ] Remove/retire legacy/duplicate pages and styles (e.g. older `web/src/pages/*` vs `web/src/components/*`) to reduce confusion
+- [x] Remove/retire legacy/duplicate pages and styles (e.g. older `web/src/pages/*` vs `web/src/components/*`) to reduce confusion
 - [ ] Reduce inline-style sprawl: migrate repeated inline styles into shared components (Card/Button/Section) or Tailwind classes
 - [ ] Standardize typography + spacing tokens (one design system, even if lightweight)
+
+#### Home page UI issues (as seen on mobile screenshots)
+- [x] Fix landing layout being “squashed”/broken on mobile due to **global CSS leaking onto `<main>`**
+  - Implemented by scoping `App.css` from `main { ... }` → `.App main { ... }` so landing pages keep their own layout.
+- [ ] Audit `web/src/App.css` and other global styles for additional unscoped selectors (e.g. `body`, `a`, `p`, `.container`, `header`, `footer`) that can override landing components.
+- [ ] Add a small “visual regression checklist” for mobile (Chrome Android + iOS Safari): Home, Pricing, View PDF, footer links.
+- [ ] Ensure hero/logo sizing is responsive on small screens (cap hero image height, prevent overflow, keep CTA visible above the fold).
 
 - [x] Brand polish: ensure "DecoDocs" and "Snap Sign Pty Ltd" are consistent across UI + docs (no legacy names)
 - [x] Replace placeholder Sign page with a clear "Signing MVP checklist" (show number of remaining tasks + CTA to analyze PDF + join waitlist)
