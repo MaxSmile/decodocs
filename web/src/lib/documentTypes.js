@@ -75,6 +75,20 @@ export const DOCUMENT_TYPES = [
     category: DOC_CATEGORIES.GENERAL,
     synonyms: ['schedule', 'timetable', 'calendar', 'rota'],
   },
+  {
+    id: 'general_resume_cv',
+    label: 'Resume / CV',
+    category: DOC_CATEGORIES.GENERAL,
+    synonyms: ['resume', 'cv', 'curriculum vitae', 'work experience', 'education', 'skills'],
+  },
+
+  // --- BUSINESS / LEGAL ---
+  {
+    id: 'legal_job_offer',
+    label: 'Job offer / offer letter',
+    category: DOC_CATEGORIES.BUSINESS_LEGAL,
+    synonyms: ['offer letter', 'job offer', 'employment offer', 'compensation', 'salary', 'starting date'],
+  },
 
   // --- BUSINESS / LEGAL ---
   {
