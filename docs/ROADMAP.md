@@ -1,6 +1,6 @@
 # DecoDocs Roadmap
 
-_Last updated: January 28, 2026_
+_Last updated: February 2, 2026_
 
 ## Overview
 DecoDocs is a document understanding product built by **Snap Sign Pty Ltd (Australia)**. It focuses on clarity before
@@ -48,6 +48,9 @@ heavier analysis depth.
 - Add **`/sign-in`** route:
   - provider linking (anonymous/email/google/apple/microsoft)
   - used by `/pricing` “Continue for free” CTA
+- Add **`/sign`** route:
+  - intentionally *not* a signing implementation yet
+  - shows the concrete Signing MVP checklist + counts, with CTAs to analyze a PDF and join the waitlist
 
 ### Goal
 Ship a reliable, privacy-forward web experience for PDF understanding, with clear plan enforcement and predictable UI
