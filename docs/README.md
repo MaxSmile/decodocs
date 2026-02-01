@@ -36,6 +36,9 @@ The source of truth for when files are stored vs ephemeral (Free vs Pro) is:
 Source of truth for provider linking and primary user identity:
 - [AUTH_LINKING.md](AUTH_LINKING.md)
 
+Source of truth for the user-facing auth UX + states:
+- [AUTH_UX.md](AUTH_UX.md)
+
 Key idea: we resolve all provider identities to a server-side **puid** and enforce limits/entitlements per puid.
 
 ## Stripe

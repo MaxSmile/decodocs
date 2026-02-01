@@ -11,7 +11,7 @@ This file mirrors `decodocs-repo/docs/ROADMAP.md` and lists actionable engineeri
 - [x] Add a visible "Free vs Pro" gating UX: explain *why* buttons are disabled + what upgrades unlock
 - [x] Harden analysis flow: loading/error/empty states for analysis results; avoid partial UI renders
 - [ ] **Authentication: add comprehensive sign-in options (Email, Google + One Tap, Microsoft, Apple)**: support real accounts (and upgrading from anonymous) so users can unlock Pro, storage, and cross-device continuity.
-  - [ ] Define the exact auth UX + states (no ambiguity)
+  - [x] Define the exact auth UX + states (no ambiguity)
     - Required entry points:
       - A visible “Sign in” button in the header/footer (always accessible)
       - A “Sign in to use analysis” CTA when gated actions are clicked
