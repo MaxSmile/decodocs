@@ -12,16 +12,86 @@ import AuthErrorNotification from './components/AuthErrorNotification.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
 import './App.css';
 
-// Placeholder component for sign page
+// "Sign" roadmap page
+// This intentionally shows the concrete checklist required for a signing MVP.
 const SignPage = () => {
+  const signMvpTasks = [
+    {
+      title: 'Signature placement UI',
+      detail: 'Place a signature field on a PDF with drag/drop + resize; support multiple signers.',
+    },
+    {
+      title: 'Identity & consent',
+      detail: 'Signer authentication (email link / SSO) + explicit consent before signing.',
+    },
+    {
+      title: 'Audit trail',
+      detail: 'Record who signed, when, from where, and what version/hash of the document was signed.',
+    },
+    {
+      title: 'Document integrity (hashing)',
+      detail: 'Generate and store a stable doc hash; prevent signing if the PDF changes.',
+    },
+    {
+      title: 'Signature appearance',
+      detail: 'Render a professional signature mark (typed/drawn/uploaded) with timestamp.',
+    },
+    {
+      title: 'Export signed PDF',
+      detail: 'Produce a signed PDF + embedded audit data (or sidecar) with deterministic output.',
+    },
+    {
+      title: 'Verification view',
+      detail: 'A public verification page that checks integrity + shows audit details safely.',
+    },
+    {
+      title: 'Send-for-signing flow',
+      detail: 'Invite signer(s), track status (sent/viewed/signed), reminders, and expiry.',
+    },
+    {
+      title: 'Storage & retention policy',
+      detail: 'Define what is stored for Free vs Pro, retention, deletion, and user controls.',
+    },
+    {
+      title: 'Legal/terms UX',
+      detail: 'Terms, privacy, and “not legal advice” shown at decision points; versioned change notice.',
+    },
+  ];
+
   return (
-    <div style={{ padding: '2rem', textAlign: 'center' }}>
-      <h1>Sign PDF</h1>
-      <p>Sign any PDF with DecoDocs</p>
-      <p>This feature is coming soon. Please check back later.</p>
-      <button onClick={() => window.history.back()} style={{ marginTop: '1rem', padding: '0.5rem 1rem', backgroundColor: '#007acc', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-        Go Back
-      </button>
+    <div style={{ padding: '2.5rem 1.5rem', maxWidth: 900, margin: '0 auto' }}>
+      <h1 style={{ marginTop: 0 }}>Sign PDFs</h1>
+      <p style={{ marginTop: 8, color: '#334155', lineHeight: 1.6 }}>
+        Signing is not ready yet. To ship a safe, verifiable signing MVP we need to complete{' '}
+        <strong>{signMvpTasks.length} tasks</strong>.
+      </p>
+
+      <div style={{ marginTop: 24, padding: 16, border: '1px solid #e2e8f0', borderRadius: 12, background: '#ffffff' }}>
+        <h2 style={{ margin: 0, fontSize: 18 }}>Signing MVP checklist</h2>
+        <ol style={{ marginTop: 12, marginBottom: 0, paddingLeft: 18, color: '#0f172a' }}>
+          {signMvpTasks.map((task) => (
+            <li key={task.title} style={{ marginBottom: 12 }}>
+              <div style={{ fontWeight: 600 }}>{task.title}</div>
+              <div style={{ color: '#475569', marginTop: 4 }}>{task.detail}</div>
+            </li>
+          ))}
+        </ol>
+      </div>
+
+      <div style={{ marginTop: 28, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+        <Link
+          to="/view"
+          className="rounded-full bg-slate-900 px-5 py-2 text-sm font-semibold text-white"
+        >
+          Analyze a PDF
+        </Link>
+        <Link
+          to="/contact"
+          className="rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700"
+        >
+          Join the waitlist
+        </Link>
+      </div>
     </div>
   );
 };
