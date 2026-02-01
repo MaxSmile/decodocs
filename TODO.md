@@ -164,6 +164,19 @@ This file mirrors `decodocs-repo/docs/ROADMAP.md` and lists actionable engineeri
 - [ ] Make web UI load these files dynamically (cacheable), instead of bundling large registries:
   - load index for typeahead
   - lazy-load validation details on selection
+  - keep override persistence server-side in Functions
+
+### AI integration tasks (classification + type-specific validation)
+- [ ] Add callable `detectDocumentType` (cheap):
+  - returns intakeCategory + typeId + confidence + reasons
+  - persists to `doc_classifications/{docHash}`
+- [ ] Add callable `getDocumentTypeState`:
+  - returns detected + override + effective type
+- [ ] Add callable `analyzeByType`:
+  - resolves effective type server-side
+  - uses validation spec JSON to guide extraction/validation
+  - returns structured JSON matching the per-type schema
+- [ ] Docs: `docs/CLASSIFICATIONS_INTEGRATION.md` is the integration plan.
 
 ### Validation schema authoring (docs)
 - [ ] Define prompt-pack output schemas (JSON) for:
