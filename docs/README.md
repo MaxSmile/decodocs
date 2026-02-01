@@ -23,6 +23,9 @@ Welcome to the DecoDocs application documentation. This guide covers the archite
 The source of truth for user types, limits, and gating is:
 - [SUBSCRIPTION_TIERS.md](SUBSCRIPTION_TIERS.md)
 
+The source of truth for when files are stored vs ephemeral (Free vs Pro) is:
+- [OPEN_VS_UPLOAD_SPEC.md](OPEN_VS_UPLOAD_SPEC.md)
+
 ### Core model
 - **Anonymous** (Firebase Anonymous): very small AI budget, no OCR, no storage
 - **Free** (non-anonymous Firebase auth): larger AI budget, no OCR, no storage

@@ -99,10 +99,10 @@ This file mirrors `decodocs-repo/docs/ROADMAP.md` and lists actionable engineeri
   - [x] Add CI-friendly `npm run test:unit` + `npm run test:e2e` runbook for the web app
 
 ## Phase 2 - Cloud Storage Integrations (Target: Q2 2026)
-- [ ] Define the "Open vs Upload" contract (Free vs Pro) as a spec:
-  - [ ] Default is ephemeral open (no storage)
-  - [ ] Upload/save is explicit and paid (history/export)
-  - [ ] Token revocation guarantees + audit logging expectations
+- [x] Define the "Open vs Upload" contract (Free vs Pro) as a spec:
+  - [x] Default is ephemeral open (no storage)
+  - [x] Upload/save is explicit and paid (history/export)
+  - [x] Token revocation guarantees + audit logging expectations
 - [ ] Google Drive (read-only):
   - [ ] OAuth consent + connect/disconnect UX
   - [ ] File picker -> open -> analyze pipeline
