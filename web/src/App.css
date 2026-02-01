@@ -35,7 +35,9 @@
   margin-top: 0;
 }
 
-main {
+/* IMPORTANT: scope legacy layout styles to the old .App wrapper only.
+   Do not style the global <main> element; it breaks the landing layout on mobile. */
+.App main {
   flex: 1;
   display: flex;
   flex-direction: column;
