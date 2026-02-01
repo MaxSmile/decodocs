@@ -57,7 +57,7 @@ try {
      }
   } else if (isProbablyPlaceholder(firebaseConfig.apiKey)) {
     throw new Error(
-      'Missing/placeholder Firebase API key. This should not happen in production. For local dev you can set VITE_FIREBASE_API_KEY or enable the Auth emulator.'
+      'Firebase client configuration is missing or invalid. Authentication will be unavailable.'
     );
   }
 

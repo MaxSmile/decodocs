@@ -36,9 +36,9 @@ export const AuthErrorNotification = () => {
           <h4 style={{ margin: '0 0 0.5rem 0', color: '#856404' }}>
             Authentication Unavailable
           </h4>
-          <p style={{ margin: '0', color: '#856404', fontSize: '0.9rem' }}>
-            Some features may be limited, but you can still view documents. 
-            {authState.error && (
+          <div style={{ margin: 0, color: '#856404', fontSize: '0.9rem', lineHeight: 1.4 }}>
+            <div>Some features may be limited, but you can still view documents.</div>
+            {import.meta.env.DEV && authState.error && (
               <details style={{ marginTop: '0.5rem' }}>
                 <summary style={{ cursor: 'pointer' }}>Error details</summary>
                 <code style={{ display: 'block', marginTop: '0.5rem', fontSize: '0.8rem' }}>
@@ -46,7 +46,7 @@ export const AuthErrorNotification = () => {
                 </code>
               </details>
             )}
-          </p>
+          </div>
         </div>
         <button
           onClick={() => setDismissed(true)}
