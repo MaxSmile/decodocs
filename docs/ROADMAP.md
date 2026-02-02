@@ -63,9 +63,10 @@ states.
 
 ### Technical Foundation
 - Firebase Hosting + Cloud Functions + Firestore usage tracking
-- Admin panel planned:
+- **Admin portal (v1 priority)**:
   - staging: `decadocs-admin.web.app`
   - production: `admin.decodocs.com`
+  - initial scope: manage `admin/*` Firestore config (Stripe, plans/entitlements, feature flags) + audit log
 - Preflight document classification (size/scanned heuristics)
 - Tier model and call-budget enforcement (MVP)
 - Test coverage (unit + Playwright tests)

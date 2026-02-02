@@ -6,6 +6,24 @@ This file mirrors `decodocs-repo/docs/ROADMAP.md` and lists actionable engineeri
 
 ## Phase 1 - Web MVP Foundation (Live, Iterating)
 
+### Admin Portal (High priority)
+- [ ] Define scope for v1 admin portal (what admins can change without redeploy):
+  - Stripe product/price IDs + webhook secrets (already stored under `admin/stripe`)
+  - Plan entitlements (Free/Pro/Premium flags + limits)
+  - Feature flags (e.g. enable/disable OCR, analysis modes)
+  - Usage policy constants (daily call budgets, rate limits)
+- [ ] Create a separate admin web app (staging `decadocs-admin.web.app`, prod `admin.decodocs.com`)
+  - Firebase Hosting target + deploy scripts
+  - Admin-only auth (Google Workspace allowlist or custom claims)
+- [ ] Build minimal UI screens:
+  - [ ] Dashboard (health + quick links)
+  - [ ] Stripe config editor (`admin/stripe`)
+  - [ ] Plans/entitlements editor (`admin/plans` or similar)
+  - [ ] Feature flags editor (`admin/flags`)
+- [ ] Security/rules:
+  - Firestore rules so only admins / Functions can read/write `admin/*`
+  - Audit log collection for admin changes (`admin_audit/*`)
+
 ### UI Quality & Consistency (High priority refactor)
 - [ ] **Unify layouts**: define one canonical `AppLayout` (header/footer/nav) and use it across all routes (Home, Pricing, Sign-in, Profile, Viewer, Editor, About/Terms/Privacy/Contact)
   - Decide: keep landing style vs app style; remove the “two different products” feel
