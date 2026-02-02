@@ -56,7 +56,7 @@ This file mirrors `decodocs-repo/docs/ROADMAP.md` and lists actionable engineeri
   - Next: add schema validation (Functions) for safer writes
 
 ### UI Quality & Consistency (High priority refactor)
-- [ ] **Unify layouts**: define one canonical `AppLayout` (header/footer/nav) and use it across all routes (Home, Pricing, Sign-in, Profile, Viewer, Editor, About/Terms/Privacy/Contact)
+- [ ] **Unify layouts**: define one canonical `Layout` (header/footer/nav) and use it across all routes (Home, Pricing, Sign-in, Profile, Viewer, Editor, About/Terms/Privacy/Contact)
   - Decide: keep landing style vs app style; remove the “two different products” feel
 - [ ] Add **DecoDocs logo + consistent nav** to the canonical layout (match landing brand)
 - [x] Remove/retire legacy/duplicate pages and styles (e.g. older `web/src/pages/*` vs `web/src/components/*`) to reduce confusion

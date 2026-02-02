@@ -866,7 +866,7 @@ const DocumentViewer = () => {
   }, [pdfDoc]);
 
   return (
-    <Layout>
+    <>
       {gate && (
         <div
           role="dialog"
@@ -1126,7 +1126,7 @@ const DocumentViewer = () => {
           )}
         </div>
       </div>
-    </Layout>
+    </>
   );
 };
 

@@ -173,22 +173,31 @@ function App() {
                 </Layout>
               }
             />
-            <Route path="/view/:documentId?" element={
-              <div className="App">
-                <DocumentViewer />
-              </div>
-            } />
+            <Route
+              path="/view/:documentId?"
+              element={
+                <Layout>
+                  <DocumentViewer />
+                </Layout>
+              }
+            />
             {/* Specific route for test documents */}
-            <Route path="/view/test-docs/:fileName" element={
-              <div className="App">
-                <DocumentViewer />
-              </div>
-            } />
-            <Route path="/edit/:documentId?" element={
-              <div className="App">
-                <DocumentEditor />
-              </div>
-            } />
+            <Route
+              path="/view/test-docs/:fileName"
+              element={
+                <Layout>
+                  <DocumentViewer />
+                </Layout>
+              }
+            />
+            <Route
+              path="/edit/:documentId?"
+              element={
+                <Layout>
+                  <DocumentEditor />
+                </Layout>
+              }
+            />
           </Routes>
         </Router>
       </AuthProvider>
