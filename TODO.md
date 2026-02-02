@@ -34,13 +34,14 @@ This file mirrors `decodocs-repo/docs/ROADMAP.md` and lists actionable engineeri
   - Firebase Hosting target: `decadocs-admin` (first deploy should claim the site)
   - deploy scripts / docs
 - [ ] Admin auth enforcement
-  - Google sign-in
+  - **Email/password sign-in only** (no Google/Apple/etc)
   - allowlist: server-side check `request.auth.token.email` endsWith `@snapsign.com.au`
   - client-side gating as UX (hide/disable admin UI if not allowlisted)
   - deny by default for non-allowlisted emails
   - apply this rule in:
     - Firestore rules for `admin/*`
     - any admin portal APIs (Cloud Functions)
+  - provisioning (for now): create admin users manually in Firebase Auth console
 - [ ] Minimal UI screens
   - [ ] Dashboard (health + quick links)
   - [ ] Stripe (`admin/stripe`)

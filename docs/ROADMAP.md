@@ -66,7 +66,8 @@ states.
 - **Admin portal (v1 priority)**:
   - staging: `decadocs-admin.web.app`
   - production: `admin.decodocs.com` (later)
-  - access: allowlisted Google accounts with `@snapsign.com.au` email (single super-admin role for now)
+  - access: allowlisted accounts with `@snapsign.com.au` email (single super-admin role for now)
+    - auth method: **email/password only** (admin portal)
     - enforcement: server-side checks using `request.auth.token.email` endsWith `@snapsign.com.au`
   - scope: manage `admin/*` Firestore config (Stripe, plans/entitlements, feature flags, usage policies)
   - audit log: not required yet (add once flows stabilize)
