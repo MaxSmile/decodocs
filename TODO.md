@@ -36,6 +36,7 @@ This file mirrors `decodocs-repo/docs/ROADMAP.md` and lists actionable engineeri
 - [ ] Admin auth enforcement
   - Google sign-in
   - allowlist: server-side check `request.auth.token.email` endsWith `@snapsign.com.au`
+  - client-side gating as UX (hide/disable admin UI if not allowlisted)
   - deny by default for non-allowlisted emails
   - apply this rule in:
     - Firestore rules for `admin/*`
