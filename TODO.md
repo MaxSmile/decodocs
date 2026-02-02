@@ -17,40 +17,43 @@ This file mirrors `decodocs-repo/docs/ROADMAP.md` and lists actionable engineeri
 - **Audit log:** not required yet (add later once testing stabilizes).
 
 #### v1 Scope (must-have)
-- [ ] **Stripe config editor** for `admin/stripe`
-  - fields: product/price IDs, webhook secret, mock secret
+- [x] **Stripe config editor** for `admin/stripe`
+  - implemented in `decodocs/admin` as a JSON editor
   - acceptance: update config without redeploy; webhook keeps working
-- [ ] **Plans / entitlements editor** for `admin/plans`
+- [x] **Plans / entitlements editor** for `admin/plans`
+  - implemented in `decodocs/admin` as a JSON editor
   - limits: max pages, daily calls, OCR on/off
   - acceptance: changes reflected in gating + server enforcement
-- [ ] **Feature flags editor** for `admin/flags`
+- [x] **Feature flags editor** for `admin/flags`
+  - implemented in `decodocs/admin` as a JSON editor
   - enable/disable experimental tools
   - acceptance: flags are read by web + Functions and affect behavior
-- [ ] **Usage policies / rate limits editor** for `admin/policies`
+- [x] **Usage policies / rate limits editor** for `admin/policies`
+  - implemented in `decodocs/admin` as a JSON editor
   - acceptance: policies enforced server-side (Functions)
 
 #### Build plan
-- [ ] Create a separate admin web app
-  - Firebase Hosting target: `decadocs-admin` (first deploy should claim the site)
-  - deploy scripts / docs
-- [ ] Admin auth enforcement
+- [x] Create a separate admin web app
+  - Firebase Hosting target: `decodocs-admin` (claimed + deployed)
+  - app scaffold in `decodocs/admin`
+- [x] Admin auth enforcement
   - **Email/password auth only** (sign-in + simple registration)
   - client-side gating:
     - if email endsWith `@snapsign.com.au` → allow
     - else → show **"Access denied"** (no admin UI)
   - server-side enforcement (source of truth):
     - `request.auth.token.email` endsWith `@snapsign.com.au`
-    - apply in Firestore rules for `admin/*` and any admin APIs (Cloud Functions)
+    - applied in Firestore rules for `admin/*`
   - note: non-allowlisted users may still create accounts, but cannot read/write admin config
-- [ ] Minimal UI screens
-  - [ ] Dashboard (health + quick links)
-  - [ ] Stripe (`admin/stripe`)
-  - [ ] Plans (`admin/plans`)
-  - [ ] Flags (`admin/flags`)
-  - [ ] Policies (`admin/policies`)
-- [ ] Security/rules
+- [x] Minimal UI screens
+  - [x] Dashboard (quick links)
+  - [x] Stripe (`admin/stripe`)
+  - [x] Plans (`admin/plans`)
+  - [x] Flags (`admin/flags`)
+  - [x] Policies (`admin/policies`)
+- [x] Security/rules
   - Firestore rules: only allowlisted admins can read/write `admin/*`
-  - Functions should not trust client input; validate schemas on write
+  - Next: add schema validation (Functions) for safer writes
 
 ### UI Quality & Consistency (High priority refactor)
 - [ ] **Unify layouts**: define one canonical `AppLayout` (header/footer/nav) and use it across all routes (Home, Pricing, Sign-in, Profile, Viewer, Editor, About/Terms/Privacy/Contact)

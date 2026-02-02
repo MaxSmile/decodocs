@@ -7,6 +7,7 @@ This document defines how Stripe configuration is supplied and how subscription 
 - The client UI never decides Pro state.
 - Stripe secrets are **not** committed in `.env` or git.
 - Stripe config is stored in Firestore under an admin-controlled document.
+- Canonical reference for admin config docs + security model: `docs/ADMIN_CONFIG.md`
 
 ## Firestore admin config
 
