@@ -17,7 +17,8 @@ This file mirrors `decodocs-repo/docs/ROADMAP.md` and lists actionable engineeri
 #### Home page UI issues (as seen on mobile screenshots)
 - [x] Fix landing layout being “squashed”/broken on mobile due to **global CSS leaking onto `<main>`**
   - Implemented by scoping `App.css` from `main { ... }` → `.App main { ... }` so landing pages keep their own layout.
-- [ ] Audit `web/src/App.css` and other global styles for additional unscoped selectors (e.g. `body`, `a`, `p`, `.container`, `header`, `footer`) that can override landing components.
+- [x] Audit `web/src/App.css` and other global styles for additional unscoped selectors (e.g. `body`, `a`, `p`, `.container`, `header`, `footer`) that can override landing components.
+  - Scoped legacy `footer { ... }` rule to `.App:not(.homepage-app) footer` to avoid overriding the Tailwind landing/footer.
 - [ ] Add a small “visual regression checklist” for mobile (Chrome Android + iOS Safari): Home, Pricing, View PDF, footer links.
 - [ ] Ensure hero/logo sizing is responsive on small screens (cap hero image height, prevent overflow, keep CTA visible above the fold).
 

@@ -743,7 +743,9 @@ button:disabled {
   background-color: #0056b3 !important;
 }
 
-footer {
+/* IMPORTANT: scope legacy global footer styling to the old .App wrapper only.
+   The new landing/app Layout uses its own Tailwind footer styles. */
+.App:not(.homepage-app) footer {
   text-align: center;
   padding: 15px 20px;
   color: #7f8c8d;

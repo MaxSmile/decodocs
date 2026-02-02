@@ -285,6 +285,10 @@ If Tailwind isn’t being loaded correctly, symptoms include:
 - missing padding/spacing utilities (e.g. `px-6`, `py-4`)
 - landing sections looking "flattened" / unstyled on mobile
 
+### Guardrail: legacy global CSS
+
+`web/src/App.css` contains legacy styles from the pre-Tailwind UI. Keep any element selectors (e.g. `main`, `footer`) **scoped under `.App:not(.homepage-app)`** so they don’t leak into the Tailwind landing/app `Layout`.
+
 ## Styling Guidelines
 
 ### CSS Architecture
