@@ -267,6 +267,24 @@ End-to-end tests use Playwright and are located in the `e2e-tests/` directory.
 npm run test:e2e
 ```
 
+## Styling / Tailwind (important)
+
+The marketing/landing UI relies on Tailwind utilities.
+
+This project uses **Tailwind v4**. The correct entrypoint is:
+
+```css
+/* web/src/index.css */
+@import "tailwindcss";
+```
+
+Do **not** use the Tailwind v3 directives (`@tailwind base; @tailwind components; @tailwind utilities;`) in this repo.
+
+If Tailwind isn’t being loaded correctly, symptoms include:
+- header logo rendering at an incorrect size
+- missing padding/spacing utilities (e.g. `px-6`, `py-4`)
+- landing sections looking "flattened" / unstyled on mobile
+
 ## Styling Guidelines
 
 ### CSS Architecture
