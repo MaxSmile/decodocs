@@ -19,7 +19,8 @@ This file mirrors `decodocs-repo/docs/ROADMAP.md` and lists actionable engineeri
   - Implemented by scoping `App.css` from `main { ... }` → `.App main { ... }` so landing pages keep their own layout.
 - [x] Audit `web/src/App.css` and other global styles for additional unscoped selectors (e.g. `body`, `a`, `p`, `.container`, `header`, `footer`) that can override landing components.
   - Scoped legacy `footer { ... }` rule to `.App:not(.homepage-app) footer` to avoid overriding the Tailwind landing/footer.
-- [ ] Add a small “visual regression checklist” for mobile (Chrome Android + iOS Safari): Home, Pricing, View PDF, footer links.
+- [x] Add a small “visual regression checklist” for mobile (Chrome Android + iOS Safari): Home, Pricing, View PDF, footer links.
+  - Added `docs/VISUAL_REGRESSION_CHECKLIST.md`
 - [ ] Ensure hero/logo sizing is responsive on small screens (cap hero image height, prevent overflow, keep CTA visible above the fold).
 
 - [x] Brand polish: ensure "DecoDocs" and "Snap Sign Pty Ltd" are consistent across UI + docs (no legacy names)

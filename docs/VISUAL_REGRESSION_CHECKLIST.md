@@ -53,6 +53,13 @@ All should:
 - Load without console errors
 - Be readable on mobile
 
+## Cache note (when checking production)
+
+If you suspect you’re seeing an old build on mobile:
+- do a hard refresh, or
+- open the URL once with a cache-busting query (e.g. `?ts=1`), or
+- clear site data for `decodocs.com`.
+
 ## What to record when something breaks
 
 - URL + route
