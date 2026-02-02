@@ -68,6 +68,8 @@ states.
   - production: `admin.decodocs.com` (later)
   - access: allowlisted accounts with `@snapsign.com.au` email (single super-admin role for now)
     - auth method: **email/password only** (admin portal)
+      - includes simple registration + sign-in
+      - client gating: allow only `@snapsign.com.au`, otherwise show "Access denied"
     - enforcement: server-side checks using `request.auth.token.email` endsWith `@snapsign.com.au`
   - scope: manage `admin/*` Firestore config (Stripe, plans/entitlements, feature flags, usage policies)
   - audit log: not required yet (add once flows stabilize)
