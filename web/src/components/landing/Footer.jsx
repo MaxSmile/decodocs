@@ -1,10 +1,42 @@
 import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 
 import { footerLinks } from '../../lib/landingData.js';
 import logo from '../../assets/DecoDocsLogo.svg';
 import { APP_VERSION } from '../../lib/version.js';
 
+const FooterLink = ({ href, children }) => {
+  const isExternal = typeof href === 'string' && /^https?:\/\//.test(href);
+  const isHash = typeof href === 'string' && href.startsWith('#');
+
+  if (isExternal) {
+    return (
+      <a className="text-slate-600 no-underline hover:text-slate-900 hover:underline" href={href}>
+        {children}
+      </a>
+    );
+  }
+
+  if (isHash) {
+    // Hash sections live on the landing page. Ensure we always navigate to '/#...'
+    return (
+      <Link className="text-slate-600 no-underline hover:text-slate-900 hover:underline" to={{ pathname: '/', hash: href }}>
+        {children}
+      </Link>
+    );
+  }
+
+  return (
+    <Link className="text-slate-600 no-underline hover:text-slate-900 hover:underline" to={href}>
+      {children}
+    </Link>
+  );
+};
+
 const Footer = () => {
+  const location = useLocation();
+  const isHome = location.pathname === '/';
+
   return (
     <footer className="border-t border-slate-200 bg-white px-6 py-12">
       <div className="mx-auto grid w-full max-w-6xl gap-10 md:grid-cols-[1.2fr_0.8fr_0.8fr_0.8fr]">
@@ -32,9 +64,13 @@ const Footer = () => {
           <ul className="mt-4 space-y-3 text-sm text-slate-600 list-none p-0 m-0">
             {footerLinks.product.map((link) => (
               <li key={link.label} className="m-0">
-                <a className="text-slate-600 no-underline hover:text-slate-900 hover:underline" href={link.href}>
-                  {link.label}
-                </a>
+                {isHome && typeof link.href === 'string' && link.href.startsWith('#') ? (
+                  <a className="text-slate-600 no-underline hover:text-slate-900 hover:underline" href={link.href}>
+                    {link.label}
+                  </a>
+                ) : (
+                  <FooterLink href={link.href}>{link.label}</FooterLink>
+                )}
               </li>
             ))}
           </ul>
@@ -45,9 +81,7 @@ const Footer = () => {
           <ul className="mt-4 space-y-3 text-sm text-slate-600 list-none p-0 m-0">
             {footerLinks.company.map((link) => (
               <li key={link.label} className="m-0">
-                <a className="text-slate-600 no-underline hover:text-slate-900 hover:underline" href={link.href}>
-                  {link.label}
-                </a>
+                <FooterLink href={link.href}>{link.label}</FooterLink>
               </li>
             ))}
           </ul>
@@ -58,9 +92,7 @@ const Footer = () => {
           <ul className="mt-4 space-y-3 text-sm text-slate-600 list-none p-0 m-0">
             {footerLinks.legal.map((link) => (
               <li key={link.label} className="m-0">
-                <a className="text-slate-600 no-underline hover:text-slate-900 hover:underline" href={link.href}>
-                  {link.label}
-                </a>
+                <FooterLink href={link.href}>{link.label}</FooterLink>
               </li>
             ))}
           </ul>
