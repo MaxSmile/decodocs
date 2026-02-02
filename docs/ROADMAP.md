@@ -67,6 +67,7 @@ states.
   - staging: `decadocs-admin.web.app`
   - production: `admin.decodocs.com` (later)
   - access: allowlisted Google accounts with `@snapsign.com.au` email (single super-admin role for now)
+    - enforcement: server-side checks using `request.auth.token.email` endsWith `@snapsign.com.au`
   - scope: manage `admin/*` Firestore config (Stripe, plans/entitlements, feature flags, usage policies)
   - audit log: not required yet (add once flows stabilize)
 - Preflight document classification (size/scanned heuristics)
