@@ -1021,9 +1021,14 @@ const DocumentViewer = () => {
         </div>
       )}
 
-      <div className="flex flex-1 min-h-0 h-[calc(100vh-120px)]">
+      {/*
+        Responsive layout:
+        - Mobile: stack viewer + toolbox vertically
+        - Desktop: two-column layout
+      */}
+      <div className="flex flex-1 min-h-0 h-[calc(100vh-120px)] flex-col lg:flex-row overflow-x-hidden">
         {/* PDF Viewer Section */}
-        <div className="flex-1 flex flex-col p-5 border-r border-gray-300 min-w-0">
+        <div className="flex-1 flex flex-col p-5 border-b border-gray-300 lg:border-b-0 lg:border-r min-w-0">
           <PDFControls
             onFileSelect={handleFileUpload}
             onEdit={handleEditDocument}
@@ -1101,8 +1106,8 @@ const DocumentViewer = () => {
           />
         </div>
 
-        {/* Analysis Toolbox Section */}
-        <div className="flex flex-col">
+        {/* Analysis Toolbox / Results */}
+        <div className="flex flex-col w-full lg:w-auto">
           <AnalysisToolbox
             onAnalyzeDocument={handleAnalyzeDocument}
             onAnalyzeByType={handleAnalyzeByType}
@@ -1115,7 +1120,7 @@ const DocumentViewer = () => {
           />
 
           {selectedDocument && (
-            <div className="w-[350px] p-5 bg-gray-50 border-l border-gray-300 overflow-y-auto">
+            <div className="w-full lg:w-[350px] p-5 bg-gray-50 border-t border-gray-300 lg:border-t-0 lg:border-l overflow-y-auto">
               <AnalysisResults analysis={analysisResults[selectedDocument.id]} />
             </div>
           )}

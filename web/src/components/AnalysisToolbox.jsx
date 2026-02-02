@@ -22,7 +22,7 @@ const AnalysisToolbox = ({
   else if (!isAuthenticated) disabledReason = 'Sign in to enable AI analysis (Free) and unlock Pro upgrades (OCR / deeper processing).';
 
   return (
-    <div className="w-[350px] p-5 bg-gray-50 border-l border-gray-300 flex flex-col overflow-y-auto">
+    <div className="w-full lg:w-[350px] p-5 bg-gray-50 border-t border-gray-300 lg:border-t-0 lg:border-l flex flex-col overflow-y-auto">
       <h3 className="mt-0 text-gray-800 border-b border-gray-300 pb-2.5">
         Document Analysis Tools
       </h3>
