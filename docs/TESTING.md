@@ -64,6 +64,7 @@ Then run Playwright in a separate terminal.
 For quick visual/LLM-driven smoke tests (helpful after UI refactors), see:
 
 - `docs/SKYVERN_SMOKE_TESTS.md`
+- `docs/VISUAL_REGRESSION_CHECKLIST.md` (manual, quick)
 
 ## Common failures
 
