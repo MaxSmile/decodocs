@@ -65,8 +65,10 @@ states.
 - Firebase Hosting + Cloud Functions + Firestore usage tracking
 - **Admin portal (v1 priority)**:
   - staging: `decadocs-admin.web.app`
-  - production: `admin.decodocs.com`
-  - initial scope: manage `admin/*` Firestore config (Stripe, plans/entitlements, feature flags) + audit log
+  - production: `admin.decodocs.com` (later)
+  - access: allowlisted Google accounts with `@snapsign.com.au` email (single super-admin role for now)
+  - scope: manage `admin/*` Firestore config (Stripe, plans/entitlements, feature flags, usage policies)
+  - audit log: not required yet (add once flows stabilize)
 - Preflight document classification (size/scanned heuristics)
 - Tier model and call-budget enforcement (MVP)
 - Test coverage (unit + Playwright tests)

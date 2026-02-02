@@ -7,22 +7,45 @@ This file mirrors `decodocs-repo/docs/ROADMAP.md` and lists actionable engineeri
 ## Phase 1 - Web MVP Foundation (Live, Iterating)
 
 ### Admin Portal (High priority)
-- [ ] Define scope for v1 admin portal (what admins can change without redeploy):
-  - Stripe product/price IDs + webhook secrets (already stored under `admin/stripe`)
-  - Plan entitlements (Free/Pro/Premium flags + limits)
-  - Feature flags (e.g. enable/disable OCR, analysis modes)
-  - Usage policy constants (daily call budgets, rate limits)
-- [ ] Create a separate admin web app (staging `decadocs-admin.web.app`, prod `admin.decodocs.com`)
-  - Firebase Hosting target + deploy scripts
-  - Admin-only auth (Google Workspace allowlist or custom claims)
-- [ ] Build minimal UI screens:
+
+#### Decisions (confirmed)
+- **Admins:** any signed-in user with `@snapsign.com.au` email = **super admin** (single role for now).
+- **Hosting:** start with **staging** at `decadocs-admin.web.app` (new Firebase Hosting target).
+  - Production domain `admin.decodocs.com` later.
+- **Config model:** one Firestore doc per config:
+  - `admin/stripe`, `admin/plans`, `admin/flags`, `admin/policies`
+- **Audit log:** not required yet (add later once testing stabilizes).
+
+#### v1 Scope (must-have)
+- [ ] **Stripe config editor** for `admin/stripe`
+  - fields: product/price IDs, webhook secret, mock secret
+  - acceptance: update config without redeploy; webhook keeps working
+- [ ] **Plans / entitlements editor** for `admin/plans`
+  - limits: max pages, daily calls, OCR on/off
+  - acceptance: changes reflected in gating + server enforcement
+- [ ] **Feature flags editor** for `admin/flags`
+  - enable/disable experimental tools
+  - acceptance: flags are read by web + Functions and affect behavior
+- [ ] **Usage policies / rate limits editor** for `admin/policies`
+  - acceptance: policies enforced server-side (Functions)
+
+#### Build plan
+- [ ] Create a separate admin web app
+  - Firebase Hosting target: `decadocs-admin` (first deploy should claim the site)
+  - deploy scripts / docs
+- [ ] Admin auth enforcement
+  - Google sign-in
+  - allowlist: email endsWith `@snapsign.com.au`
+  - deny by default for non-allowlisted emails
+- [ ] Minimal UI screens
   - [ ] Dashboard (health + quick links)
-  - [ ] Stripe config editor (`admin/stripe`)
-  - [ ] Plans/entitlements editor (`admin/plans` or similar)
-  - [ ] Feature flags editor (`admin/flags`)
-- [ ] Security/rules:
-  - Firestore rules so only admins / Functions can read/write `admin/*`
-  - Audit log collection for admin changes (`admin_audit/*`)
+  - [ ] Stripe (`admin/stripe`)
+  - [ ] Plans (`admin/plans`)
+  - [ ] Flags (`admin/flags`)
+  - [ ] Policies (`admin/policies`)
+- [ ] Security/rules
+  - Firestore rules: only allowlisted admins can read/write `admin/*`
+  - Functions should not trust client input; validate schemas on write
 
 ### UI Quality & Consistency (High priority refactor)
 - [ ] **Unify layouts**: define one canonical `AppLayout` (header/footer/nav) and use it across all routes (Home, Pricing, Sign-in, Profile, Viewer, Editor, About/Terms/Privacy/Contact)
