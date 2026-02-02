@@ -59,6 +59,12 @@ npm run preview
 
 Then run Playwright in a separate terminal.
 
+## Skyvern (optional visual smoke tests)
+
+For quick visual/LLM-driven smoke tests (helpful after UI refactors), see:
+
+- `docs/SKYVERN_SMOKE_TESTS.md`
+
 ## Common failures
 
 ### "Not implemented: HTMLCanvasElement's getContext()"
