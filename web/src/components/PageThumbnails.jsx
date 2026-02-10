@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { HiTrash, HiRefresh, HiPlus } from 'react-icons/hi';
+import { HiTrash, HiRefresh, HiPlus, HiDuplicate } from 'react-icons/hi';
 
 const PageThumbnail = ({ pdfDoc, pageNum, onClick, isActive }) => {
     const canvasRef = useRef(null);
@@ -32,16 +32,6 @@ const PageThumbnail = ({ pdfDoc, pageNum, onClick, isActive }) => {
 
     return (
         <div className="flex flex-col items-center gap-2 group relative">
-            {/* Actions Overlay (Visible on Hover / Active) */}
-            <div className={`absolute -top-3 right-0 flex gap-1 transition-opacity ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} z-10`}>
-                <button className="p-1 bg-white border border-slate-200 rounded shadow-sm text-slate-500 hover:text-blue-600 hover:border-blue-300" title="Rotate">
-                    <HiRefresh className="w-3 h-3" />
-                </button>
-                <button className="p-1 bg-white border border-slate-200 rounded shadow-sm text-slate-500 hover:text-red-600 hover:border-red-300" title="Delete">
-                    <HiTrash className="w-3 h-3" />
-                </button>
-            </div>
-
             <div
                 onClick={onClick}
                 className={`cursor-pointer p-1 rounded-sm transition-all border-2 ${isActive ? 'border-blue-500 ring-2 ring-blue-100' : 'border-transparent hover:border-blue-200'
@@ -52,14 +42,27 @@ const PageThumbnail = ({ pdfDoc, pageNum, onClick, isActive }) => {
                 </div>
             </div>
 
+            {/* Actions Buttons - Bottom Center */}
+            <div className={`flex items-center gap-2 transition-opacity ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} mt-1`}>
+                <button className="p-1 !bg-transparent hover:!bg-slate-200/70 !text-slate-600 hover:!text-slate-800 transition-colors !min-w-0 !h-auto" title="Duplicate">
+                    <HiDuplicate className="w-4 h-4" />
+                </button>
+                <button className="p-1 !bg-transparent hover:!bg-slate-200/70 !text-slate-600 hover:!text-slate-800 transition-colors !min-w-0 !h-auto" title="Rotate">
+                    <HiRefresh className="w-4 h-4" />
+                </button>
+                <button className="p-1 !bg-transparent hover:!bg-slate-200/70 !text-slate-600 hover:!text-slate-800 transition-colors !min-w-0 !h-auto" title="Delete">
+                    <HiTrash className="w-4 h-4" />
+                </button>
+            </div>
+
             <div className="text-center text-xs text-slate-400 font-medium">
                 {pageNum}
             </div>
 
-            {/* Insert Plus Button (Sample) */}
-            <div className="w-full h-4 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-blue-500">
-                <div className="w-6 h-6 rounded-full bg-blue-50 border border-blue-200 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-colors">
-                    <HiPlus className="w-4 h-4" />
+            {/* Insert Plus Button - Visible and fixed background */}
+            <div className="w-full h-8 flex items-center justify-center cursor-pointer text-blue-500 mt-2 mb-2">
+                <div className="w-8 h-8 rounded-full !bg-blue-50 border-2 border-dashed border-blue-200 flex items-center justify-center hover:!bg-blue-600 hover:border-blue-600 hover:text-white transition-all shadow-sm">
+                    <HiPlus className="w-5 h-5" />
                 </div>
             </div>
         </div>

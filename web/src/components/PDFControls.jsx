@@ -26,7 +26,7 @@ const PDFControls = ({
       <div className="flex items-center gap-2 pr-3 border-r border-white/20">
         <button
           onClick={() => fileInputRef.current?.click()}
-          className="p-1.5 text-slate-300 hover:text-white hover:bg-white/10 rounded-full transition-colors tooltip-trigger"
+          className="p-1.5 !bg-transparent text-slate-300 hover:text-white hover:!bg-white/10 rounded-full transition-colors tooltip-trigger"
           title="Open PDF"
         >
           <HiUpload className="w-5 h-5" />
@@ -38,7 +38,7 @@ const PDFControls = ({
         <button
           onClick={onPreviousPage}
           disabled={pageNumber <= 1}
-          className="p-1 rounded-full hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition-colors text-white"
+          className="p-1 !bg-transparent rounded-full hover:!bg-white/10 disabled:opacity-30 disabled:hover:!bg-transparent transition-colors text-white"
         >
           <HiChevronLeft className="w-5 h-5" />
         </button>
@@ -50,7 +50,7 @@ const PDFControls = ({
         <button
           onClick={onNextPage}
           disabled={pageNumber >= numPages}
-          className="p-1 rounded-full hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition-colors text-white"
+          className="p-1 !bg-transparent rounded-full hover:!bg-white/10 disabled:opacity-30 disabled:hover:!bg-transparent transition-colors text-white"
         >
           <HiChevronRight className="w-5 h-5" />
         </button>
@@ -60,7 +60,7 @@ const PDFControls = ({
       <div className="flex items-center gap-2 pl-3 border-l border-white/20">
         <button
           onClick={onZoomOut}
-          className="p-1.5 text-slate-300 hover:text-white hover:bg-white/10 rounded-full transition-colors"
+          className="p-1.5 !bg-transparent text-slate-300 hover:text-white hover:!bg-white/10 rounded-full transition-colors"
           title="Zoom Out"
         >
           <HiZoomOut className="w-4 h-4" />
@@ -70,7 +70,7 @@ const PDFControls = ({
         </span>
         <button
           onClick={onZoomIn}
-          className="p-1.5 text-slate-300 hover:text-white hover:bg-white/10 rounded-full transition-colors"
+          className="p-1.5 !bg-transparent text-slate-300 hover:text-white hover:!bg-white/10 rounded-full transition-colors"
           title="Zoom In"
         >
           <HiZoomIn className="w-4 h-4" />

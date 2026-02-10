@@ -24,7 +24,7 @@ const Layout = ({ children, showHeader = true, showFooter = true, variant = 'mar
       {/* Header */}
       {showHeader && (
         <header className="sticky top-0 z-30 w-full border-b border-white/40 bg-white/70 backdrop-blur-xl">
-          <div className={`mx-auto flex w-full max-w-6xl items-center justify-between px-6 ${isAppLayout ? 'h-14 py-2' : 'py-4'}`}>
+          <div className={`mx-auto flex w-full items-center justify-between px-6 ${isAppLayout ? 'h-14 py-2' : 'max-w-6xl py-4'}`}>
             <Link to="/" className="flex items-center gap-3 text-lg font-semibold text-slate-900 no-underline">
               <img src={logo} alt="DecoDocs" className="h-9 w-9" />
               {!isAppLayout && "DecoDocs"}
@@ -77,7 +77,7 @@ const Layout = ({ children, showHeader = true, showFooter = true, variant = 'mar
 
           {/* Auth Status Banner (compact) */}
           <div className="border-t border-white/40 bg-white/60 px-6 py-2 text-xs text-slate-600">
-            <div className="mx-auto w-full max-w-6xl">
+            <div className={`mx-auto w-full ${isAppLayout ? '' : 'max-w-6xl'}`}>
               {authState.status === 'authenticated' ? (
                 <span>Authenticated (AI features available)</span>
               ) : firebaseError ? (
