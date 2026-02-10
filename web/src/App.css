@@ -695,7 +695,8 @@
 }
 
 /* General Buttons */
-button {
+/* General Buttons - Scoped to legacy app layout to avoid leaking to landing page */
+.legacy-app button {
   background-color: #3498db;
   color: white;
   border: none;
@@ -707,11 +708,11 @@ button {
   min-width: 120px;
 }
 
-button:hover:not(:disabled) {
+.legacy-app button:hover:not(:disabled) {
   background-color: #2980b9;
 }
 
-button:disabled {
+.legacy-app button:disabled {
   background-color: #adb5bd;
   cursor: not-allowed;
 }

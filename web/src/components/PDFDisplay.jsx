@@ -1,19 +1,51 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
+import PDFPage from './PDFPage';
 
 /**
- * PDF display component with canvas, text layer, and annotations overlay
+ * PDF display component for continuous scrolling
  */
 const PDFDisplay = ({
   pdfDoc,
+  numPages,
+  pageScale,
   isLoading,
   loadingMessage,
-  canvasRef,
-  textLayerRef,
-  annotationsRef,
+  onPageVisible, // Callback when a page becomes visible
+  highlights = [],
+  clauseMarkers = [],
+  riskBadges = [],
+  renderPageOverlay, // Function (pageNum) => ReactNode
 }) => {
+  const containerRef = useRef(null);
+
+  // Intersection Observer to detect current page
+  useEffect(() => {
+    if (!pdfDoc || !containerRef.current || !onPageVisible) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const pageNum = parseInt(entry.target.getAttribute('data-page-num'), 10);
+            onPageVisible(pageNum);
+          }
+        });
+      },
+      {
+        root: containerRef.current,
+        threshold: 0.5, // 50% visibility triggers change
+      }
+    );
+
+    const pages = containerRef.current.querySelectorAll('.page-wrapper');
+    pages.forEach((page) => observer.observe(page));
+
+    return () => observer.disconnect();
+  }, [pdfDoc, numPages, onPageVisible]);
+
   if (isLoading) {
     return (
-      <div className="flex-1 flex items-center justify-center border border-dashed border-gray-300 rounded bg-gray-50 text-gray-600">
+      <div className="flex-1 flex items-center justify-center border border-dashed border-gray-300 rounded bg-gray-50 text-gray-600 h-full">
         <div className="text-center">
           <div className="w-10 h-10 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
           <p>{loadingMessage || 'Loading PDF...'}</p>
@@ -22,32 +54,29 @@ const PDFDisplay = ({
     );
   }
 
-  if (!pdfDoc) {
-    return (
-      <div className="flex-1 flex items-center justify-center border border-dashed border-gray-300 rounded bg-gray-50 text-gray-600">
-        <p>No PDF selected. Click "Open PDF" to load a document.</p>
-      </div>
-    );
-  }
+  if (!pdfDoc) return null;
 
   return (
-    <div className="flex-1 border border-gray-300 rounded overflow-hidden relative bg-gray-100 h-[calc(100vh-200px)] overflow-auto">
-      <div className="relative mx-auto w-fit">
-        <canvas
-          ref={canvasRef}
-          className="block max-w-full max-h-full bg-white shadow-lg"
-        />
-        {/* Text layer for selection and searching */}
+    <div className="flex flex-col items-center gap-8 py-8 w-full">
+      {Array.from({ length: numPages }, (_, i) => i + 1).map((pageNum) => (
         <div
-          ref={textLayerRef}
-          className="absolute top-0 left-0 w-full h-full overflow-hidden opacity-0 leading-none"
-        />
-        {/* Annotations overlay */}
-        <div
-          ref={annotationsRef}
-          className="absolute top-0 left-0 w-full h-full pointer-events-none"
-        />
-      </div>
+          key={pageNum}
+          className="page-wrapper"
+          data-page-num={pageNum}
+        >
+          <PDFPage
+            id={`pdf-page-${pageNum}`}
+            pdfDoc={pdfDoc}
+            pageNum={pageNum}
+            scale={pageScale}
+            highlights={highlights}
+            clauseMarkers={clauseMarkers}
+            riskBadges={riskBadges}
+          >
+            {renderPageOverlay ? renderPageOverlay(pageNum) : null}
+          </PDFPage>
+        </div>
+      ))}
     </div>
   );
 };

@@ -1,7 +1,7 @@
 # DecoDocs — User Types, Entitlements, and Limits (Technical Spec)
 
 This document is the **source of truth** for:
-- how we classify users (Anonymous / Free / Pro)
+- how we classify users (Anonymous / Free / Pro / Small Business / Enterprise)
 - which features are gated
 - how AI budgets are enforced
 - where entitlements and abuse-prevention metadata live
@@ -13,11 +13,12 @@ This document is the **source of truth** for:
 
 **Capabilities**
 - AI analysis: **allowed** (very small budget)
+- LLM tier: **low-cost** model
 - OCR / vision model: **not allowed**
 - Storage with us: **none** (browser-only)
 
 **Limits**
-- **20,000 tokens per Firebase uid** (same uid == same Firebase auth session)
+- **20,000 tokens per Firebase uid-session** (same uid == same anonymous login session)
 
 > Note: Internally, enforcement will be done against **puid** (primary user identifier) once provider-linking is introduced.
 > See docs/AUTH_LINKING.md.
@@ -27,6 +28,7 @@ This document is the **source of truth** for:
 
 **Capabilities**
 - AI analysis: **allowed** (bigger budget)
+- LLM tier: **standard** model
 - OCR / vision model: **not allowed**
 - Storage with us: **none** (browser-only)
 - Cloud connectors (later): user can connect Google Drive / OneDrive / iCloud as external sources (no storage on our side).
@@ -34,31 +36,63 @@ This document is the **source of truth** for:
 **Limits**
 - **40,000 tokens per day (per Firebase `uid`)**
 
-### 1.3 Pro
-**Definition:** Non-anonymous Firebase Auth user AND Stripe subscription is **active**.
+### 1.3 Pro (Individual)
+**Definition:** Non-anonymous Firebase Auth user AND Stripe subscription is **active** on the Pro plan.
+
+**Price**
+- **$5 / month** (individual)
 
 **Capabilities**
 - AI analysis: **unlimited** (until we observe abuse, then we introduce fair-use)
-- Better model: **yes** (vs Free/Anonymous)
+- LLM tier: **premium** model (vs Free/Anonymous)
 - OCR / scanned PDF support: **yes**
 - Storage with us: **5 GB per user**
+
+### 1.4 Small Business
+**Definition:** Non-anonymous Firebase Auth user AND Stripe subscription is **active** on the Small Business plan.
+
+**Price**
+- **$50 / month** (up to 10 accounts)
+
+**Capabilities**
+- Includes all Pro capabilities.
+- Org-level ownership for documents and usage.
+- Admin visibility across team documents.
+- Shared billing and seat management (up to 10).
+- LLM tier: **premium** model.
+- Storage with us: **5 GB per user**.
+
+### 1.5 Enterprise
+**Definition:** Contracted org account (plan flag set by admin/config), non-anonymous users under the org.
+
+**Price**
+- **Custom** (seat- or usage-based, to be defined)
+
+**Capabilities**
+- All Small Business capabilities.
+- Enterprise controls: SSO (SAML), SCIM, RBAC, audit logs, retention policies, legal hold, export controls.
+- Security/compliance posture: DPA, data residency options, subprocessor list, and compliance roadmap.
+- LLM tier: **premium** model, with model/provider transparency and AI output traceability.
+- Storage with us: **custom** (per contract).
 
 ## 2) Feature Gating Rules
 
 ### 2.1 AI analysis
 - Anonymous: allowed within **20k tokens per uid-session**
 - Free: allowed within **40k tokens/day**
-- Pro: unlimited
+- Pro / Small Business / Enterprise: unlimited (subject to fair-use)
 
 ### 2.2 OCR / scanned PDFs
 - We detect scanned PDFs.
 - **Free and Anonymous do not get OCR** (no vision model).
-- Pro gets OCR.
+- Pro / Small Business / Enterprise get OCR.
 
 ### 2.3 Storage
 - Anonymous: none
 - Free: none (browser-only)
 - Pro: **5 GB** stored with us
+- Small Business: **5 GB per user** (org-managed)
+- Enterprise: **custom** (per contract)
 
 ## 3) Entitlements Source of Truth
 
@@ -69,9 +103,12 @@ This document is the **source of truth** for:
   - `isAnonymous`
 
 ### 3.2 Subscription status
-- Stripe is the source of truth for **Pro** subscription state.
+- Stripe is the source of truth for **Pro** and **Small Business** subscription state.
+- Enterprise is set via admin config (contracted).
 - Server-side code determines:
   - `subscriptionActive: boolean`
+  - `planId: free | pro | business | enterprise`
+  - `seatLimit` (for business/enterprise)
 
 ### 3.3 Canonical user record
 We keep a minimal record for **all** users (including Anonymous), because any user can later become Free/Pro.
@@ -107,6 +144,8 @@ At minimum, we store:
 When a user hits a gate, the UI should distinguish:
 - **Anonymous → Register** (to get the Free tier limits)
 - **Free → Upgrade to Pro** (for OCR, better model, unlimited AI, 5GB storage)
+- **Team features → Upgrade to Small Business** (org visibility, shared billing, seats)
+- **Enterprise controls → Contact sales** (SSO, SCIM, audit, retention)
 
 Also: when actions are *disabled* (not just blocked after a click), the UI must explain *why* and provide a clear next step.
 

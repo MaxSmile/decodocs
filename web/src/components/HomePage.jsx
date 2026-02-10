@@ -7,8 +7,8 @@ import SocialProof from './landing/SocialProof.jsx';
 import HowItWorks from './landing/HowItWorks.jsx';
 import FeatureGrid from './landing/FeatureGrid.jsx';
 import UseCases from './landing/UseCases.jsx';
-import Pricing from './landing/Pricing.jsx';
-import FAQ from './landing/FAQ.jsx';
+import Integrations from './landing/Integrations.jsx';
+import SecureByDesign from './landing/SecureByDesign.jsx';
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -66,10 +66,10 @@ const HomePage = () => {
       <Hero onOpenPdf={openFilePicker} />
       <SocialProof />
       <HowItWorks />
+      <Integrations />
       <FeatureGrid />
       <UseCases />
-      <Pricing />
-      <FAQ />
+      <SecureByDesign />
     </LandingLayout>
   );
 };
