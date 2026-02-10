@@ -1,8 +1,11 @@
 import React from 'react';
 import SectionHeader from './SectionHeader.jsx';
 import { howItWorksSteps } from '../../lib/landingData.js';
+import { HiUpload, HiSparkles, HiCheckCircle } from 'react-icons/hi';
 
 const HowItWorks = () => {
+  const stepIcons = [HiUpload, HiSparkles, HiCheckCircle];
+
   return (
     <section id="how-it-works" className="px-6 py-16">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-10">
@@ -22,7 +25,7 @@ const HowItWorks = () => {
                 <span className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
                   Step {index + 1}
                 </span>
-                <span className="text-xl">{String(index + 1).padStart(2, '0')}</span>
+                {React.createElement(stepIcons[index], { className: "w-6 h-6 text-slate-400" })}
               </div>
               <h3 className="mt-6 text-xl font-semibold text-slate-900">{step.title}</h3>
               <p className="mt-3 text-sm text-slate-600">{step.description}</p>

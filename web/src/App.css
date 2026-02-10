@@ -694,56 +694,6 @@
   border-bottom: none;
 }
 
-/* General Buttons */
-/* General Buttons - Scoped to legacy app layout to avoid leaking to landing page */
-.legacy-app button {
-  background-color: #3498db;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  font-size: 15px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  min-width: 120px;
-}
-
-.legacy-app button:hover:not(:disabled) {
-  background-color: #2980b9;
-}
-
-.legacy-app button:disabled {
-  background-color: #adb5bd;
-  cursor: not-allowed;
-}
-
-.btn-secondary {
-  background-color: #6c757d !important;
-}
-
-.btn-secondary:hover:not(:disabled) {
-  background-color: #5a6268 !important;
-}
-
-.btn-outline {
-  background-color: transparent !important;
-  border: 1px solid #6c757d;
-  color: #6c757d;
-}
-
-.btn-outline:hover:not(:disabled) {
-  background-color: #6c757d !important;
-  color: white !important;
-}
-
-.btn-primary {
-  background-color: #007bff !important;
-}
-
-.btn-primary:hover:not(:disabled) {
-  background-color: #0056b3 !important;
-}
-
 /* IMPORTANT: scope legacy global footer styling to the old .App wrapper only.
    The new landing/app Layout uses its own Tailwind footer styles. */
 .App:not(.homepage-app) footer {

@@ -101,9 +101,10 @@ export const AuthProvider = ({ children }) => {
       // If undefined, defaults to a valid user
       const mockUser = window.MOCK_AUTH_USER === undefined ? { uid: 'test-user', isAnonymous: true } : window.MOCK_AUTH_USER;
 
+      const isAuthenticated = !!mockUser;
       setAuthState({
-        status: mockUser ? 'authenticated' : 'unauthenticated',
-        user: mockUser,
+        status: isAuthenticated ? 'authenticated' : 'unauthenticated',
+        user: mockUser || null,
         error: null,
       });
       return;
@@ -127,6 +128,7 @@ export const AuthProvider = ({ children }) => {
         if (!user) {
           try {
             const userCredential = await signInAnonymously(auth);
+            // Anonymous-first session is a valid active session.
             setAuthState({ status: 'authenticated', user: userCredential.user, error: null });
           } catch (error) {
             console.error('Authentication error:', error);

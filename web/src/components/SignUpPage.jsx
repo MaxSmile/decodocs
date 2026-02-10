@@ -6,12 +6,10 @@ import {
   EmailAuthProvider,
   linkWithPopup,
   linkWithCredential,
-  signOut,
 } from 'firebase/auth';
 import { FcGoogle } from 'react-icons/fc';
 import { AiFillApple } from 'react-icons/ai';
 import { FaMicrosoft } from 'react-icons/fa';
-import { MdEmail } from 'react-icons/md';
 import { useAuth } from '../context/AuthContext.jsx';
 
 const useQuery = () => {
@@ -25,28 +23,25 @@ const Card = ({ children }) => (
   </div>
 );
 
-export default function SignInPage() {
+export default function SignUpPage() {
   const {
     authState,
     auth,
     signInWithGoogle,
     signInWithMicrosoft,
     signInWithApple,
-    signInWithEmail,
     signUpWithEmail,
-    resetPassword,
   } = useAuth();
   const navigate = useNavigate();
   const q = useQuery();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [status, setStatus] = useState({ kind: 'idle', message: '' });
 
   const user = authState?.user || null;
   const isAnon = !!user?.isAnonymous;
-
-  const intent = q.get('intent');
 
   const runProvider = async (provider, directSignIn) => {
     setStatus({ kind: 'loading', message: 'Opening sign-in…' });
@@ -83,79 +78,39 @@ export default function SignInPage() {
     }
   };
 
-  const doEmailSignIn = async () => {
-    setStatus({ kind: 'loading', message: 'Signing in…' });
-    try {
-      if (!email || !password) throw new Error('Email and password are required.');
-      if (auth.currentUser && isAnon) {
-        // Link to anonymous account
-        const credential = EmailAuthProvider.credential(email, password);
-        await linkWithCredential(auth.currentUser, credential);
-        setStatus({ kind: 'ok', message: 'Email linked and signed in.' });
-      } else {
-        await signInWithEmail(email, password);
-        setStatus({ kind: 'ok', message: 'Signed in.' });
-      }
-      navigate('/profile');
-    } catch (e) {
-      setStatus({ kind: 'error', message: e?.message || 'Email sign-in failed.' });
-    }
-  };
-
-  const doEmailSignUp = async () => {
-    setStatus({ kind: 'loading', message: 'Creating account…' });
-    try {
-      if (!email || !password) throw new Error('Email and password are required.');
-      if (String(password).length < 10) throw new Error('Password must be at least 10 characters.');
-      await signUpWithEmail(email, password);
-      setStatus({ kind: 'ok', message: 'Account created and signed in.' });
-      navigate('/profile');
-    } catch (e) {
-      setStatus({ kind: 'error', message: e?.message || 'Email sign-up failed.' });
-    }
-  };
-
-  const doResetPassword = async () => {
-    setStatus({ kind: 'loading', message: 'Sending reset email…' });
-    try {
-      if (!email) throw new Error('Enter your email first.');
-      await resetPassword(email);
-      setStatus({ kind: 'ok', message: 'Password reset email sent (if the account exists).' });
-    } catch (e) {
-      setStatus({ kind: 'error', message: e?.message || 'Password reset failed.' });
-    }
-  };
-
-  const header = intent === 'upgrade' ? 'Sign in to upgrade' : 'Sign in';
-
   // If already authenticated and not anonymous, redirect to profile
   if (authState.status === 'authenticated' && !isAnon) {
     navigate('/profile');
     return <div>Redirecting...</div>;
   }
 
+  const doEmailSignUp = async () => {
+    setStatus({ kind: 'loading', message: 'Creating account…' });
+    try {
+      if (!email || !password || !confirmPassword) throw new Error('Email and passwords are required.');
+      if (password !== confirmPassword) throw new Error('Passwords do not match.');
+      if (String(password).length < 10) throw new Error('Password must be at least 10 characters.');
+      if (auth.currentUser && isAnon) {
+        // Link to anonymous account
+        const credential = EmailAuthProvider.credential(email, password);
+        await linkWithCredential(auth.currentUser, credential);
+        setStatus({ kind: 'ok', message: 'Account created and linked.' });
+      } else {
+        await signUpWithEmail(email, password);
+        setStatus({ kind: 'ok', message: 'Account created.' });
+      }
+      navigate('/profile');
+    } catch (e) {
+      setStatus({ kind: 'error', message: e?.message || 'Account creation failed.' });
+    }
+  };
+
   return (
     <div style={{ padding: '2.5rem 1.5rem', maxWidth: 900, margin: '0 auto' }}>
-      <h1 style={{ marginTop: 0 }}>{header}</h1>
+      <h1 style={{ marginTop: 0 }}>Sign up</h1>
       <p style={{ marginTop: 10, color: '#475569', lineHeight: 1.6 }}>
-        We support Google, Email, Apple, and Microsoft. Linking is universal — you can attach multiple providers to one account.
+        Create your DecoDocs account to get started.
       </p>
-
-      {status.kind !== 'idle' && (
-        <div
-          className="error"
-          style={{
-            marginTop: 14,
-            padding: 12,
-            borderRadius: 12,
-            border: '1px solid ' + (status.kind === 'error' ? '#fecaca' : '#bbf7d0'),
-            background: status.kind === 'error' ? '#fef2f2' : '#f0fdf4',
-            color: status.kind === 'error' ? '#991b1b' : '#166534',
-          }}
-        >
-          {status.message}
-        </div>
-      )}
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 14, marginTop: 16 }}>
         <Card>
@@ -189,7 +144,7 @@ export default function SignInPage() {
         </Card>
 
         <Card>
-          <div style={{ fontWeight: 900 }}>Sign in with email</div>
+          <div style={{ fontWeight: 900 }}>Create account</div>
           <div style={{ marginTop: 10, display: 'grid', gap: 10 }}>
             <input
               value={email}
@@ -204,37 +159,44 @@ export default function SignInPage() {
               type="password"
               style={{ padding: 10, borderRadius: 12, border: '1px solid #e2e8f0' }}
             />
+            <input
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Confirm password"
+              type="password"
+              style={{ padding: 10, borderRadius: 12, border: '1px solid #e2e8f0' }}
+            />
 
-            <div style={{ display: 'grid', gap: 10 }}>
-              <button
-                type="button"
-                onClick={doEmailSignIn}
-                style={{ padding: '10px 12px', borderRadius: 12, border: '1px solid #0f172a', background: '#0f172a', color: '#fff', fontWeight: 900, cursor: 'pointer' }}
-              >
-                Sign In
-              </button>
+            <button
+              type="button"
+              onClick={doEmailSignUp}
+              style={{ padding: '10px 12px', borderRadius: 12, border: '1px solid #0f172a', background: '#0f172a', color: '#fff', fontWeight: 900, cursor: 'pointer' }}
+            >
+              Create account
+            </button>
+          </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
-                <button
-                  type="button"
-                  onClick={doEmailSignUp}
-                  style={{ background: 'none', border: 'none', color: '#0f172a', textDecoration: 'underline', cursor: 'pointer', fontWeight: 600 }}
-                >
-                  Create account
-                </button>
-                <button
-                  type="button"
-                  onClick={doResetPassword}
-                  style={{ background: 'none', border: 'none', color: '#0f172a', textDecoration: 'underline', cursor: 'pointer', fontWeight: 600 }}
-                >
-                  Reset password
-                </button>
-              </div>
-            </div>
+          <div style={{ color: '#64748b', fontSize: 13, lineHeight: 1.5, marginTop: 10 }}>
+            Recommended password minimum: 10 chars. If an email already exists and linking fails, sign out then sign in using that email.
           </div>
         </Card>
       </div>
 
+      {status.kind !== 'idle' && (
+        <div
+          className="error"
+          style={{
+            marginTop: 14,
+            padding: 12,
+            borderRadius: 12,
+            border: '1px solid ' + (status.kind === 'error' ? '#fecaca' : '#bbf7d0'),
+            background: status.kind === 'error' ? '#fef2f2' : '#f0fdf4',
+            color: status.kind === 'error' ? '#991b1b' : '#166534',
+          }}
+        >
+          {status.message}
+        </div>
+      )}
       <div style={{ marginTop: 18, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
         <Link to="/pricing" style={{ color: '#0f172a', fontWeight: 800 }}>Back to pricing</Link>
         <Link to="/" style={{ color: '#475569', fontWeight: 700 }}>Home</Link>

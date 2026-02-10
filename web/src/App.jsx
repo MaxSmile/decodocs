@@ -9,7 +9,9 @@ import TermsPage from './components/TermsPage.jsx';
 import ContactPage from './components/ContactPage.jsx';
 import PricingPage from './components/PricingPage.jsx';
 import SignInPage from './components/SignInPage.jsx';
+import SignUpPage from './components/SignUpPage.jsx';
 import ProfilePage from './components/ProfilePage.jsx';
+import UseCasePage from './components/landing/UseCasePage.jsx';
 import Layout from './components/Layout.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 import AuthErrorNotification from './components/AuthErrorNotification.jsx';
@@ -20,8 +22,7 @@ import './App.css';
 const PrivateRoute = ({ children }) => {
   const { authState } = useAuth();
   if (authState.status === 'loading') return <div>Loading...</div>;
-  // For now, we might allow unauthenticated access or redirect. 
-  // Given previous code, let's keep it simple.
+  if (authState.status !== 'authenticated') return <Navigate to="/sign-in" replace />;
   return children;
 };
 
@@ -45,7 +46,7 @@ const SignPage = () => {
 };
 
 // Placeholder for SignUp if not imported
-const SignUp = () => <div>Sign Up Page</div>;
+// const SignUp = () => <div>Sign Up Page</div>;
 
 const App = () => {
   return (
@@ -55,11 +56,7 @@ const App = () => {
         <Router>
           <Routes>
             {/* Landing Page */}
-            <Route path="/" element={
-              <Layout>
-                <HomePage />
-              </Layout>
-            } />
+            <Route path="/" element={<HomePage />} />
 
             {/* Pricing Page */}
             <Route path="/pricing" element={
@@ -96,38 +93,34 @@ const App = () => {
               </Layout>
             } />
 
+            {/* Use Case Pages */}
+            <Route path="/use-cases/:slug" element={<UseCasePage />} />
+
             {/* Auth Pages */}
             <Route path="/sign-in" element={
-              <Layout showHeader={false} showFooter={false}>
+              <Layout>
                 <SignInPage />
               </Layout>
             } />
 
             <Route path="/sign-up" element={
-              <Layout showHeader={false} showFooter={false}>
-                <SignUp />
+              <Layout>
+                <SignUpPage />
               </Layout>
             } />
 
             {/* App / Document Viewer */}
             <Route path="/view" element={
-              <PrivateRoute>
-                {/* DocumentViewer handles its own Layout with variant="app" */}
-                <DocumentViewer />
-              </PrivateRoute>
+              <DocumentViewer />
             } />
 
             <Route path="/view/:documentId" element={
-              <PrivateRoute>
-                <DocumentViewer />
-              </PrivateRoute>
+              <DocumentViewer />
             } />
 
             {/* Specific route for test documents */}
             <Route path="/view/test-docs/:fileName" element={
-              <PrivateRoute>
-                <DocumentViewer />
-              </PrivateRoute>
+              <DocumentViewer />
             } />
 
             {/* Profile */}

@@ -1,18 +1,10 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import './AboutPage.css';
 
 const AboutPage = () => {
   return (
-    <div className="about-page">
-      <header className="App-header">
-        <Link to="/" style={{ textDecoration: 'none', color: 'white' }}>
-          <h1>DecoDocs</h1>
-          <p><strong>Understand documents before you sign.</strong></p>
-        </Link>
-      </header>
-
-      <main className="about-main">
+    <section className="about-page">
+      <div className="about-main">
         <div className="about-container">
           {/* Header Section */}
           <section className="about-header">
@@ -76,7 +68,7 @@ const AboutPage = () => {
           <section className="team-company">
             <h2>Company</h2>
             <p>
-              SnapSign is built by a small, focused team with backgrounds in software engineering, automation, 
+              SnapSign is built by a small, focused team with backgrounds in software engineering, automation,
               and privacy-first systems. We prioritize correctness, transparency, and long-term maintainability.
             </p>
             <div className="legal-block">
@@ -90,7 +82,7 @@ const AboutPage = () => {
           <section className="collaboration-contact">
             <h2>Collaboration</h2>
             <p>
-              We welcome serious collaboration and partnership enquiries. For certain discussions, 
+              We welcome serious collaboration and partnership enquiries. For certain discussions,
               a Non-Disclosure Agreement (NDA) may be required before sharing internal details.
             </p>
             <div className="contact-info">
@@ -98,22 +90,8 @@ const AboutPage = () => {
             </div>
           </section>
         </div>
-      </main>
-
-      {/* Footer */}
-      <footer className="about-footer">
-        <div className="footer-content">
-          <p>© Snap Sign Pty Ltd</p>
-          <p>ABN 72 679 570 757</p>
-          <div className="footer-links">
-            <Link to="/about">About</Link>
-            <Link to="/privacy">Privacy Policy</Link>
-            <Link to="/terms">Terms of Service</Link>
-            <Link to="/contact">Contact</Link>
-          </div>
-        </div>
-      </footer>
-    </div>
+      </div>
+    </section>
   );
 };
 

@@ -15,6 +15,7 @@ Welcome to the DecoDocs application documentation. This guide covers the archite
 - [Subscription / Entitlements](#subscription--entitlements)
 - [Auth Linking](#auth-linking)
 - [Email-to-Sign Flow](#email-to-sign-flow)
+- [AI Signature Studio Flow](#ai-signature-studio-flow)
 
 ## Overview
 
@@ -71,6 +72,15 @@ For detailed technical specifications about the email-to-sign functionality, see
 - **Free Flow**: Stateless processing with no document storage
 - **Pro Flow**: OCR capabilities and persistent storage options
 - **Envelope Format**: .snapsign container with integrity verification
+
+## AI Signature Studio Flow
+
+For detailed technical specifications about AI-assisted calligraphic/artistic signature generation, see [AI_SIGNATURE_STUDIO_FLOW.md](AI_SIGNATURE_STUDIO_FLOW.md).
+
+### Signature Studio Principles
+- **User-controlled approval**: AI proposes variants, user explicitly selects final output
+- **Safety first**: block obvious impersonation and forgery-style prompts
+- **Tiered persistence**: ephemeral by default, profile storage in paid tiers
 
 ## Cloud Integrations
 

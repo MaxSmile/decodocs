@@ -21,61 +21,62 @@ const PDFControls = ({
   fileInputRef,
 }) => {
   return (
-    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4 bg-slate-900/90 backdrop-blur-md px-4 py-2 rounded-full shadow-2xl border border-white/10 z-30 transition-all hover:bg-slate-900 text-white">
+    <div
+      id="viewer-page-controls"
+      className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-slate-800/85 backdrop-blur-md px-3 py-1.5 rounded-full shadow-lg border border-white/10 z-30 text-white text-xs"
+    >
       {/* File Actions */}
-      <div className="flex items-center gap-2 pr-3 border-r border-white/20">
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          className="p-1.5 !bg-transparent text-slate-300 hover:text-white hover:!bg-white/10 rounded-full transition-colors tooltip-trigger"
-          title="Open PDF"
-        >
-          <HiUpload className="w-5 h-5" />
-        </button>
-      </div>
+      <button
+        onClick={() => fileInputRef.current?.click()}
+        className="p-1 bg-transparent text-slate-300 hover:text-white hover:bg-white/10 rounded-full transition-colors"
+        title="Open PDF"
+      >
+        <HiUpload className="w-3.5 h-3.5" />
+      </button>
+
+      <div className="w-px h-3.5 bg-white/20" />
 
       {/* Page Navigation */}
-      <div className="flex items-center gap-3">
-        <button
-          onClick={onPreviousPage}
-          disabled={pageNumber <= 1}
-          className="p-1 !bg-transparent rounded-full hover:!bg-white/10 disabled:opacity-30 disabled:hover:!bg-transparent transition-colors text-white"
-        >
-          <HiChevronLeft className="w-5 h-5" />
-        </button>
+      <button
+        onClick={onPreviousPage}
+        disabled={pageNumber <= 1}
+        className="p-0.5 bg-transparent rounded-full hover:bg-white/10 disabled:opacity-30 transition-colors text-white"
+      >
+        <HiChevronLeft className="w-3.5 h-3.5" />
+      </button>
 
-        <span className="text-sm font-medium text-white min-w-[4ch] text-center select-none font-mono tracking-wide">
-          {pageNumber} <span className="text-slate-400 font-normal">/ {numPages || '-'}</span>
-        </span>
+      <span className="font-medium text-white min-w-[3ch] text-center select-none tabular-nums">
+        {pageNumber} <span className="text-slate-400">/ {numPages || '-'}</span>
+      </span>
 
-        <button
-          onClick={onNextPage}
-          disabled={pageNumber >= numPages}
-          className="p-1 !bg-transparent rounded-full hover:!bg-white/10 disabled:opacity-30 disabled:hover:!bg-transparent transition-colors text-white"
-        >
-          <HiChevronRight className="w-5 h-5" />
-        </button>
-      </div>
+      <button
+        onClick={onNextPage}
+        disabled={pageNumber >= numPages}
+        className="p-0.5 bg-transparent rounded-full hover:bg-white/10 disabled:opacity-30 transition-colors text-white"
+      >
+        <HiChevronRight className="w-3.5 h-3.5" />
+      </button>
+
+      <div className="w-px h-3.5 bg-white/20" />
 
       {/* Zoom Controls */}
-      <div className="flex items-center gap-2 pl-3 border-l border-white/20">
-        <button
-          onClick={onZoomOut}
-          className="p-1.5 !bg-transparent text-slate-300 hover:text-white hover:!bg-white/10 rounded-full transition-colors"
-          title="Zoom Out"
-        >
-          <HiZoomOut className="w-4 h-4" />
-        </button>
-        <span className="text-xs font-medium text-slate-400 w-10 text-center select-none">
-          {Math.round(pageScale * 100)}%
-        </span>
-        <button
-          onClick={onZoomIn}
-          className="p-1.5 !bg-transparent text-slate-300 hover:text-white hover:!bg-white/10 rounded-full transition-colors"
-          title="Zoom In"
-        >
-          <HiZoomIn className="w-4 h-4" />
-        </button>
-      </div>
+      <button
+        onClick={onZoomOut}
+        className="p-0.5 bg-transparent text-slate-300 hover:text-white hover:bg-white/10 rounded-full transition-colors"
+        title="Zoom Out"
+      >
+        <HiZoomOut className="w-3.5 h-3.5" />
+      </button>
+      <span className="font-medium text-slate-400 w-8 text-center select-none tabular-nums">
+        {Math.round(pageScale * 100)}%
+      </span>
+      <button
+        onClick={onZoomIn}
+        className="p-0.5 bg-transparent text-slate-300 hover:text-white hover:bg-white/10 rounded-full transition-colors"
+        title="Zoom In"
+      >
+        <HiZoomIn className="w-3.5 h-3.5" />
+      </button>
 
       <input
         type="file"

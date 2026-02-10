@@ -377,8 +377,8 @@ const ToolButton = ({ active, icon: Icon, label, onClick, tooltip }) => (
     onClick={onClick}
     title={tooltip || label}
     className={`flex items-center justify-center p-2.5 rounded-lg transition-all relative ${active
-      ? '!bg-slate-200/80 !text-slate-800'
-      : '!bg-transparent !text-slate-500 hover:!bg-slate-200/50 hover:!text-slate-800'
+      ? 'bg-slate-200/80 text-slate-800'
+      : 'bg-transparent text-slate-500 hover:bg-slate-200/50 hover:text-slate-800'
       }`}
   >
     <Icon className="w-5 h-5" />
