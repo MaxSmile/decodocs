@@ -1,0 +1,8 @@
+# SSH private keys – NEVER commit these
+the_keys/id_rsa
+
+# Runtime credentials
+group_vars/vault.yml
+
+# Ansible retry files
+*.retry

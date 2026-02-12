@@ -1,6 +1,19 @@
+# ── Domain & TLS ─────────────────────────────────────
 fileserver_domain: storage.decodocs.com
 fileserver_tls_port: 8443
-fileserver_upstream: "http://127.0.0.1:8080"
 
 enable_certbot: true
 certbot_email: ops@decodocs.com
+
+# ── MinIO Object Storage ────────────────────────────
+minio_api_port: 9000
+minio_console_port: 9001
+minio_data_dir: /opt/minio/data
+minio_default_bucket: decodocs
+
+# ── MinIO Credentials ───────────────────────────────
+# Override these via group_vars/vault.yml (plain YAML)
+# or pass --extra-vars on the command line.
+#
+# minio_root_user:     → set in vault.yml
+# minio_root_password: → set in vault.yml

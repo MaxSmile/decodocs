@@ -1,13 +1,23 @@
 ---
-- name: Configure DecoDocs fileserver host
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║  DecoDocs Fileserver — full from-scratch provisioning playbook    ║
+# ║                                                                    ║
+# ║  Installs: MinIO (S3-compatible storage) + Nginx reverse proxy    ║
+# ║            + Let's Encrypt TLS + UFW firewall rule                ║
+# ║                                                                    ║
+# ║  Usage:                                                            ║
+# ║    ansible-playbook setup-fileserver.yml                           ║
+# ╚════════════════════════════════════════════════════════════════════╝
+
+- name: Provision DecoDocs fileserver from scratch
   hosts: fileserver
   become: true
 
   vars:
     letsencrypt_cert_path: "/etc/letsencrypt/live/{{ fileserver_domain }}/fullchain.pem"
-    letsencrypt_key_path: "/etc/letsencrypt/live/{{ fileserver_domain }}/privkey.pem"
+    letsencrypt_key_path:  "/etc/letsencrypt/live/{{ fileserver_domain }}/privkey.pem"
     snakeoil_cert_path: /etc/ssl/certs/ssl-cert-snakeoil.pem
-    snakeoil_key_path: /etc/ssl/private/ssl-cert-snakeoil.key
+    snakeoil_key_path:  /etc/ssl/private/ssl-cert-snakeoil.key
 
   handlers:
     - name: reload nginx
@@ -15,16 +25,138 @@
         name: nginx
         state: reloaded
 
+    - name: restart minio
+      ansible.builtin.service:
+        name: minio
+        state: restarted
+
   tasks:
-    - name: Install nginx and certbot packages
+    # ── 1. System packages ───────────────────────────────────────────
+    - name: Install required system packages
       ansible.builtin.apt:
         name:
           - nginx
           - certbot
           - python3-certbot-nginx
+          - ufw
+          - curl
+          - ssl-cert                # provides snakeoil cert for TLS bootstrap
         state: present
         update_cache: true
 
+    # ── 2. Firewall — ensure port 8443 is open ──────────────────────
+    - name: Allow fileserver TLS port ({{ fileserver_tls_port }}) through UFW
+      ansible.builtin.command: ufw allow {{ fileserver_tls_port }}/tcp
+      register: ufw_result
+      changed_when: "'added' in ufw_result.stdout.lower() or 'Added' in ufw_result.stdout"
+
+    # ── 3. MinIO Object Storage ──────────────────────────────────────
+    - name: Validate MinIO credentials are defined
+      ansible.builtin.assert:
+        that:
+          - minio_root_user is defined and minio_root_user | length > 0
+          - minio_root_password is defined and minio_root_password | length > 0
+        fail_msg: >
+          MinIO credentials not set. Set group_vars/vault.yml (plain YAML),
+          or pass minio_root_user/minio_root_password via --extra-vars.
+
+    - name: Create minio system group
+      ansible.builtin.group:
+        name: minio
+        system: true
+
+    - name: Create minio system user
+      ansible.builtin.user:
+        name: minio
+        group: minio
+        system: true
+        shell: /usr/sbin/nologin
+        home: /opt/minio
+        create_home: false
+
+    - name: Create MinIO data directory
+      ansible.builtin.file:
+        path: "{{ minio_data_dir }}"
+        state: directory
+        owner: minio
+        group: minio
+        mode: "0750"
+
+    - name: Download MinIO server binary
+      ansible.builtin.get_url:
+        url: "https://dl.min.io/server/minio/release/linux-amd64/minio"
+        dest: /usr/local/bin/minio
+        mode: "0755"
+        owner: root
+        group: root
+      notify: restart minio
+
+    - name: Download MinIO client (mc)
+      ansible.builtin.get_url:
+        url: "https://dl.min.io/client/mc/release/linux-amd64/mc"
+        dest: /usr/local/bin/mc
+        mode: "0755"
+        owner: root
+        group: root
+
+    - name: Deploy MinIO environment file
+      ansible.builtin.template:
+        src: templates/minio.env.j2
+        dest: /etc/default/minio
+        owner: root
+        group: minio
+        mode: "0640"
+      notify: restart minio
+
+    - name: Deploy MinIO systemd unit
+      ansible.builtin.template:
+        src: templates/minio.service.j2
+        dest: /etc/systemd/system/minio.service
+        owner: root
+        group: root
+        mode: "0644"
+      register: minio_unit
+
+    - name: Reload systemd daemon
+      ansible.builtin.systemd:
+        daemon_reload: true
+      when: minio_unit.changed
+
+    - name: Enable and start MinIO
+      ansible.builtin.service:
+        name: minio
+        enabled: true
+        state: started
+
+    - name: Wait for MinIO API to be ready
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ minio_api_port }}/minio/health/live"
+        status_code: 200
+      register: minio_health
+      retries: 12
+      delay: 5
+      until: minio_health.status == 200
+
+    # ── 4. Create default bucket ─────────────────────────────────────
+    - name: Configure mc alias for local MinIO
+      ansible.builtin.command: >
+        mc alias set local
+        http://127.0.0.1:{{ minio_api_port }}
+        {{ minio_root_user }}
+        {{ minio_root_password }}
+      changed_when: false
+      no_log: true
+
+    - name: Create default storage bucket
+      ansible.builtin.command: mc mb --ignore-existing local/{{ minio_default_bucket }}
+      register: mc_mb_result
+      changed_when: "'created' in mc_mb_result.stdout.lower()"
+
+    - name: Ensure default bucket is private (no anonymous access)
+      ansible.builtin.command: mc anonymous set none local/{{ minio_default_bucket }}
+      changed_when: false
+
+    # ── 5. Nginx reverse proxy ───────────────────────────────────────
     - name: Ensure ACME challenge directory exists
       ansible.builtin.file:
         path: /var/www/certbot
@@ -33,7 +165,7 @@
         group: www-data
         mode: "0755"
 
-    - name: Render nginx site config with bootstrap cert
+    - name: Render Nginx site config (bootstrap with snakeoil cert)
       ansible.builtin.template:
         src: templates/storage.decodocs.com.conf.j2
         dest: "/etc/nginx/sites-available/{{ fileserver_domain }}.conf"
@@ -42,35 +174,38 @@
         mode: "0644"
       vars:
         ssl_cert_path: "{{ snakeoil_cert_path }}"
-        ssl_key_path: "{{ snakeoil_key_path }}"
+        ssl_key_path:  "{{ snakeoil_key_path }}"
 
-    - name: Enable fileserver site
+    - name: Inspect existing fileserver Nginx site symlink path
+      ansible.builtin.stat:
+        path: "/etc/nginx/sites-enabled/{{ fileserver_domain }}.conf"
+      register: fileserver_nginx_site_enabled
+
+    - name: Refuse to overwrite non-symlink Nginx site file
+      ansible.builtin.fail:
+        msg: >
+          /etc/nginx/sites-enabled/{{ fileserver_domain }}.conf already exists
+          and is not a symlink. Refusing to replace unmanaged nginx config.
+      when:
+        - fileserver_nginx_site_enabled.stat.exists
+        - not fileserver_nginx_site_enabled.stat.islnk
+
+    - name: Enable fileserver Nginx site
       ansible.builtin.file:
         src: "/etc/nginx/sites-available/{{ fileserver_domain }}.conf"
         dest: "/etc/nginx/sites-enabled/{{ fileserver_domain }}.conf"
         state: link
-        force: true
 
-    - name: Disable default nginx site
-      ansible.builtin.file:
-        path: /etc/nginx/sites-enabled/default
-        state: absent
-
-    - name: Validate nginx configuration
+    - name: Validate Nginx configuration
       ansible.builtin.command: nginx -t
       changed_when: false
 
-    - name: Ensure nginx is enabled and running
+    - name: Ensure Nginx is running (shared instance-safe)
       ansible.builtin.service:
         name: nginx
-        enabled: true
         state: started
 
-    - name: Reload nginx with bootstrap cert
-      ansible.builtin.service:
-        name: nginx
-        state: reloaded
-
+    # ── 6. TLS via Let's Encrypt ─────────────────────────────────────
     - name: Request Let's Encrypt certificate
       ansible.builtin.command: >
         certbot certonly
@@ -89,7 +224,7 @@
         path: "{{ letsencrypt_cert_path }}"
       register: letsencrypt_cert_stat
 
-    - name: Render nginx site config with Let's Encrypt cert
+    - name: Re-render Nginx config with Let's Encrypt cert
       ansible.builtin.template:
         src: templates/storage.decodocs.com.conf.j2
         dest: "/etc/nginx/sites-available/{{ fileserver_domain }}.conf"
@@ -98,11 +233,11 @@
         mode: "0644"
       vars:
         ssl_cert_path: "{{ letsencrypt_cert_path }}"
-        ssl_key_path: "{{ letsencrypt_key_path }}"
+        ssl_key_path:  "{{ letsencrypt_key_path }}"
       when: letsencrypt_cert_stat.stat.exists
       notify: reload nginx
 
-    - name: Configure certbot renewal hook
+    - name: Configure certbot auto-renewal cron
       ansible.builtin.cron:
         name: renew certbot and reload nginx
         user: root
@@ -110,3 +245,23 @@
         hour: "3"
         job: "certbot renew --quiet --deploy-hook 'systemctl reload nginx'"
       when: enable_certbot | bool
+
+    # ── 7. Smoke test ────────────────────────────────────────────────
+    - name: Verify MinIO is reachable through Nginx
+      ansible.builtin.uri:
+        url: "https://127.0.0.1:{{ fileserver_tls_port }}/minio/health/live"
+        validate_certs: false
+        status_code: 200
+      register: smoke_test
+      retries: 3
+      delay: 2
+      until: smoke_test.status == 200
+      ignore_errors: true
+
+    - name: Report deployment status
+      ansible.builtin.debug:
+        msg: >
+          ✅ DecoDocs fileserver is live!
+          MinIO API:     https://{{ fileserver_domain }}:{{ fileserver_tls_port }}
+          MinIO Console: http://127.0.0.1:{{ minio_console_port }} (SSH tunnel only)
+          Default bucket: {{ minio_default_bucket }} (private)
