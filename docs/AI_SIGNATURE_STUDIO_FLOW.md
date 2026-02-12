@@ -3,6 +3,7 @@
 ## 0) Goals
 - Enable users to create a calligraphic or artistic signature style with AI assistance.
 - Preserve user control: AI proposes variants; user chooses, edits, and approves final output.
+- Keep MVP scope strict: **self-sign only** (no multi-party recipients, no signee roles, no signing order).
 - Prevent impersonation and obvious forgery workflows.
 - Keep privacy-first defaults for Free, with optional persistence in Paid tiers.
 - Keep terminology clear:
@@ -42,6 +43,11 @@
 - User must confirm legal name intent for signature generation.
 - Underage and regulated use cases may require extra policy gates (future).
 
+### 1.5 MVP Scope Boundaries
+- Signing scope: self-sign only.
+- No recipient workflow in Signature Studio.
+- No routing, no role assignment, no sequence/order engine.
+
 ## 2) Safety and Preflight Analyzer (runs before model generation)
 Input:
 - typed name
@@ -74,6 +80,8 @@ B) Signature setup step during sign flow (if no saved signature exists)
 - No server-side storage of final signature assets
 - No persistent profile history
 - No custom style reference upload (typed name + basic presets only)
+- **Type mode**: output includes a Firestore-ready draft payload (not auto-saved in MVP).
+- **Draw/Upload modes**: output is ephemeral `dataUrl` only; no server persistence.
 - Variant limits:
   - up to 6 variants per session
   - up to 3 regeneration attempts per day (per anonymous/free identity)
@@ -93,8 +101,11 @@ B) Signature setup step during sign flow (if no saved signature exists)
    - stroke thickness
    - slant
    - baseline smoothing
-8) Apply chosen signature to current document (ephemeral use)
-9) Purge session artifacts after TTL expiry
+8) Output contract by mode:
+   - `type`: include `{ displayName, fontId, fontFamily, createdAt }` draft object, Firestore-ready
+   - `draw/upload`: include ephemeral `dataUrl` payload only
+9) Apply chosen signature to current document (ephemeral use)
+10) Purge session artifacts after TTL expiry
 
 ### 3.4 Free error handling
 - Low-quality input: prompt user to retry with clearer writing/sample
@@ -180,6 +191,12 @@ Suggested text:
 ### 6.2 Review-state message
 - "Your request can proceed, but this style may require confirmation before saving."
 
+### 6.3 Modal Consent Placement
+- Signature modal must include a consent disclaimer at the **bottom of the modal**.
+- Required text pattern:
+  - self-sign intent confirmation
+  - authorization confirmation
+
 ## 7) Security and Privacy Requirements
 - TLS in transit for all uploads and generation requests
 - Temporary files encrypted at rest with strict TTL purge
@@ -193,6 +210,9 @@ FREE:
 - User can generate artistic signature variants from typed name + preset style.
 - User can apply chosen variant to current signing flow without persistence.
 - Policy blocks clear impersonation/forgery prompts.
+- System remains self-sign only (no recipient/role/order flow).
+- Typed output includes Firestore-ready draft fields but does not require server write in MVP.
+- Draw/Upload output remains ephemeral `dataUrl` with no server storage.
 
 PRO:
 - User can upload handwriting sample and generate personalized variants.
@@ -200,6 +220,9 @@ PRO:
 - System enforces tier limits and maintains profile-scoped access control.
 
 ## 9) Non-Goals (MVP)
+- Multi-party send-for-sign flow
+- Signee roles (signer/approver/observer)
+- Signing order and routing logic
 - Fully automatic legal identity verification across jurisdictions
 - Guarantee that generated style is legally valid in every country
 - Replication of a specific third-party real signature

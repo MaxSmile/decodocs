@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { HiX, HiPencil, HiDocumentText, HiPhotograph, HiTrash, HiSave } from 'react-icons/hi';
+import { HiX, HiPencil, HiDocumentText, HiPhotograph, HiTrash } from 'react-icons/hi';
 
 /* ── Signature font families (bundled via Google Fonts at runtime) ── */
 const SIGNATURE_FONTS = [
@@ -21,6 +21,17 @@ function ensureFontsLoaded() {
   link.rel = 'stylesheet';
   link.href = `https://fonts.googleapis.com/css2?family=${families}&display=swap`;
   document.head.appendChild(link);
+}
+
+function buildTypeSignatureDraft({ displayName, font }) {
+  return {
+    version: 1,
+    kind: 'type',
+    displayName,
+    fontId: font.id,
+    fontFamily: font.family,
+    createdAt: new Date().toISOString(),
+  };
 }
 
 /* ────────────────────────────────────────────────────────────────────
@@ -72,7 +83,17 @@ const DrawTab = ({ onResult }) => {
   const handleAdopt = () => {
     if (!hasContent) return;
     const dataUrl = canvasRef.current.toDataURL('image/png');
-    onResult({ mode: 'draw', dataUrl, width: 200, height: 60 });
+    onResult({
+      mode: 'draw',
+      dataUrl,
+      width: 200,
+      height: 60,
+      persistence: {
+        kind: 'ephemeral-data-url',
+        canPersist: false,
+        reason: 'free-tier-no-server-storage',
+      },
+    });
   };
 
   useEffect(() => {
@@ -141,7 +162,21 @@ const TypeTab = ({ onResult }) => {
 
   const handleAdopt = () => {
     if (!name.trim()) return;
-    onResult({ mode: 'type', text: name.trim(), fontFamily: selectedFont.family, fontId: selectedFont.id, width: 200, height: 50 });
+    const displayName = name.trim();
+    onResult({
+      mode: 'type',
+      text: displayName,
+      fontFamily: selectedFont.family,
+      fontId: selectedFont.id,
+      width: 200,
+      height: 50,
+      persistence: {
+        kind: 'candidate-profile',
+        canPersist: true,
+        target: 'firestore-signature-profiles',
+      },
+      profileDraft: buildTypeSignatureDraft({ displayName, font: selectedFont }),
+    });
   };
 
   return (
@@ -216,6 +251,7 @@ const TypeTab = ({ onResult }) => {
    ──────────────────────────────────────────────────────────────────── */
 const UploadTab = ({ onResult }) => {
   const [preview, setPreview] = useState(null);
+  const [uploadMeta, setUploadMeta] = useState(null);
   const inputRef = useRef(null);
 
   const handleFile = (e) => {
@@ -226,17 +262,34 @@ const UploadTab = ({ onResult }) => {
     const reader = new FileReader();
     reader.onload = () => {
       setPreview(reader.result);
+      setUploadMeta({
+        fileName: file.name,
+        mimeType: file.type || null,
+        sizeBytes: file.size || null,
+      });
     };
     reader.readAsDataURL(file);
   };
 
   const handleAdopt = () => {
     if (!preview) return;
-    onResult({ mode: 'upload', dataUrl: preview, width: 200, height: 60 });
+    onResult({
+      mode: 'upload',
+      dataUrl: preview,
+      width: 200,
+      height: 60,
+      uploadMeta,
+      persistence: {
+        kind: 'ephemeral-data-url',
+        canPersist: false,
+        reason: 'free-tier-no-server-storage',
+      },
+    });
   };
 
   const clear = () => {
     setPreview(null);
+    setUploadMeta(null);
     if (inputRef.current) inputRef.current.value = '';
     onResult(null);
   };
@@ -339,6 +392,11 @@ const SignatureModal = ({ open, onClose, onAdopt, savedSignatures = [] }) => {
           </button>
         </div>
 
+        {/* Scope note */}
+        <div className="mx-5 mt-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] leading-relaxed text-amber-800">
+          Self-sign only in this version. No multi-party recipients, signee roles, or signing order are supported.
+        </div>
+
         {/* Tabs */}
         <div className="flex border-b border-slate-100">
           {TABS.map((tab) => {
@@ -370,7 +428,7 @@ const SignatureModal = ({ open, onClose, onAdopt, savedSignatures = [] }) => {
 
         {/* Footer hint */}
         <div className="px-5 pb-4 text-[11px] text-slate-400 leading-snug">
-          By adopting this signature you confirm that you intend to sign this document and that this is your signature or you are authorized to create it.
+          Consent: By adopting this signature, you confirm this is for your own self-sign use and that you are authorized to create and apply it.
         </div>
       </div>
     </div>
