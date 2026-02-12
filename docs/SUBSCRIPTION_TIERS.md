@@ -1,7 +1,7 @@
 # DecoDocs — User Types, Entitlements, and Limits (Technical Spec)
 
 This document is the **source of truth** for:
-- how we classify users (Anonymous / Free / Pro / Small Business / Enterprise)
+- how we classify users (Anonymous / Free / Pro / Business / Enterprise)
 - which features are gated
 - how AI budgets are enforced
 - where entitlements and abuse-prevention metadata live
@@ -48,28 +48,28 @@ This document is the **source of truth** for:
 - OCR / scanned PDF support: **yes**
 - Storage with us: **5 GB per user**
 
-### 1.4 Small Business
-**Definition:** Non-anonymous Firebase Auth user AND Stripe subscription is **active** on the Small Business plan.
+### 1.4 Business
+**Definition:** Non-anonymous Firebase Auth user AND Stripe subscription is **active** on the Business plan.
 
 **Price**
-- **$50 / month** (up to 10 accounts)
+- **$50 / month** (up to 5 worker accounts)
 
 **Capabilities**
 - Includes all Pro capabilities.
 - Org-level ownership for documents and usage.
 - Admin visibility across team documents.
-- Shared billing and seat management (up to 10).
+- Shared billing and seat management (up to 5 worker accounts).
 - LLM tier: **premium** model.
 - Storage with us: **5 GB per user**.
 
 ### 1.5 Enterprise
-**Definition:** Contracted org account (plan flag set by admin/config), non-anonymous users under the org.
+**Definition:** Contracted org account (plan flag set by admin/config), non-anonymous users under the org, typically for teams needing **more than 5 worker accounts**.
 
 **Price**
 - **Custom** (seat- or usage-based, to be defined)
 
 **Capabilities**
-- All Small Business capabilities.
+- All Business capabilities.
 - Enterprise controls: SSO (SAML), SCIM, RBAC, audit logs, retention policies, legal hold, export controls.
 - Security/compliance posture: DPA, data residency options, subprocessor list, and compliance roadmap.
 - LLM tier: **premium** model, with model/provider transparency and AI output traceability.
@@ -80,18 +80,18 @@ This document is the **source of truth** for:
 ### 2.1 AI analysis
 - Anonymous: allowed within **20k tokens per uid-session**
 - Free: allowed within **40k tokens/day**
-- Pro / Small Business / Enterprise: unlimited (subject to fair-use)
+- Pro / Business / Enterprise: unlimited (subject to fair-use)
 
 ### 2.2 OCR / scanned PDFs
 - We detect scanned PDFs.
 - **Free and Anonymous do not get OCR** (no vision model).
-- Pro / Small Business / Enterprise get OCR.
+- Pro / Business / Enterprise get OCR.
 
 ### 2.3 Storage
 - Anonymous: none
 - Free: none (browser-only)
 - Pro: **5 GB** stored with us
-- Small Business: **5 GB per user** (org-managed)
+- Business: **5 GB per user** (org-managed)
 - Enterprise: **custom** (per contract)
 
 ## 3) Entitlements Source of Truth
@@ -103,7 +103,7 @@ This document is the **source of truth** for:
   - `isAnonymous`
 
 ### 3.2 Subscription status
-- Stripe is the source of truth for **Pro** and **Small Business** subscription state.
+- Stripe is the source of truth for **Pro** and **Business** subscription state.
 - Enterprise is set via admin config (contracted).
 - Server-side code determines:
   - `subscriptionActive: boolean`
@@ -144,7 +144,7 @@ At minimum, we store:
 When a user hits a gate, the UI should distinguish:
 - **Anonymous → Register** (to get the Free tier limits)
 - **Free → Upgrade to Pro** (for OCR, better model, unlimited AI, 5GB storage)
-- **Team features → Upgrade to Small Business** (org visibility, shared billing, seats)
+- **Team features → Upgrade to Business** (org visibility, shared billing, up to 5 worker accounts)
 - **Enterprise controls → Contact sales** (SSO, SCIM, audit, retention)
 
 Also: when actions are *disabled* (not just blocked after a click), the UI must explain *why* and provide a clear next step.

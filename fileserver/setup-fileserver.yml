@@ -1,0 +1,112 @@
+---
+- name: Configure DecoDocs fileserver host
+  hosts: fileserver
+  become: true
+
+  vars:
+    letsencrypt_cert_path: "/etc/letsencrypt/live/{{ fileserver_domain }}/fullchain.pem"
+    letsencrypt_key_path: "/etc/letsencrypt/live/{{ fileserver_domain }}/privkey.pem"
+    snakeoil_cert_path: /etc/ssl/certs/ssl-cert-snakeoil.pem
+    snakeoil_key_path: /etc/ssl/private/ssl-cert-snakeoil.key
+
+  handlers:
+    - name: reload nginx
+      ansible.builtin.service:
+        name: nginx
+        state: reloaded
+
+  tasks:
+    - name: Install nginx and certbot packages
+      ansible.builtin.apt:
+        name:
+          - nginx
+          - certbot
+          - python3-certbot-nginx
+        state: present
+        update_cache: true
+
+    - name: Ensure ACME challenge directory exists
+      ansible.builtin.file:
+        path: /var/www/certbot
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: "0755"
+
+    - name: Render nginx site config with bootstrap cert
+      ansible.builtin.template:
+        src: templates/storage.decodocs.com.conf.j2
+        dest: "/etc/nginx/sites-available/{{ fileserver_domain }}.conf"
+        owner: root
+        group: root
+        mode: "0644"
+      vars:
+        ssl_cert_path: "{{ snakeoil_cert_path }}"
+        ssl_key_path: "{{ snakeoil_key_path }}"
+
+    - name: Enable fileserver site
+      ansible.builtin.file:
+        src: "/etc/nginx/sites-available/{{ fileserver_domain }}.conf"
+        dest: "/etc/nginx/sites-enabled/{{ fileserver_domain }}.conf"
+        state: link
+        force: true
+
+    - name: Disable default nginx site
+      ansible.builtin.file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+
+    - name: Validate nginx configuration
+      ansible.builtin.command: nginx -t
+      changed_when: false
+
+    - name: Ensure nginx is enabled and running
+      ansible.builtin.service:
+        name: nginx
+        enabled: true
+        state: started
+
+    - name: Reload nginx with bootstrap cert
+      ansible.builtin.service:
+        name: nginx
+        state: reloaded
+
+    - name: Request Let's Encrypt certificate
+      ansible.builtin.command: >
+        certbot certonly
+        --webroot
+        --webroot-path /var/www/certbot
+        --domain {{ fileserver_domain }}
+        --email {{ certbot_email }}
+        --agree-tos
+        --non-interactive
+      args:
+        creates: "{{ letsencrypt_cert_path }}"
+      when: enable_certbot | bool
+
+    - name: Check if Let's Encrypt certificate exists
+      ansible.builtin.stat:
+        path: "{{ letsencrypt_cert_path }}"
+      register: letsencrypt_cert_stat
+
+    - name: Render nginx site config with Let's Encrypt cert
+      ansible.builtin.template:
+        src: templates/storage.decodocs.com.conf.j2
+        dest: "/etc/nginx/sites-available/{{ fileserver_domain }}.conf"
+        owner: root
+        group: root
+        mode: "0644"
+      vars:
+        ssl_cert_path: "{{ letsencrypt_cert_path }}"
+        ssl_key_path: "{{ letsencrypt_key_path }}"
+      when: letsencrypt_cert_stat.stat.exists
+      notify: reload nginx
+
+    - name: Configure certbot renewal hook
+      ansible.builtin.cron:
+        name: renew certbot and reload nginx
+        user: root
+        minute: "13"
+        hour: "3"
+        job: "certbot renew --quiet --deploy-hook 'systemctl reload nginx'"
+      when: enable_certbot | bool

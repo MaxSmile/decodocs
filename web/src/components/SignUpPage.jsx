@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   GoogleAuthProvider,
@@ -42,6 +42,20 @@ export default function SignUpPage() {
 
   const user = authState?.user || null;
   const isAnon = !!user?.isAnonymous;
+  const intent = q.get('intent');
+  const upgradePlan = q.get('plan') === 'business' ? 'business' : 'pro';
+  const upgradeBilling = q.get('billing') === 'annual' ? 'annual' : 'monthly';
+  const sandbox = q.get('sandbox') === '1' ? '1' : null;
+  const postAuthPath = useMemo(() => {
+    if (intent !== 'upgrade') return '/profile';
+    const qp = new URLSearchParams({
+      autoCheckout: '1',
+      plan: upgradePlan,
+      billing: upgradeBilling,
+    });
+    if (sandbox) qp.set('sandbox', sandbox);
+    return `/pricing?${qp.toString()}`;
+  }, [intent, sandbox, upgradeBilling, upgradePlan]);
 
   const runProvider = async (provider, directSignIn) => {
     setStatus({ kind: 'loading', message: 'Opening sign-in…' });
@@ -61,7 +75,7 @@ export default function SignUpPage() {
       }
 
       setStatus({ kind: 'ok', message: 'Signed in. Your accounts are linked.' });
-      navigate('/profile');
+      navigate(postAuthPath);
     } catch (e) {
       // Common case: trying to link a provider that already exists on another account.
       const code = e?.code || '';
@@ -78,9 +92,13 @@ export default function SignUpPage() {
     }
   };
 
-  // If already authenticated and not anonymous, redirect to profile
+  useEffect(() => {
+    if (authState.status === 'authenticated' && !isAnon) {
+      navigate(postAuthPath, { replace: true });
+    }
+  }, [authState.status, isAnon, navigate, postAuthPath]);
+
   if (authState.status === 'authenticated' && !isAnon) {
-    navigate('/profile');
     return <div>Redirecting...</div>;
   }
 
@@ -99,7 +117,7 @@ export default function SignUpPage() {
         await signUpWithEmail(email, password);
         setStatus({ kind: 'ok', message: 'Account created.' });
       }
-      navigate('/profile');
+      navigate(postAuthPath);
     } catch (e) {
       setStatus({ kind: 'error', message: e?.message || 'Account creation failed.' });
     }
@@ -111,6 +129,11 @@ export default function SignUpPage() {
       <p style={{ marginTop: 10, color: '#475569', lineHeight: 1.6 }}>
         Create your DecoDocs account to get started.
       </p>
+      {intent === 'upgrade' && (
+        <p style={{ marginTop: 8, color: '#1e3a8a', lineHeight: 1.6 }}>
+          Next step after sign-up: start {upgradePlan === 'business' ? 'Business' : 'Pro'} checkout ({upgradeBilling} billing).
+        </p>
+      )}
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 14, marginTop: 16 }}>
         <Card>

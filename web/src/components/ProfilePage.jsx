@@ -1,14 +1,29 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { useAuth } from '../context/AuthContext.jsx';
 
 export default function ProfilePage() {
   const { authState, auth } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const search = useMemo(() => new URLSearchParams(location.search), [location.search]);
 
   const user = authState?.user;
   const [notice, setNotice] = useState(null);
+
+  useEffect(() => {
+    const stripeState = search.get('stripe');
+    if (stripeState === 'success') {
+      setNotice('Stripe checkout completed. If billing status does not update yet, wait a few seconds for webhook sync and refresh.');
+      return;
+    }
+    if (stripeState === 'cancel') {
+      setNotice('Stripe checkout was canceled.');
+      return;
+    }
+    setNotice(null);
+  }, [search]);
 
   const doSignOut = async () => {
     if (!auth) return;

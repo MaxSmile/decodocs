@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   GoogleAuthProvider,
@@ -6,7 +6,6 @@ import {
   EmailAuthProvider,
   linkWithPopup,
   linkWithCredential,
-  signOut,
 } from 'firebase/auth';
 import { FcGoogle } from 'react-icons/fc';
 import { AiFillApple } from 'react-icons/ai';
@@ -47,6 +46,19 @@ export default function SignInPage() {
   const isAnon = !!user?.isAnonymous;
 
   const intent = q.get('intent');
+  const upgradePlan = q.get('plan') === 'business' ? 'business' : 'pro';
+  const upgradeBilling = q.get('billing') === 'annual' ? 'annual' : 'monthly';
+  const sandbox = q.get('sandbox') === '1' ? '1' : null;
+  const postAuthPath = useMemo(() => {
+    if (intent !== 'upgrade') return '/profile';
+    const qp = new URLSearchParams({
+      autoCheckout: '1',
+      plan: upgradePlan,
+      billing: upgradeBilling,
+    });
+    if (sandbox) qp.set('sandbox', sandbox);
+    return `/pricing?${qp.toString()}`;
+  }, [intent, sandbox, upgradeBilling, upgradePlan]);
 
   const runProvider = async (provider, directSignIn) => {
     setStatus({ kind: 'loading', message: 'Opening sign-in…' });
@@ -66,7 +78,7 @@ export default function SignInPage() {
       }
 
       setStatus({ kind: 'ok', message: 'Signed in. Your accounts are linked.' });
-      navigate('/profile');
+      navigate(postAuthPath);
     } catch (e) {
       // Common case: trying to link a provider that already exists on another account.
       const code = e?.code || '';
@@ -96,7 +108,7 @@ export default function SignInPage() {
         await signInWithEmail(email, password);
         setStatus({ kind: 'ok', message: 'Signed in.' });
       }
-      navigate('/profile');
+      navigate(postAuthPath);
     } catch (e) {
       setStatus({ kind: 'error', message: e?.message || 'Email sign-in failed.' });
     }
@@ -109,7 +121,7 @@ export default function SignInPage() {
       if (String(password).length < 10) throw new Error('Password must be at least 10 characters.');
       await signUpWithEmail(email, password);
       setStatus({ kind: 'ok', message: 'Account created and signed in.' });
-      navigate('/profile');
+      navigate(postAuthPath);
     } catch (e) {
       setStatus({ kind: 'error', message: e?.message || 'Email sign-up failed.' });
     }
@@ -128,9 +140,13 @@ export default function SignInPage() {
 
   const header = intent === 'upgrade' ? 'Sign in to upgrade' : 'Sign in';
 
-  // If already authenticated and not anonymous, redirect to profile
+  useEffect(() => {
+    if (authState.status === 'authenticated' && !isAnon) {
+      navigate(postAuthPath, { replace: true });
+    }
+  }, [authState.status, isAnon, navigate, postAuthPath]);
+
   if (authState.status === 'authenticated' && !isAnon) {
-    navigate('/profile');
     return <div>Redirecting...</div>;
   }
 
@@ -140,6 +156,11 @@ export default function SignInPage() {
       <p style={{ marginTop: 10, color: '#475569', lineHeight: 1.6 }}>
         We support Google, Email, Apple, and Microsoft. Linking is universal — you can attach multiple providers to one account.
       </p>
+      {intent === 'upgrade' && (
+        <p style={{ marginTop: 8, color: '#1e3a8a', lineHeight: 1.6 }}>
+          Next step after sign-in: start {upgradePlan === 'business' ? 'Business' : 'Pro'} checkout ({upgradeBilling} billing).
+        </p>
+      )}
 
       {status.kind !== 'idle' && (
         <div

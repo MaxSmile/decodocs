@@ -24,11 +24,21 @@ Suggested fields:
 
 ```json
 {
-  "live": {
-    "productId": "prod_...",
-    "priceMonthlyId": "price_...",
-    "priceYearlyId": "price_..."
+  "apiKey": "sk_test_...",
+  "publishableKey": "pk_test_...",
+  "productIds": {
+    "pro": "prod_...",
+    "business": "prod_..."
   },
+  "priceIds": {
+    "pro_monthly": "price_...",
+    "pro_annual": "price_...",
+    "business_monthly": "price_...",
+    "business_annual": "price_..."
+  },
+  "successUrl": "https://decodocs.com/profile?stripe=success",
+  "cancelUrl": "https://decodocs.com/pricing?stripe=cancel",
+  "portalReturnUrl": "https://decodocs.com/profile",
   "webhookSecret": "whsec_...",
   "mockWebhookSecret": "dev_only_shared_secret",
   "updatedAt": "<serverTimestamp>"

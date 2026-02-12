@@ -31,6 +31,8 @@ The source of truth for when files are stored vs ephemeral (Free vs Pro) is:
 - **Anonymous** (Firebase Anonymous): very small AI budget, no OCR, no storage
 - **Free** (non-anonymous Firebase auth): larger AI budget, no OCR, no storage
 - **Pro** (non-anonymous + Stripe active): unlimited AI (for now), OCR enabled, 5GB storage (Contabo VPS)
+- **Business** (non-anonymous + Stripe active): Pro capabilities + shared billing/seats (up to 5 worker accounts)
+- **Enterprise** (contracted): custom seats, controls, and compliance options
 
 ## Auth Linking
 
