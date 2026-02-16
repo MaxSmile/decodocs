@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+HEALTH_URL="http://127.0.0.1:{{ minio_api_port }}/minio/health/live"
+WEBHOOK_URL="{{ minio_alert_webhook_url | default('') }}"
+
+if curl --silent --show-error --fail "${HEALTH_URL}" >/dev/null; then
+  exit 0
+fi
+
+MSG="MinIO healthcheck failed on $(hostname) at $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+echo "${MSG}" >&2
+
+if [[ -n "${WEBHOOK_URL}" ]]; then
+  curl --silent --show-error --fail \
+    -H "Content-Type: application/json" \
+    -d "{\"text\":\"${MSG}\"}" \
+    "${WEBHOOK_URL}" >/dev/null || true
+fi
+
+exit 1

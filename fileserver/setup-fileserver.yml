@@ -165,7 +165,7 @@
         {{ minio_root_user }}
         {{ minio_root_password }}
       changed_when: false
-      no_log: false
+      no_log: true
 
     - name: 4.2 Create default storage bucket
       ansible.builtin.command: mc mb --ignore-existing local/{{ minio_default_bucket }}

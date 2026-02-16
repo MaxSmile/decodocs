@@ -27,6 +27,12 @@ import { useValidationSpec } from '../hooks/useValidationSpec';
 import { usePdfJs } from '../hooks/usePdfJs';
 import { useDocumentAnalysis } from '../hooks/useDocumentAnalysis';
 import { useDocumentTypeDetection } from '../hooks/useDocumentTypeDetection';
+import {
+  createUploadUrl,
+  createDownloadUrl,
+  uploadViaPresignedUrl,
+  downloadBlobViaPresignedUrl,
+} from '../services/storageService';
 
 const DocumentViewer = () => {
   const { authState, app } = useAuth();
@@ -95,6 +101,8 @@ const DocumentViewer = () => {
   const [annotations, setAnnotations] = useState([]);
   const [signatureModalOpen, setSignatureModalOpen] = useState(false);
   const [pendingSignature, setPendingSignature] = useState(null); // holds adopted sig data until placed
+  const [cloudObjectKey, setCloudObjectKey] = useState(null);
+  const [isCloudBusy, setIsCloudBusy] = useState(false);
 
   // Derived State
   const isLoading = isPdfLoading || isAnalysisLoading;
@@ -159,6 +167,7 @@ const DocumentViewer = () => {
     if (location.state?.document && !fileName && pdfLibLoaded) {
       const doc = location.state.document;
       setSelectedDocument(doc);
+      setCloudObjectKey(doc?.cloudKey || null);
 
       const load = async () => {
         try {
@@ -192,7 +201,98 @@ const DocumentViewer = () => {
       };
 
       setSelectedDocument(newDocument);
+      setCloudObjectKey(null);
       navigate('/view', { state: { document: newDocument } });
+    }
+  };
+
+  const sanitizeFileName = (name) =>
+    String(name || 'document.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');
+
+  const handleSaveToCloud = async () => {
+    if (!functions) return;
+    if (!selectedDocument?.file) {
+      setGate({
+        title: 'No local file to upload',
+        message: 'Open a local PDF first, then save it to DecoDocs cloud storage.',
+        primaryLabel: 'OK',
+      });
+      return;
+    }
+
+    setIsCloudBusy(true);
+    try {
+      const keySeed = `documents/${Date.now()}-${sanitizeFileName(selectedDocument.name)}`;
+      const uploadInfo = await createUploadUrl(functions, {
+        key: keySeed,
+        contentType: selectedDocument.type || 'application/pdf',
+        expiresIn: 600,
+      });
+
+      await uploadViaPresignedUrl({
+        url: uploadInfo.url,
+        file: selectedDocument.file,
+        contentType: selectedDocument.type || 'application/pdf',
+      });
+
+      setCloudObjectKey(uploadInfo.key);
+      setSelectedDocument((prev) => ({ ...(prev || {}), cloudKey: uploadInfo.key }));
+      setGate({
+        title: 'Saved to DecoDocs',
+        message: `Document uploaded successfully.\nObject key: ${uploadInfo.key}`,
+        primaryLabel: 'OK',
+      });
+    } catch (err) {
+      const code = err?.code || '';
+      const isProGate = String(code).includes('permission-denied');
+      setGate({
+        title: isProGate ? 'Pro required' : 'Cloud upload failed',
+        message: isProGate
+          ? 'Cloud storage is available for Pro plans. Upgrade to continue.'
+          : (err?.message || 'Unable to upload file to cloud storage.'),
+        primaryLabel: isProGate ? 'View plans' : 'OK',
+        primaryTo: isProGate ? '/pricing' : null,
+      });
+    } finally {
+      setIsCloudBusy(false);
+    }
+  };
+
+  const handleDownload = async () => {
+    if (!pdfDoc) return;
+
+    // Prefer original in-memory file when available.
+    if (selectedDocument?.file) {
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(selectedDocument.file);
+      link.download = selectedDocument?.name || 'document.pdf';
+      link.click();
+      return;
+    }
+
+    // Fallback: cloud object download via callable + pre-signed URL.
+    if (functions && cloudObjectKey) {
+      setIsCloudBusy(true);
+      try {
+        const downloadInfo = await createDownloadUrl(functions, {
+          key: cloudObjectKey,
+          expiresIn: 600,
+        });
+        const blob = await downloadBlobViaPresignedUrl(downloadInfo.url);
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = selectedDocument?.name || 'document.pdf';
+        link.click();
+        return;
+      } catch (err) {
+        setGate({
+          title: 'Download failed',
+          message: err?.message || 'Unable to download cloud document.',
+          primaryLabel: 'OK',
+        });
+      } finally {
+        setIsCloudBusy(false);
+      }
     }
   };
 
@@ -418,9 +518,10 @@ const DocumentViewer = () => {
                   </button>
                   <button
                     id="btn-save-decodocs"
-                    onClick={() => alert('Save to DecoDocs (coming soon)')}
-                    className="p-1.5 rounded-md text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors"
-                    title="Save to DecoDocs"
+                    onClick={handleSaveToCloud}
+                    className="p-1.5 rounded-md text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    title={isCloudBusy ? 'Working...' : 'Save to DecoDocs'}
+                    disabled={isCloudBusy}
                   >
                     <HiCloudUpload className="w-4 h-4" />
                   </button>
@@ -431,14 +532,9 @@ const DocumentViewer = () => {
               <div id="viewer-primary-actions" className="flex items-center gap-2">
                 <button
                   id="btn-download"
-                  onClick={() => {
-                    if (!pdfDoc) return;
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(selectedDocument?.file || new Blob());
-                    link.download = selectedDocument?.name || 'document.pdf';
-                    link.click();
-                  }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg transition-colors shadow-sm"
+                  onClick={handleDownload}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={isCloudBusy}
                 >
                   <HiDownload className="w-3.5 h-3.5" />
                   Download

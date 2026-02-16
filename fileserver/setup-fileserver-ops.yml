@@ -1,0 +1,68 @@
+---
+- name: Configure DecoDocs fileserver ops hardening
+  hosts: fileserver
+  become: true
+
+  tasks:
+    - name: Validate MinIO paths and backup settings
+      ansible.builtin.assert:
+        that:
+          - minio_data_dir is defined and minio_data_dir | length > 0
+          - minio_backup_dir is defined and minio_backup_dir | length > 0
+          - minio_backup_retention_days | int > 0
+
+    - name: Ensure MinIO backup directory exists
+      ansible.builtin.file:
+        path: "{{ minio_backup_dir }}"
+        state: directory
+        owner: root
+        group: root
+        mode: "0750"
+
+    - name: Install MinIO backup script
+      ansible.builtin.template:
+        src: templates/minio-backup.sh.j2
+        dest: /usr/local/sbin/minio-backup.sh
+        owner: root
+        group: root
+        mode: "0750"
+
+    - name: Install MinIO healthcheck script
+      ansible.builtin.template:
+        src: templates/minio-healthcheck.sh.j2
+        dest: /usr/local/sbin/minio-healthcheck.sh
+        owner: root
+        group: root
+        mode: "0750"
+
+    - name: Configure MinIO backup cron
+      ansible.builtin.cron:
+        name: minio backup archive
+        user: root
+        minute: "{{ minio_backup_cron_minute }}"
+        hour: "{{ minio_backup_cron_hour }}"
+        job: "/usr/local/sbin/minio-backup.sh >> /var/log/minio-backup.log 2>&1"
+
+    - name: Configure MinIO healthcheck cron
+      ansible.builtin.cron:
+        name: minio healthcheck monitor
+        user: root
+        minute: "{{ minio_healthcheck_cron_minute }}"
+        job: "/usr/local/sbin/minio-healthcheck.sh >> /var/log/minio-healthcheck.log 2>&1"
+
+    - name: Run one-time MinIO healthcheck
+      ansible.builtin.command: /usr/local/sbin/minio-healthcheck.sh
+      changed_when: false
+
+    - name: Run one-time MinIO backup verification
+      ansible.builtin.command: /usr/local/sbin/minio-backup.sh
+      changed_when: false
+
+    - name: Report ops hardening status
+      ansible.builtin.debug:
+        msg: |
+          MinIO ops hardening configured.
+          Backup dir: {{ minio_backup_dir }}
+          Backup retention (days): {{ minio_backup_retention_days }}
+          Backup cron: {{ minio_backup_cron_hour }}:{{ minio_backup_cron_minute }}
+          Health cron minute spec: {{ minio_healthcheck_cron_minute }}

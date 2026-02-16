@@ -1,0 +1,145 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import Footer from '../components/astro/Footer.astro';
+import {
+  socialProofLogos,
+  socialProofStats,
+  howItWorksSteps,
+  featureGridItems,
+  useCases,
+} from '../lib/landingData.js';
+
+const title = 'DecoDocs — Understand documents before you sign';
+const description =
+  'Upload a PDF to get plain-English explanations, risks, and what to check before you sign.';
+---
+
+<MainLayout title={title} description={description} canonical="https://decodocs.com/" image="https://decodocs.com/og.svg">
+  <main class="relative overflow-hidden">
+    <div class="absolute inset-0 pointer-events-none">
+      <div class="absolute -top-32 -right-20 h-72 w-72 rounded-full bg-[#d8e6ff] blur-3xl opacity-60 animate-float-slow" />
+      <div class="absolute top-40 -left-24 h-72 w-72 rounded-full bg-[#fde4c7] blur-3xl opacity-50 animate-float-slow" />
+    </div>
+
+    <section id="hero" class="relative z-10 px-6 pt-24 pb-20 lg:pt-32 lg:pb-24">
+      <div class="mx-auto grid w-full max-w-6xl items-center gap-16 lg:grid-cols-[1.1fr_0.9fr]">
+        <div class="flex flex-col gap-8">
+          <span class="w-fit rounded-full border border-slate-200 bg-white px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-slate-600 shadow-sm">
+            Modern document intelligence
+          </span>
+          <h1 class="text-5xl font-bold tracking-tight text-slate-900 md:text-6xl leading-[1.1]">
+            Decode documents<br class="hidden lg:block" />
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-600">before you sign.</span>
+          </h1>
+          <p class="text-xl text-slate-600 leading-relaxed max-w-xl">
+            DecoDocs turns dense PDFs into clear decisions with AI summaries, risk flags, and evidence-backed explanations.
+          </p>
+          <div class="flex flex-col gap-4 sm:flex-row sm:items-center">
+            <a class="inline-flex w-full sm:w-auto justify-center rounded-full bg-slate-900 px-8 py-4 text-base font-bold text-white no-underline hover:bg-slate-800" href="/view">Analyze a Document</a>
+            <a class="inline-flex w-full sm:w-auto justify-center rounded-full border border-slate-300 bg-white px-8 py-4 text-base font-bold text-slate-800 no-underline hover:bg-slate-50" href="/view/test-docs/offer.pdf">View Demo</a>
+          </div>
+        </div>
+
+        <div class="relative">
+          <div class="absolute -top-12 -right-12 h-64 w-64 rounded-full bg-purple-100 blur-3xl opacity-60 animate-float-slow" />
+          <div class="absolute -bottom-12 -left-12 h-64 w-64 rounded-full bg-amber-100 blur-3xl opacity-60 animate-float-slow" style="animation-delay:2s" />
+          <div class="relative rounded-3xl border border-white/60 bg-white/80 backdrop-blur-xl p-8 shadow-2xl shadow-slate-900/10 ring-1 ring-slate-900/5">
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-6">Contract Review</p>
+            <div class="space-y-5">
+              <div class="rounded-2xl bg-amber-50 p-5 border border-amber-100/50">
+                <p class="text-xs font-bold text-amber-700 uppercase tracking-wide mb-2">Risk Flagged</p>
+                <p class="text-base text-slate-800 leading-snug font-medium">Termination clause requires 90-day notice and carries a 3x fee.</p>
+              </div>
+              <div class="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+                <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Plain English</p>
+                <p class="text-sm text-slate-600 leading-relaxed">You must give three months notice or pay a penalty equal to three months of fees.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="px-6 py-12 bg-white/70">
+      <div class="mx-auto flex w-full max-w-6xl flex-col gap-8">
+        <div class="grid gap-4 sm:grid-cols-3">
+          {socialProofStats.map((stat) => (
+            <div class="rounded-2xl border border-slate-200 bg-white p-5 text-center">
+              <p class="text-2xl font-bold text-slate-900">{stat.value}</p>
+              <p class="text-sm text-slate-600">{stat.label}</p>
+            </div>
+          ))}
+        </div>
+        <div class="flex flex-wrap items-center justify-center gap-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
+          {socialProofLogos.map((logo) => <span class="rounded-full border border-slate-200 bg-white px-4 py-2">{logo}</span>)}
+        </div>
+      </div>
+    </section>
+
+    <section id="how-it-works" class="px-6 py-16">
+      <div class="mx-auto flex w-full max-w-6xl flex-col gap-10">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">How it works</p>
+          <h2 class="mt-3 text-4xl font-bold text-slate-900">Three steps to clarity</h2>
+        </div>
+        <div class="grid gap-6 md:grid-cols-3">
+          {howItWorksSteps.map((step, index) => (
+            <article class="rounded-3xl border border-slate-100 bg-white p-6 shadow-lg shadow-slate-900/5">
+              <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Step {index + 1}</p>
+              <h3 class="mt-4 text-xl font-semibold text-slate-900">{step.title}</h3>
+              <p class="mt-3 text-sm text-slate-600">{step.description}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section id="features" class="px-6 py-16">
+      <div class="mx-auto flex w-full max-w-6xl flex-col gap-10">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Product</p>
+          <h2 class="mt-3 text-4xl font-bold text-slate-900">Every insight you need to move faster</h2>
+        </div>
+        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {featureGridItems.map((feature) => (
+            <article class="rounded-3xl border border-slate-100 bg-white p-6 shadow-lg shadow-slate-900/5">
+              <h3 class="text-lg font-semibold text-slate-900">{feature.title}</h3>
+              <p class="mt-3 text-sm text-slate-600">{feature.description}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section id="use-cases" class="px-6 py-24 bg-slate-50">
+      <div class="mx-auto flex w-full max-w-6xl flex-col gap-12">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Use cases</p>
+          <h2 class="mt-3 text-4xl font-bold text-slate-900">Built for high-stakes decisions</h2>
+        </div>
+        <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          {useCases.map((useCase, index) => (
+            <article class="group relative flex flex-col rounded-3xl border border-slate-200 bg-white p-8 shadow-sm hover:shadow-xl hover:border-slate-300 transition-all duration-300">
+              <div class="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-400 mb-6">
+                <span>{useCase.audience || 'Use case'}</span>
+                <span>{String(index + 1).padStart(2, '0')}</span>
+              </div>
+              <h3 class="text-2xl font-bold text-slate-900 mb-4">{useCase.title}</h3>
+              <p class="text-base text-slate-600 leading-relaxed">{useCase.description}</p>
+              <a href={`/use-cases/${useCase.slug}`} class="mt-8 pt-6 border-t border-slate-100 flex items-center text-sm font-bold text-slate-900 no-underline">Learn more</a>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section class="px-6 py-24 bg-white">
+      <div class="mx-auto w-full max-w-6xl rounded-3xl border border-slate-200 bg-slate-900 p-10 text-center text-white">
+        <h2 class="text-3xl font-bold">Secure by design. Trusted by teams.</h2>
+        <p class="mt-4 text-slate-300 max-w-2xl mx-auto">Your data is encrypted at rest and in transit. Free mode never stores files. Enterprise adds SSO and audit trails.</p>
+        <a class="mt-8 inline-flex rounded-full bg-white px-8 py-4 text-base font-bold text-slate-900 no-underline hover:bg-slate-100" href="/view">Get Started</a>
+      </div>
+    </section>
+  </main>
+  <Footer />
+</MainLayout>

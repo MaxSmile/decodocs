@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+DATA_DIR="{{ minio_data_dir }}"
+BACKUP_DIR="{{ minio_backup_dir }}"
+RETENTION_DAYS="{{ minio_backup_retention_days }}"
+
+mkdir -p "${BACKUP_DIR}"
+
+TS="$(date -u +%Y%m%dT%H%M%SZ)"
+ARCHIVE="${BACKUP_DIR}/minio-data-${TS}.tar.gz"
+SUMFILE="${ARCHIVE}.sha256"
+
+if [[ ! -d "${DATA_DIR}" ]]; then
+  echo "MinIO data dir does not exist: ${DATA_DIR}" >&2
+  exit 1
+fi
+
+tar -C "$(dirname "${DATA_DIR}")" -czf "${ARCHIVE}" "$(basename "${DATA_DIR}")"
+sha256sum "${ARCHIVE}" > "${SUMFILE}"
+
+# Restore-readiness check: validate tar archive structure.
+tar -tzf "${ARCHIVE}" >/dev/null
+
+find "${BACKUP_DIR}" -type f -name 'minio-data-*.tar.gz' -mtime +"${RETENTION_DAYS}" -delete
+find "${BACKUP_DIR}" -type f -name 'minio-data-*.tar.gz.sha256' -mtime +"${RETENTION_DAYS}" -delete
+
+echo "Backup complete: ${ARCHIVE}"

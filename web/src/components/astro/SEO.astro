@@ -1,0 +1,29 @@
+---
+const {
+  title = 'DecoDocs — Understand documents before you sign',
+  description = 'Upload a PDF to get plain-English explanations, risks, and what to check—before you sign. Free tier available.',
+  canonical = 'https://decodocs.com/',
+  image = 'https://decodocs.com/og.svg',
+  noindex = false,
+} = Astro.props;
+---
+
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+{noindex && <meta name="robots" content="noindex,nofollow" />}
+
+<meta property="og:site_name" content="DecoDocs" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:image" content={image} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content={title} />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={image} />

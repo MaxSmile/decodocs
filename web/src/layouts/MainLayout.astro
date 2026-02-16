@@ -1,0 +1,50 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import SEO from '../components/astro/SEO.astro';
+import Header from '../components/islands/Header.tsx';
+import AuthWatcher from '../components/islands/AuthWatcher.tsx';
+import '../index.css';
+
+const {
+  title,
+  description,
+  canonical,
+  image,
+  noindex = false,
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="application-name" content="DecoDocs" />
+    <meta name="theme-color" content="#0f172a" />
+    <ClientRouter />
+    <SEO
+      title={title}
+      description={description}
+      canonical={canonical}
+      image={image}
+      noindex={noindex}
+    />
+    <script is:inline>
+      (function () {
+        var canonicalHost = 'decodocs.com';
+        var host = location.host;
+        var isFirebase = host.endsWith('.web.app') || host.endsWith('.firebaseapp.com');
+        if (isFirebase && host !== canonicalHost) {
+          location.replace(
+            'https://' + canonicalHost + location.pathname + location.search + location.hash
+          );
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <AuthWatcher client:load transition:persist />
+    <Header client:load transition:persist />
+    <slot />
+  </body>
+</html>

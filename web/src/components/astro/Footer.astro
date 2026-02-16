@@ -1,0 +1,40 @@
+---
+import { footerLinks } from '../../lib/landingData.js';
+const normalizeHref = (href) => (href.startsWith('#') ? `/${href}` : href);
+---
+
+<footer class="border-t border-slate-200 bg-white/80 px-6 py-12">
+  <div class="mx-auto grid w-full max-w-6xl gap-8 md:grid-cols-4">
+    <div>
+      <p class="text-lg font-bold text-slate-900">DecoDocs</p>
+      <p class="mt-2 text-sm text-slate-600">Understand documents before you sign.</p>
+    </div>
+
+    <div>
+      <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Product</p>
+      <ul class="mt-3 space-y-2 text-sm text-slate-700 list-none p-0">
+        {footerLinks.product.map((item) => (
+          <li><a class="no-underline text-slate-700 hover:text-slate-900" href={normalizeHref(item.href)}>{item.label}</a></li>
+        ))}
+      </ul>
+    </div>
+
+    <div>
+      <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Company</p>
+      <ul class="mt-3 space-y-2 text-sm text-slate-700 list-none p-0">
+        {footerLinks.company.map((item) => (
+          <li><a class="no-underline text-slate-700 hover:text-slate-900" href={normalizeHref(item.href)}>{item.label}</a></li>
+        ))}
+      </ul>
+    </div>
+
+    <div>
+      <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Legal</p>
+      <ul class="mt-3 space-y-2 text-sm text-slate-700 list-none p-0">
+        {footerLinks.legal.map((item) => (
+          <li><a class="no-underline text-slate-700 hover:text-slate-900" href={normalizeHref(item.href)}>{item.label}</a></li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</footer>

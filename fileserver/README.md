@@ -121,6 +121,20 @@ fileserver/
    ansible-playbook setup-fileserver.yml
    ```
 
+4. **Create/sync MinIO app credentials for DecoDocs** (after base setup):
+
+   ```bash
+   # 1) Set functions_set_doc_url in group_vars/all.yml
+   # 2) Run:
+   ansible-playbook setup-minio-app-user.yml
+   ```
+
+5. **Apply ops hardening** (backup + health monitoring):
+
+   ```bash
+   ansible-playbook setup-fileserver-ops.yml
+   ```
+
 ### What the playbook does (in order)
 
 1. **System packages** — installs Nginx, Certbot, UFW, curl, ssl-cert.
@@ -151,6 +165,54 @@ fileserver/
     - public HTTPS endpoint at `https://storage.smrtai.top`
     - `systemctl cat minio`
     - `systemctl show minio -p EnvironmentFiles -p ExecStart -p User -p Group`
+
+### Post-setup app credential playbook
+
+`setup-minio-app-user.yml` is a follow-up playbook that:
+
+1. creates/updates a non-root MinIO app user,
+2. attaches a bucket-scoped read/write policy,
+3. validates bucket access with that app user,
+4. writes runtime storage config to Firestore at `admin/minio` via `setDocByPath`.
+
+The playbook does not create credential/env files. Provide
+`minio_app_access_key` and `minio_app_secret_key` via `group_vars/vault.yml`
+or `--extra-vars`.
+
+### Ops hardening playbook
+
+`setup-fileserver-ops.yml` installs:
+
+1. `/usr/local/sbin/minio-backup.sh` (daily compressed backups + checksum + retention),
+2. `/usr/local/sbin/minio-healthcheck.sh` (localhost MinIO health probe + optional webhook),
+3. cron entries for scheduled backup and health monitoring.
+
+Config knobs are in `group_vars/all.yml`:
+
+- `minio_backup_dir`
+- `minio_backup_retention_days`
+- `minio_backup_cron_hour` / `minio_backup_cron_minute`
+- `minio_healthcheck_cron_minute`
+- `minio_alert_webhook_url` (optional)
+
+### MinIO app key rotation workflow
+
+Use the helper script:
+
+```bash
+./rotate-minio-app-key.sh
+```
+
+This generates a new strong secret and runs:
+
+```bash
+ansible-playbook setup-minio-app-user.yml --extra-vars "minio_app_secret_key=<new-secret>"
+```
+
+After rotation:
+
+1. store the new secret in your secure secret manager,
+2. rerun `node test/fetch-minio-config.js` and `npm run test:minio` in `functions/`.
 
 ### Idempotency and recovery
 

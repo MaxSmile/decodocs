@@ -1,5 +1,4 @@
 import React from 'react';
-import { useAuth } from '../context/AuthContext.jsx';
 
 import Footer from './landing/Footer.jsx';
 import SiteHeader from './SiteHeader.jsx';
@@ -10,10 +9,7 @@ import SiteHeader from './SiteHeader.jsx';
  * NOTE: This intentionally matches the landing design language (logo + light header)
  * so pages don't feel like separate products.
  */
-const Layout = ({ children, showHeader = true, showFooter = true, variant = 'marketing' }) => {
-  const { authState } = useAuth();
-  const firebaseError = authState.status === 'error' ? authState.error?.message : null;
-
+const Layout = ({ children, showHeader = false, showFooter = true, variant = 'marketing' }) => {
   const isAppLayout = variant === 'app';
 
   return (

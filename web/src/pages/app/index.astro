@@ -1,0 +1,16 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import ReactAppIsland from '../../components/islands/ReactAppIsland.jsx';
+---
+
+<MainLayout
+  title="DecoDocs App"
+  description="DecoDocs application"
+  canonical="https://decodocs.com/app/"
+  image="https://decodocs.com/og.svg"
+  noindex={true}
+>
+  <main class="min-h-[calc(100vh-56px)]">
+    <ReactAppIsland client:only="react" basename="/" />
+  </main>
+</MainLayout>

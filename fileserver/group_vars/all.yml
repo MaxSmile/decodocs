@@ -11,6 +11,33 @@ minio_console_port: 9001
 minio_data_dir: /opt/minio/data
 minio_default_bucket: decodocs
 
+# ── MinIO App User + Firestore Sync ─────────────────
+minio_app_access_key: decodocsapp
+minio_app_policy_name: decodocs-rw
+minio_region: us-east-1
+minio_firestore_doc_path: admin/minio
+minio_firestore_mode: prod
+
+# Set in group_vars/vault.yml:
+# minio_app_secret_key: "<strong-random-secret>"
+
+# setDocByPath HTTP endpoint for deployed Firebase Functions
+# Example:
+# functions_set_doc_url: https://setdocbypath-xxxxx-uc.a.run.app/setDocByPath
+functions_set_doc_url: "https://setdocbypath-ylrliabaza-uc.a.run.app/setDocByPath"
+
+# Optional: header value for x-admin-secret, if enabled in your function
+functions_admin_secret: ""
+
+# ── Fileserver Ops Hardening ─────────────────────────
+minio_backup_dir: /var/backups/minio
+minio_backup_retention_days: 14
+minio_backup_cron_minute: "27"
+minio_backup_cron_hour: "2"
+
+minio_healthcheck_cron_minute: "*/5"
+minio_alert_webhook_url: ""
+
 # ── MinIO Credentials ───────────────────────────────
 # Override these via group_vars/vault.yml (plain YAML)
 # or pass --extra-vars on the command line.

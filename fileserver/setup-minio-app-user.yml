@@ -1,0 +1,151 @@
+---
+- name: Configure DecoDocs MinIO app user and sync Firestore config
+  hosts: fileserver
+  become: true
+
+  vars:
+    minio_admin_alias: local
+    minio_app_alias: decodocs-app
+    minio_policy_tmp_path: /tmp/decodocs-minio-policy.json
+
+  tasks:
+    - name: Check if local MinIO credentials file exists
+      ansible.builtin.stat:
+        path: "{{ playbook_dir }}/group_vars/vault.yml"
+      register: local_vault_file
+      delegate_to: localhost
+      become: false
+
+    - name: Load MinIO credentials file when present
+      ansible.builtin.include_vars:
+        file: "{{ playbook_dir }}/group_vars/vault.yml"
+      no_log: true
+      when: local_vault_file.stat.exists
+
+    - name: Validate required variables
+      ansible.builtin.assert:
+        that:
+          - minio_root_user is defined and minio_root_user | length > 0
+          - minio_root_password is defined and minio_root_password | length > 0
+          - minio_app_access_key is defined and minio_app_access_key | length > 0
+          - minio_app_secret_key is defined and minio_app_secret_key | length > 0
+          - minio_default_bucket is defined and minio_default_bucket | length > 0
+          - fileserver_domain is defined and fileserver_domain | length > 0
+          - functions_set_doc_url is defined and functions_set_doc_url | length > 0
+        fail_msg: >
+          Required values are missing. Ensure minio root creds are set in group_vars/vault.yml,
+          ensure minio app creds are set in group_vars/vault.yml, and set
+          functions_set_doc_url in group_vars/all.yml or via --extra-vars.
+
+    - name: Wait for MinIO API to be ready
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ minio_api_port }}/minio/health/live"
+        status_code: 200
+      register: minio_health
+      retries: 12
+      delay: 5
+      until: minio_health.status == 200
+
+    - name: Configure mc alias for MinIO admin user
+      ansible.builtin.command: >
+        mc alias set {{ minio_admin_alias }}
+        http://127.0.0.1:{{ minio_api_port }}
+        {{ minio_root_user }}
+        {{ minio_root_password }}
+      changed_when: false
+      no_log: true
+
+    - name: Render MinIO app policy JSON
+      ansible.builtin.template:
+        src: templates/minio.app-policy.json.j2
+        dest: "{{ minio_policy_tmp_path }}"
+        owner: root
+        group: root
+        mode: "0600"
+
+    - name: Create or update MinIO app policy
+      ansible.builtin.command: >
+        mc admin policy create {{ minio_admin_alias }}
+        {{ minio_app_policy_name }}
+        {{ minio_policy_tmp_path }}
+      changed_when: false
+
+    - name: Remove MinIO app user before recreation
+      ansible.builtin.command: >
+        mc admin user remove {{ minio_admin_alias }} {{ minio_app_access_key }}
+      register: minio_app_user_remove
+      failed_when: false
+      changed_when: minio_app_user_remove.rc == 0
+
+    - name: Create MinIO app user
+      ansible.builtin.command: >
+        mc admin user add {{ minio_admin_alias }}
+        {{ minio_app_access_key }}
+        {{ minio_app_secret_key }}
+      no_log: true
+
+    - name: Attach MinIO app policy to app user
+      ansible.builtin.command: >
+        mc admin policy attach {{ minio_admin_alias }}
+        {{ minio_app_policy_name }}
+        --user {{ minio_app_access_key }}
+      changed_when: false
+
+    - name: Configure mc alias for MinIO app user
+      ansible.builtin.command: >
+        mc alias set {{ minio_app_alias }}
+        http://127.0.0.1:{{ minio_api_port }}
+        {{ minio_app_access_key }}
+        {{ minio_app_secret_key }}
+      changed_when: false
+      no_log: true
+
+    - name: Verify MinIO app user can access bucket
+      ansible.builtin.command: mc ls {{ minio_app_alias }}/{{ minio_default_bucket }}
+      changed_when: false
+
+    - name: Build headers for setDocByPath request
+      ansible.builtin.set_fact:
+        set_doc_headers: >-
+          {{
+            {'Content-Type': 'application/json'}
+            | combine(
+                (functions_admin_secret | default('') | length > 0)
+                | ternary({'x-admin-secret': functions_admin_secret}, {})
+              )
+          }}
+
+    - name: Save MinIO app config to Firestore
+      ansible.builtin.uri:
+        url: "{{ functions_set_doc_url }}"
+        method: POST
+        headers: "{{ set_doc_headers }}"
+        body_format: json
+        body:
+          qpath: "{{ minio_firestore_doc_path }}"
+          merge: true
+          data:
+            mode: "{{ minio_firestore_mode }}"
+            provider: "minio"
+            endpoint: "https://{{ fileserver_domain }}"
+            bucket: "{{ minio_default_bucket }}"
+            region: "{{ minio_region }}"
+            forcePathStyle: true
+            policyName: "{{ minio_app_policy_name }}"
+            updatedBy: "ansible:setup-minio-app-user"
+            prod:
+              accessKey: "{{ minio_app_access_key }}"
+              secretKey: "{{ minio_app_secret_key }}"
+        status_code: 200
+      register: firestore_write_result
+      no_log: true
+
+    - name: Report MinIO app user sync result
+      ansible.builtin.debug:
+        msg: |
+          MinIO app user is configured and Firestore sync is complete.
+          Firestore path: {{ minio_firestore_doc_path }}
+          Endpoint: https://{{ fileserver_domain }}
+          Bucket: {{ minio_default_bucket }}
+          Policy: {{ minio_app_policy_name }}
+          setDocByPath response ok: {{ firestore_write_result.json.ok | default(false) }}

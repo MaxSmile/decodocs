@@ -11,6 +11,9 @@ This guide provides instructions for deploying the DecoDocs application to produ
   - Console: SSH tunnel only (`ssh -L 9001:127.0.0.1:9001 root@storage.smrtai.top`)
   - Internal: MinIO ports 9000 (API) and 9001 (console) are localhost-only
   - Server URL: `https://storage.smrtai.top` (configured via `MINIO_SERVER_URL`)
+  - App credentials + runtime config are synced to Firestore `admin/minio`
+    by `Decodocs/fileserver/setup-minio-app-user.yml`
+  - Ops hardening (backup/health cron) is applied by `Decodocs/fileserver/setup-fileserver-ops.yml`
 
 ## Prerequisites
 
