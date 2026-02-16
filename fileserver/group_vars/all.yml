@@ -1,6 +1,6 @@
 # ── Domain & TLS ─────────────────────────────────────
-fileserver_domain: storage.decodocs.com
-fileserver_tls_port: 8443
+fileserver_domain: storage.smrtai.top
+fileserver_tls_port: 7433
 
 enable_certbot: true
 certbot_email: ops@decodocs.com

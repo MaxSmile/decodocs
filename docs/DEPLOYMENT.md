@@ -4,6 +4,14 @@
 
 This guide provides instructions for deploying the DecoDocs application to production using Firebase Hosting and Firebase Functions. It covers both initial setup and ongoing deployment processes.
 
+### Infrastructure Components
+- **Frontend & API**: Firebase Hosting + Functions (`snapsign-au` project)
+- **Storage**: MinIO on Contabo VPS (`storage.smrtai.top`)
+  - S3 API: `https://storage.smrtai.top` 
+  - Console: SSH tunnel only (`ssh -L 9001:127.0.0.1:9001 root@storage.smrtai.top`)
+  - Internal: MinIO ports 9000 (API) and 9001 (console) are localhost-only
+  - Server URL: `https://storage.smrtai.top` (configured via `MINIO_SERVER_URL`)
+
 ## Prerequisites
 
 Before deploying, ensure you have:

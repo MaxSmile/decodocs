@@ -360,6 +360,16 @@ The application is deployed using Firebase CLI:
 firebase deploy --only hosting:decodocs
 ```
 
+### Storage Infrastructure
+Pro tier storage is hosted on a separate Contabo VPS with MinIO:
+- **Domain**: `storage.smrtai.top`
+- **S3 API**: `https://storage.smrtai.top/` (Cloudflare 443 -> origin 7433 -> Nginx -> MinIO API)
+- **Console**: SSH tunnel only (not publicly exposed)
+- **TLS Proxy Port**: 7433 (API)
+- **Internal MinIO**: Ports 9000 (API) and 9001 (console) are localhost-only
+- **Setup**: See `../fileserver/README.md` for Ansible provisioning
+- **Server URL**: `https://storage.smrtai.top` (used by MinIO for pre-signed URLs)
+
 ### Development Setup
 For local development:
 

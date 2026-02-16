@@ -160,6 +160,26 @@ functions/
 - **CDN**: Global content distribution
 - **SSL/TLS**: Secure communications
 
+## Storage Architecture
+
+### Pro Tier Storage
+- **Provider**: Contabo VPS (self-hosted)
+- **Technology**: MinIO (S3-compatible object storage)
+- **Capacity**: 5GB per user
+- **Access**: Public via Nginx TLS proxy (API only)
+- **Ports**:
+  - S3 API: `7433` (HTTPS via Nginx → MinIO 9000)
+  - Console: SSH tunnel only (not publicly exposed)
+  - Server URL: `https://storage.smrtai.top` (for pre-signed URLs)
+- **Security**: Pre-signed URLs for client access; credentials never exposed; console admin access via SSH tunnel only
+- **Internal**: MinIO ports 9000/9001 are localhost-only, only accessible via Nginx proxy
+
+### Data Flow
+1. Client requests S3 object via `https://storage.smrtai.top/`
+2. Nginx TLS proxy (port 7433) forwards to MinIO API (127.0.0.1:9000)
+3. MinIO generates pre-signed URL with `https://storage.smrtai.top/` prefix
+4. Client downloads directly using pre-signed URL (no intermediate server)
+
 ## Performance Considerations
 
 ### Frontend Performance

@@ -15,7 +15,7 @@ server {
     }
 }
 
-# HTTPS – reverse proxy to MinIO S3 API
+# HTTPS 7433 – reverse proxy to MinIO S3 API
 server {
     listen {{ fileserver_tls_port }} ssl http2;
     listen [::]:{{ fileserver_tls_port }} ssl http2;
@@ -39,6 +39,7 @@ server {
     proxy_buffering         off;
     proxy_request_buffering off;
 
+    # MinIO S3 API
     location / {
         proxy_pass http://127.0.0.1:{{ minio_api_port }};
         proxy_http_version 1.1;

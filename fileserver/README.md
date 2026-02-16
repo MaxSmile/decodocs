@@ -2,7 +2,7 @@
 
 One-command provisioning of a production-ready **MinIO** (S3-compatible)
 object storage server behind **Nginx** with **Let's Encrypt** TLS on
-`storage.decodocs.com`.
+`storage.smrtai.top`.
 
 ### Why MinIO?
 
@@ -32,9 +32,9 @@ This playbook implements option 2.  MinIO was chosen because it:
       ▼
   Cloudflare  ──  DNS proxy, caches nothing (S3 pre-signed URLs are unique)
       │
-      │  Origin rule: rewrite destination port → 8443, preserve Host & SNI
+      │  Origin rule: rewrite destination port → 7433, preserve Host & SNI
       ▼
-  Nginx (this VPS, port 8443)
+  Nginx (this VPS, port 7433)
       │
       │  reverse proxy, TLS termination (Let's Encrypt)
       │  proxy_buffering off (streaming uploads/downloads)
@@ -57,9 +57,9 @@ signature embedded in the URL and serves or accepts the object.
 |------------|---------|
 | **MinIO**  | S3-compatible object storage server (binary at `/usr/local/bin/minio`) |
 | **mc**     | MinIO command-line client (for bucket management, at `/usr/local/bin/mc`) |
-| **Nginx**  | TLS reverse proxy — `storage.decodocs.com:8443` → `127.0.0.1:9000` |
+| **Nginx**  | TLS reverse proxy — `7433` → MinIO API (9000) |
 | **Certbot**| Automatic Let's Encrypt certificate provisioning and renewal |
-| **UFW**    | Firewall rule ensuring port `8443/tcp` is open |
+| **UFW**    | Firewall rule ensuring port `7433/tcp` is open |
 
 ### File layout
 
@@ -73,7 +73,7 @@ fileserver/
 │   ├── all.yml                          # Domain, ports, bucket name
 │   └── vault.yml                        # MinIO credentials (plain YAML)
 ├── templates/
-│   ├── storage.decodocs.com.conf.j2    # Nginx vhost (HTTP redirect + HTTPS proxy)
+│   ├── storage.smrtai.top.conf.j2    # Nginx vhost (HTTP redirect + HTTPS proxy)
 │   ├── minio.env.j2                     # /etc/default/minio environment vars
 │   └── minio.service.j2                # systemd unit for MinIO
 └── the_keys/                            # SSH keys (gitignored — never committed)
@@ -87,12 +87,12 @@ fileserver/
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
-| `fileserver_domain` | `storage.decodocs.com` | Nginx `server_name` and Certbot domain |
-| `fileserver_tls_port` | `8443` | Nginx HTTPS listen port (443 stays untouched) |
+| `fileserver_domain` | `storage.smrtai.top` | Nginx `server_name` and Certbot domain |
+| `fileserver_tls_port` | `7433` | Nginx HTTPS port for MinIO S3 API |
 | `enable_certbot` | `true` | Set `false` to skip Let's Encrypt (uses snakeoil cert) |
 | `certbot_email` | `ops@decodocs.com` | Renewal failure notifications |
-| `minio_api_port` | `9000` | MinIO S3 API port (localhost only) |
-| `minio_console_port` | `9001` | MinIO web console port (localhost only) |
+| `minio_api_port` | `9000` | MinIO S3 API port (localhost only, proxied via Nginx on 7433) |
+| `minio_console_port` | `9001` | MinIO web console port (localhost only, SSH tunnel access only) |
 | `minio_data_dir` | `/opt/minio/data` | On-disk object storage path |
 | `minio_default_bucket` | `decodocs` | Auto-created bucket (private, no anonymous access) |
 
@@ -124,15 +124,16 @@ fileserver/
 ### What the playbook does (in order)
 
 1. **System packages** — installs Nginx, Certbot, UFW, curl, ssl-cert.
-2. **Firewall** — opens port `8443/tcp` via UFW (no other ports are touched).
+2. **Firewall** — opens port `7433/tcp` via UFW (no other ports are touched).
 3. **MinIO install** — creates `minio` system user/group, downloads the
    MinIO server binary and `mc` client to `/usr/local/bin/`, deploys the
    systemd unit and environment file, starts the service.
-4. **Health check** — waits up to 60 s for MinIO's `/minio/health/live`
-   endpoint to return 200.
+4. **Health check** — applies pending MinIO handlers, restarts MinIO to
+   ensure runtime credentials are current, then waits up to 60 s for
+   `/minio/health/live` to return 200.
 5. **Default bucket** — creates the `decodocs` bucket with `mc` and sets
    anonymous access to `none` (private).
-6. **Nginx vhost** — renders `storage.decodocs.com.conf.j2` into
+6. **Nginx vhost** — renders `storage.smrtai.top.conf.j2` into
    `sites-available`, symlinks it into `sites-enabled`.  Validates config
    with `nginx -t` before starting.
    - **Shared-Nginx safe:** the playbook never removes `default` or any
@@ -145,8 +146,11 @@ fileserver/
    re-rendered with the real cert and reloaded.
 9. **Auto-renewal** — a cron job runs `certbot renew` daily at 03:13 and
    reloads Nginx on success.
-10. **Smoke test** — verifies MinIO is reachable through
-    `https://127.0.0.1:8443/minio/health/live` (self-signed OK).
+10. **Smoke test + diagnostics** — verifies:
+    - local MinIO API health at `http://127.0.0.1:9000/minio/health/live`
+    - public HTTPS endpoint at `https://storage.smrtai.top`
+    - `systemctl cat minio`
+    - `systemctl show minio -p EnvironmentFiles -p ExecStart -p User -p Group`
 
 ### Idempotency and recovery
 
@@ -154,7 +158,7 @@ The playbook is **fully idempotent** — safe to re-run at any time against
 a running server or a fresh VPS.  To rebuild from scratch:
 
 1. Spin up a fresh Debian/Ubuntu VPS on Contabo (or any provider).
-2. Point DNS for `storage.decodocs.com` to the new IP (via Cloudflare).
+2. Point DNS for `storage.smrtai.top` to the new IP (via Cloudflare).
 3. Place the SSH key and run the playbook.
 
 **Data lives in `/opt/minio/data`.** Back this directory up if you need
@@ -162,13 +166,13 @@ to preserve stored files (e.g. via a cron-based `rsync` or snapshot).
 
 ### Accessing the MinIO Console
 
-The MinIO web console binds to `127.0.0.1:9001` only — it is **never**
-exposed to the internet.  Access it via SSH tunnel:
+The MinIO web console is **not publicly exposed**. Access it via SSH tunnel:
 
 ```bash
-ssh -L 9001:127.0.0.1:9001 root@storage.decodocs.com
-# Then open http://localhost:9001 in your browser
+ssh -L 9001:127.0.0.1:9001 -i ./the_keys/id_rsa root@storage.smrtai.top
 ```
+
+Then open `http://localhost:9001` in your browser.
 
 Log in with the credentials from `vault.yml`.  The console lets you
 browse buckets, view objects, manage access policies, and check server
@@ -178,28 +182,38 @@ metrics.
 
 | Port | Listener | Purpose |
 |------|----------|---------|
-| `80` | Nginx | ACME HTTP-01 challenge + redirect to `https://$host:8443` |
-| `8443` | Nginx | TLS termination, reverse proxy to MinIO (only port exposed via UFW) |
-| `9000` | MinIO | S3 API (localhost only — never directly exposed) |
-| `9001` | MinIO | Web console (localhost only — SSH tunnel access) |
+| `80` | Nginx | ACME HTTP-01 challenge + redirect to `https://$host:7433` |
+| `7433` | Nginx | TLS termination, reverse proxy to MinIO S3 API (9000) — publicly exposed |
+| `9000` | MinIO | S3 API (localhost only — proxied by Nginx on 7433) |
+| `9001` | MinIO | Web console (localhost only — SSH tunnel access only) |
 | `443` | — | **Not used** — left free for other services on this VPS |
 
 ### Cloudflare configuration
 
-The DNS record for `storage.decodocs.com` should be **proxied** (orange
+The DNS record for `storage.smrtai.top` should be **proxied** (orange
 cloud) through Cloudflare.  Add an **Origin Rule** in the Cloudflare
 dashboard:
 
-- **When:** hostname equals `storage.decodocs.com`
-- **Then:** rewrite destination port to `8443`
+- **When:** hostname equals `storage.smrtai.top`
+- **Then:** rewrite destination port to `7433`
 
 This lets clients connect on the standard `443` while Cloudflare forwards
 to the actual listen port.  Make sure **"Preserve Host header"** is
 enabled so the Nginx `server_name` match works correctly.
 
+### Client Access
+
+All external access to MinIO goes through Nginx with TLS:
+
+- **MinIO S3 API**: `https://storage.smrtai.top:7433/` (or `https://storage.smrtai.top/` via Cloudflare)
+
+MinIO is configured with `MINIO_SERVER_URL=https://storage.smrtai.top` so that generated pre-signed URLs point to the canonical TLS endpoint.
+
+The MinIO web console is private and accessible only via SSH tunnel.
+
 ### Nginx template nuances
 
-The template (`storage.decodocs.com.conf.j2`) has several MinIO-specific
+The template (`storage.smrtai.top.conf.j2`) has several MinIO-specific
 settings worth understanding:
 
 - **`proxy_buffering off` / `proxy_request_buffering off`** — critical
