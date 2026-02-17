@@ -27,14 +27,13 @@ test.describe('Core Document Workflow', () => {
 
   // 3.1 Document Ingestion
   test.describe('3.1 Document Ingestion', () => {
-    
+
     test('ING-01: Initial State', async ({ page }) => {
       // Navigate to /view directly
       await page.goto('/view');
-      
-      // The PDFDisplay component shows: "No PDF selected. Click 'Open PDF' to load a document."
-      // in a flex container with class names like "flex-1 flex items-center justify-center"
-      await expect(page.locator('text=No PDF selected')).toBeVisible({ timeout: 10000 });
+
+      // The PDFDisplay component shows: "Upload a PDF or .snapsign file"
+      await expect(page.locator('text=Upload a PDF')).toBeVisible({ timeout: 10000 });
     });
 
     test('ING-02 to ING-05: File Selection and Rendering', async ({ page }) => {
@@ -49,13 +48,13 @@ test.describe('Core Document Workflow', () => {
 
       // ING-03: Loading State
       // Loading message will briefly appear
-      
+
       // ING-04: Render Success - wait for canvas to appear
       const canvas = page.locator('canvas');
       await expect(canvas).toBeVisible({ timeout: 30000 }); // Wait for PDF.js to render
-      
+
       // Verify placeholder is gone
-      await expect(page.locator('text=No PDF selected')).not.toBeVisible();
+      await expect(page.locator('text=Upload a PDF')).not.toBeVisible();
     });
 
     test('ING-06: Zoom Controls', async ({ page }) => {
@@ -66,16 +65,16 @@ test.describe('Core Document Workflow', () => {
 
       // Find Zoom In button in the controls
       const zoomInBtn = page.locator('button', { hasText: 'Zoom In' });
-      
+
       // Zoom level is displayed as a percentage (e.g., "150%")
       const zoomDisplay = page.locator('text=/%/');
-      
+
       // Initial zoom should be 150%
       const initialZoom = await zoomDisplay.textContent();
-      
+
       // Click zoom in
       await zoomInBtn.click();
-      
+
       // Verify zoom level changed
       const newZoom = await zoomDisplay.textContent();
       expect(newZoom).not.toBe(initialZoom);
@@ -84,20 +83,20 @@ test.describe('Core Document Workflow', () => {
 
   // 3.2 feature: Toolbox & Analysis Triggering
   test.describe('3.2 Toolbox & Analysis Triggering', () => {
-    
+
     test('BTN-01: Auth Enforcement (Guest)', async ({ page }) => {
       // Override MOCK_AUTH to simulate unauthenticated state
       await page.addInitScript({ content: 'window.MOCK_AUTH = true; window.MOCK_AUTH_USER = null;' });
-      
+
       await page.goto('/view');
       const pdfPath = path.join(__dirname, '../public/test-docs/dummy.pdf');
       await page.locator('input[type="file"]').setInputFiles(pdfPath);
       await expect(page.locator('canvas')).toBeVisible({ timeout: 30000 });
-      
+
       // Check if buttons are disabled when not authenticated
       const analyzeBtn = page.locator('button', { hasText: 'Analyze Document' });
       await expect(analyzeBtn).toBeDisabled();
-      
+
       const explainBtn = page.locator('button', { hasText: 'Explain Selection' });
       await expect(explainBtn).toBeDisabled();
     });
@@ -108,14 +107,14 @@ test.describe('Core Document Workflow', () => {
       const pdfPath = path.join(__dirname, '../public/test-docs/dummy.pdf');
       await page.locator('input[type="file"]').setInputFiles(pdfPath);
       await expect(page.locator('canvas')).toBeVisible({ timeout: 30000 });
-      
+
       // Wait for auth to complete
       await page.waitForTimeout(500);
-      
+
       // Check if buttons are enabled when authenticated
       const analyzeBtn = page.locator('button', { hasText: 'Analyze Document' });
       await expect(analyzeBtn).toBeEnabled();
-      
+
       const explainBtn = page.locator('button', { hasText: 'Explain Selection' });
       await expect(explainBtn).toBeEnabled();
     });
@@ -123,7 +122,7 @@ test.describe('Core Document Workflow', () => {
 
   // Mocking API for Analysis (Used in 3.3 and 3.4)
   test.describe('3.3 & 3.4 Analysis Results & Annotations (Mocked)', () => {
-    
+
     test.beforeEach(async ({ page }) => {
       // Mock the analyzeText endpoint
       await page.route('**/analyzeText', async route => {
@@ -152,7 +151,7 @@ test.describe('Core Document Workflow', () => {
         });
       });
 
-      
+
       await page.goto('/view');
       const pdfPath = path.join(__dirname, '../public/test-docs/dummy.pdf');
       await page.locator('input[type="file"]').setInputFiles(pdfPath);
@@ -162,23 +161,23 @@ test.describe('Core Document Workflow', () => {
     test('ANL-01 & ANL-02: Analyze Trigger and Completion', async ({ page }) => {
       // Find the Analyze Document button
       const analyzeBtn = page.locator('button', { hasText: 'Analyze Document' });
-      
+
       // Verify button is enabled
       await expect(analyzeBtn).toBeEnabled();
-      
+
       // ANL-01: Click to trigger analysis
       // Set up a promise to listen for the loading state before clicking
       const loadingPromise = page.waitForSelector('button:has-text("Analyzing...")', { timeout: 2000 }).catch(() => null);
-      
+
       await analyzeBtn.click();
-      
+
       // Try to catch the "Analyzing..." state, but don't fail if we miss it
       await loadingPromise;
-      
+
       // ANL-02: Wait for analysis completion
       await expect(analyzeBtn).toContainText('Analyze Document', { timeout: 10000 });
       await expect(analyzeBtn).toBeEnabled();
-      
+
       // Verify analysis completed successfully
       await page.waitForTimeout(500);
     });
@@ -187,13 +186,13 @@ test.describe('Core Document Workflow', () => {
       // Trigger analysis first
       const analyzeBtn = page.locator('button', { hasText: 'Analyze Document' });
       await analyzeBtn.click();
-      
+
       // Wait for analysis to complete
       await expect(analyzeBtn).toContainText('Analyze Document', { timeout: 10000 });
-      
+
       // Wait a bit for UI to update
       await page.waitForTimeout(1000);
-      
+
       // RES-01: Check for analysis results panel (might be in a different container)
       // The results are displayed but structure may vary
       // Just verify the analysis completed successfully
@@ -204,13 +203,13 @@ test.describe('Core Document Workflow', () => {
       // Trigger analysis first
       const analyzeBtn = page.locator('button', { hasText: 'Analyze Document' });
       await analyzeBtn.click();
-      
+
       // Wait for analysis to complete
       await expect(analyzeBtn).toContainText('Analyze Document', { timeout: 10000 });
-      
+
       // Wait for potential annotations to render
       await page.waitForTimeout(1000);
-      
+
       // Verify analysis completed successfully (annotations are internal implementation)
       await expect(analyzeBtn).toBeEnabled();
     });
@@ -223,7 +222,7 @@ test.describe('Core Document Workflow', () => {
       const pdfPath = path.join(__dirname, '../public/test-docs/dummy.pdf');
       await page.locator('input[type="file"]').setInputFiles(pdfPath);
       await expect(page.locator('canvas')).toBeVisible({ timeout: 30000 });
-      
+
       // Force enable buttons
       await page.evaluate(() => {
         document.querySelectorAll('button').forEach(b => b.removeAttribute('disabled'));
@@ -234,15 +233,15 @@ test.describe('Core Document Workflow', () => {
       // Mock translateToPlainEnglish
       await page.route('**/translateToPlainEnglish', async route => {
         await route.fulfill({
-            status: 200,
-            contentType: 'application/json',
-            body: JSON.stringify({
-                success: true,
-                translation: {
-                    originalText: 'Original Legalese',
-                    plainEnglishTranslation: 'Simple English'
-                }
-            })
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            success: true,
+            translation: {
+              originalText: 'Original Legalese',
+              plainEnglishTranslation: 'Simple English'
+            }
+          })
         });
       });
 
@@ -254,29 +253,29 @@ test.describe('Core Document Workflow', () => {
       });
 
       await page.locator('button', { hasText: 'Translate to Plain English' }).click();
-      
+
       // Wait a bit for dialog to appear
-      await page.waitForTimeout(1000); 
+      await page.waitForTimeout(1000);
     });
 
     // TOOL-02 Highlight Risks
     test('TOOL-02: Highlight Risks', async ({ page }) => {
-       // Mock highlightRisks
-       await page.route('**/highlightRisks', async route => {
+      // Mock highlightRisks
+      await page.route('**/highlightRisks', async route => {
         await route.fulfill({
-            status: 200,
-            contentType: 'application/json',
-            body: JSON.stringify({
-                success: true,
-                risks: {
-                    summary: { totalRisks: 1 },
-                    items: [{
-                        riskLevel: 'high',
-                        description: 'Bad thing',
-                        explanation: 'It is bad.'
-                    }]
-                }
-            })
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            success: true,
+            risks: {
+              summary: { totalRisks: 1 },
+              items: [{
+                riskLevel: 'high',
+                description: 'Bad thing',
+                explanation: 'It is bad.'
+              }]
+            }
+          })
         });
       });
 
@@ -288,7 +287,7 @@ test.describe('Core Document Workflow', () => {
       });
 
       await page.locator('button', { hasText: 'Highlight Risks' }).click();
-      
+
       // Wait for UI to update
       await page.waitForTimeout(1000);
     });

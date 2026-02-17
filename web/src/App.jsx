@@ -78,22 +78,28 @@ const AppRoutes = () => {
 
       {/* App / Document Viewer */}
       <Route path="/view" element={
-        <DocumentViewer />
+        <Layout variant="app" showHeader>
+          <DocumentViewer />
+        </Layout>
       } />
 
       <Route path="/view/:documentId" element={
-        <DocumentViewer />
+        <Layout variant="app" showHeader>
+          <DocumentViewer />
+        </Layout>
       } />
 
       {/* Specific route for test documents */}
       <Route path="/view/test-docs/:fileName" element={
-        <DocumentViewer />
+        <Layout variant="app" showHeader>
+          <DocumentViewer />
+        </Layout>
       } />
 
       {/* Profile */}
       <Route path="/profile" element={
         <PrivateRoute>
-          <Layout variant="app">
+          <Layout variant="app" showHeader>
             <ProfilePage />
           </Layout>
         </PrivateRoute>
@@ -102,13 +108,17 @@ const AppRoutes = () => {
       {/* Editor */}
       <Route path="/edit/:documentId" element={
         <PrivateRoute>
-          <DocumentEditor />
+          <Layout variant="app" showHeader>
+            <DocumentEditor />
+          </Layout>
         </PrivateRoute>
       } />
 
       <Route path="/edit/test-docs/:fileName" element={
         <PrivateRoute>
-          <DocumentEditor />
+          <Layout variant="app" showHeader>
+            <DocumentEditor />
+          </Layout>
         </PrivateRoute>
       } />
 

@@ -24,11 +24,6 @@ export const useDocumentAnalysis = ({ functions, authState, isMockMode }) => {
             return { ok: true, classification: 'OK' };
         }
 
-        if (!functions) {
-            console.error('Firebase functions not available. Returning default response.');
-            return { ok: true, classification: 'OK' };
-        }
-
         try {
             const stats = buildDocStats({
                 pageCount: numPages,
@@ -60,7 +55,7 @@ export const useDocumentAnalysis = ({ functions, authState, isMockMode }) => {
         setAnalysisResults((prev) => ({
             ...prev,
             [selectedDocument.id]: {
-                ...(prev[selectedDocument.id] || {}),
+                ...(prev[selectedDocument.id]),
                 _meta: { status: 'loading', message: 'Running type-specific analysis…' },
             },
         }));
@@ -80,7 +75,7 @@ export const useDocumentAnalysis = ({ functions, authState, isMockMode }) => {
                 setAnalysisResults((prev) => ({
                     ...prev,
                     [selectedDocument.id]: {
-                        ...(prev[selectedDocument.id] || {}),
+                        ...(prev[selectedDocument.id]),
                         _meta: { status: 'error', message: 'Not available in mock mode yet.' },
                     },
                 }));
@@ -104,7 +99,7 @@ export const useDocumentAnalysis = ({ functions, authState, isMockMode }) => {
             setAnalysisResults((prev) => ({
                 ...prev,
                 [selectedDocument.id]: {
-                    ...(prev[selectedDocument.id] || {}),
+                    ...(prev[selectedDocument.id]),
                     _meta: { status: 'success' },
                     typeSpecific,
                 },
@@ -127,7 +122,7 @@ export const useDocumentAnalysis = ({ functions, authState, isMockMode }) => {
             setAnalysisResults((prev) => ({
                 ...prev,
                 [selectedDocument.id]: {
-                    ...(prev[selectedDocument.id] || {}),
+                    ...(prev[selectedDocument.id]),
                     _meta: { status: 'error', message: e?.message || 'Request failed.' },
                 },
             }));
@@ -155,7 +150,7 @@ export const useDocumentAnalysis = ({ functions, authState, isMockMode }) => {
         setAnalysisResults((prev) => ({
             ...prev,
             [selectedDocument.id]: {
-                ...(prev[selectedDocument.id] || {}),
+                ...(prev[selectedDocument.id]),
                 _meta: { status: 'loading', message: 'Running analysis…' },
             },
         }));
@@ -175,7 +170,7 @@ export const useDocumentAnalysis = ({ functions, authState, isMockMode }) => {
                 setAnalysisResults((prev) => ({
                     ...prev,
                     [selectedDocument.id]: {
-                        ...(prev[selectedDocument.id] || {}),
+                        ...(prev[selectedDocument.id]),
                         _meta: { status: 'error', message: msg },
                     },
                 }));
@@ -242,19 +237,24 @@ export const useDocumentAnalysis = ({ functions, authState, isMockMode }) => {
 
             if (result.data.ok) {
                 setGate(null);
-                const mappedAnalysis = {
-                    _meta: { status: 'success' },
-                    summary: result.data.result.plainExplanation,
-                    keyPoints: [],
-                    risks: result.data.result.risks.map((risk) => ({
-                        id: risk.id,
-                        clause: risk.title,
-                        riskLevel: risk.severity, // Fixed mapping
-                        description: risk.whyItMatters,
-                        explanation: risk.whatToCheck.join('; '),
-                    })),
-                    recommendations: result.data.result.risks.flatMap((risk) => risk.whatToCheck || []),
-                };
+	                const mappedAnalysis = {
+	                    _meta: { status: 'success' },
+	                    summary: result.data.result.plainExplanation,
+	                    keyPoints: [],
+	                    risks: result.data.result.risks.map((risk) => {
+	                        const checks = Array.isArray(risk.whatToCheck) ? risk.whatToCheck : [];
+	                        return {
+	                            id: risk.id,
+	                            clause: risk.title,
+	                            riskLevel: risk.severity, // Fixed mapping
+	                            description: risk.whyItMatters,
+	                            explanation: checks.join('; '),
+	                        };
+	                    }),
+	                    recommendations: result.data.result.risks.flatMap((risk) =>
+	                        Array.isArray(risk.whatToCheck) ? risk.whatToCheck : []
+	                    ),
+	                };
 
                 setAnalysisResults((prev) => ({
                     ...prev,
@@ -272,7 +272,7 @@ export const useDocumentAnalysis = ({ functions, authState, isMockMode }) => {
                     setAnalysisResults((prev) => ({
                         ...prev,
                         [selectedDocument.id]: {
-                            ...(prev[selectedDocument.id] || {}),
+                            ...(prev[selectedDocument.id]),
                             _meta: { status: 'error', message: msg },
                         },
                     }));
@@ -293,7 +293,7 @@ export const useDocumentAnalysis = ({ functions, authState, isMockMode }) => {
                     setAnalysisResults((prev) => ({
                         ...prev,
                         [selectedDocument.id]: {
-                            ...(prev[selectedDocument.id] || {}),
+                            ...(prev[selectedDocument.id]),
                             _meta: { status: 'error', message: msg },
                         },
                     }));
@@ -313,7 +313,7 @@ export const useDocumentAnalysis = ({ functions, authState, isMockMode }) => {
                     setAnalysisResults((prev) => ({
                         ...prev,
                         [selectedDocument.id]: {
-                            ...(prev[selectedDocument.id] || {}),
+                            ...(prev[selectedDocument.id]),
                             _meta: { status: 'error', message: msg },
                         },
                     }));
@@ -336,7 +336,7 @@ export const useDocumentAnalysis = ({ functions, authState, isMockMode }) => {
             setAnalysisResults((prev) => ({
                 ...prev,
                 [selectedDocument.id]: {
-                    ...(prev[selectedDocument.id] || {}),
+                    ...(prev[selectedDocument.id]),
                     _meta: { status: 'error', message: error?.message || 'Analysis failed.' },
                 },
             }));

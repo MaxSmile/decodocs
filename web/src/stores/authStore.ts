@@ -119,7 +119,7 @@ export const startAuthWatcher = async () => {
 
   const { auth, firebaseAuthModule } = await getAuthClient();
 
-  if (!auth || !firebaseAuthModule) {
+  if (!auth || !firebaseAuthModule || typeof (firebaseAuthModule as any).onAuthStateChanged !== 'function') {
     authStateStore.set({
       status: 'error',
       user: null,
@@ -185,7 +185,38 @@ export const authActions = {
     const { auth, firebaseAuthModule } = await getAuthClient();
     await firebaseAuthModule.signOut(auth);
   },
+  linkWithGoogle: async () => {
+    const { auth, firebaseAuthModule } = await getAuthClient();
+    const user = auth.currentUser;
+    if (!user) throw new Error('No user to link');
+    return firebaseAuthModule.linkWithPopup(user, new firebaseAuthModule.GoogleAuthProvider());
+  },
+  linkWithMicrosoft: async () => {
+    const { auth, firebaseAuthModule } = await getAuthClient();
+    const user = auth.currentUser;
+    if (!user) throw new Error('No user to link');
+    return firebaseAuthModule.linkWithPopup(user, new firebaseAuthModule.OAuthProvider('microsoft.com'));
+  },
+  linkWithApple: async () => {
+    const { auth, firebaseAuthModule } = await getAuthClient();
+    const user = auth.currentUser;
+    if (!user) throw new Error('No user to link');
+    return firebaseAuthModule.linkWithPopup(user, new firebaseAuthModule.OAuthProvider('apple.com'));
+  },
+  linkWithEmail: async (email: string, password: string) => {
+    const { auth, firebaseAuthModule } = await getAuthClient();
+    const user = auth.currentUser;
+    if (!user) throw new Error('No user to link');
+    const credential = firebaseAuthModule.EmailAuthProvider.credential(email, password);
+    return firebaseAuthModule.linkWithCredential(user, credential);
+  },
 };
 
 export const getAuthStateSnapshot = () => authStateStore.get();
 export const getFirebaseSnapshot = () => ({ app: firebaseAppStore.get(), auth: firebaseAuthStore.get() });
+
+// Testing hooks for pure helpers/internal flows.
+export const __testables = {
+  isProbablyPlaceholder,
+  getFirebaseConfig,
+};

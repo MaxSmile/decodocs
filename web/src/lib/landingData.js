@@ -376,41 +376,42 @@ export const useCases = [
 export const pricingPlans = [
   {
     name: 'Starter',
-    description: 'For occasional checks and quick clarity.',
+    description: 'For personal use and quick document checks.',
     monthlyPrice: 0,
     annualPrice: 0,
     cta: 'Start free',
     highlights: [
-      '3 document decodes / month',
-      'No storage (privacy-first)',
-      'Basic risk flags'
+      '40k tokens/day AI budget',
+      'Text-only PDF support',
+      'No cloud storage (privacy-first)',
+      'Basic risk highlighting'
     ]
   },
   {
     name: 'Pro',
-    description: 'For teams reviewing docs weekly.',
-    monthlyPrice: 29,
-    annualPrice: 24,
+    description: 'Advanced AI and private cloud storage.',
+    monthlyPrice: 5,
+    annualPrice: 60,
     cta: 'Upgrade to Pro',
     isPopular: true,
     highlights: [
-      'Unlimited document decodes',
-      'Private doc vaults',
-      'Advanced risk mapping',
-      'Shareable reports'
+      'Unlimited AI analysis',
+      'OCR for scanned PDFs',
+      '5GB private cloud storage',
+      'Priority vision models'
     ]
   },
   {
-    name: 'Enterprise',
-    description: 'For regulated or high-volume workflows.',
-    monthlyPrice: 79,
-    annualPrice: 65,
-    cta: 'Talk to sales',
+    name: 'Business',
+    description: 'For small teams needing shared visibility.',
+    monthlyPrice: 50,
+    annualPrice: 600,
+    cta: 'Start Business',
     highlights: [
-      'Custom AI workflows',
-      'Dedicated security review',
-      'SSO & audit logs',
-      'Priority support'
+      'Everything in Pro',
+      'Up to 5 worker accounts',
+      'Shared team document vaults',
+      'Consolidated billing'
     ]
   }
 ];

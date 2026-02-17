@@ -346,7 +346,7 @@ const DocumentEditor = () => {
   );
 
   return (
-    <Layout variant="app" showFooter={false}>
+    <div className="contents">
       <div className="flex flex-col h-full bg-slate-100">
 
 
@@ -504,7 +504,7 @@ const DocumentEditor = () => {
           />
         </div>
       </div>
-    </Layout>
+    </div>
   );
 };
 
