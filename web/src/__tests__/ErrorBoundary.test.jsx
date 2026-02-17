@@ -39,8 +39,8 @@ describe('ErrorBoundary', () => {
       </ErrorBoundary>
     );
 
-    expect(screen.getByText('Oops! Something went wrong')).toBeInTheDocument();
-    expect(screen.getByText(/unexpected error/i)).toBeInTheDocument();
+    expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+    expect(screen.getByText(/unexpected application error/i)).toBeInTheDocument();
   });
 
   it('should display a home button to recover from error', () => {
@@ -50,23 +50,17 @@ describe('ErrorBoundary', () => {
       </ErrorBoundary>
     );
 
-    const homeButton = screen.getByText('Go to Home');
+    const homeButton = screen.getByText('Go to home');
     expect(homeButton).toBeInTheDocument();
   });
 
   it('should show error details in development mode', () => {
-    // Set NODE_ENV to development
-    const originalEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = 'development';
-
     render(
       <ErrorBoundary>
         <BrokenComponent />
       </ErrorBoundary>
     );
 
-    expect(screen.getByText('Error Details (development only)')).toBeInTheDocument();
-
-    process.env.NODE_ENV = originalEnv;
+    expect(screen.getByText('Technical details (development only)')).toBeInTheDocument();
   });
 });

@@ -5,11 +5,12 @@ import { useAuth } from '../context/AuthContext.jsx';
 import Button from './ui/Button.jsx';
 import logo from '../assets/DecoDocsLogo.svg';
 
-const marketingNav = [
+const coreNav = [
   { label: 'How it works', href: '#how-it-works' },
   { label: 'Features', href: '#features' },
   { label: 'Use cases', href: '#use-cases' },
   { label: 'Pricing', to: '/pricing' },
+  { label: 'About', to: '/about' },
 ];
 
 const SiteHeader = ({ variant = 'marketing', onOpenPdf, children }) => {
@@ -22,6 +23,9 @@ const SiteHeader = ({ variant = 'marketing', onOpenPdf, children }) => {
   const isHome = location.pathname === '/' || location.pathname === '/app';
   const isAuthPage = location.pathname === '/sign-in' || location.pathname === '/sign-up';
   const isAuthenticated = authState?.status === 'authenticated';
+  const desktopNavClass = isAppLayout
+    ? 'hidden items-center gap-5 text-sm font-semibold text-slate-600 lg:flex'
+    : 'hidden items-center gap-8 text-sm font-semibold text-slate-600 md:flex';
 
   useEffect(() => {
     setIsMobileOpen(false);
@@ -108,19 +112,17 @@ const SiteHeader = ({ variant = 'marketing', onOpenPdf, children }) => {
 
   return (
     <header className="sticky top-0 z-30 w-full border-b border-white/40 bg-white/70 backdrop-blur-xl">
-      <div className={`mx-auto flex w-full items-center justify-between px-6 ${isAppLayout ? 'h-14 py-2' : 'max-w-6xl py-4'}`}>
-        <Link to="/" className="flex items-center gap-3 text-lg font-bold tracking-tight text-slate-900 no-underline">
-          <img src={logoSrc} alt="DecoDocs" className="h-9 w-9" />
-          {!isAppLayout && 'DecoDocs'}
+      <div className={`mx-auto flex w-full items-center justify-between px-5 sm:px-6 ${isAppLayout ? 'h-14 py-2' : 'max-w-6xl py-3 sm:py-4'}`}>
+        <Link to="/" className="flex items-center gap-2.5 text-base font-bold tracking-tight text-slate-900 no-underline sm:gap-3 sm:text-lg">
+          <img src={logoSrc} alt="DecoDocs" className="h-8 w-8 sm:h-9 sm:w-9" />
+          <span className="hidden sm:inline">DecoDocs</span>
         </Link>
 
-        {!isAppLayout && (
-          <nav className="hidden items-center gap-8 text-sm font-semibold text-slate-600 md:flex">
-            {marketingNav.map((item) => (
-              <span key={item.label}>{renderNavItem(item)}</span>
-            ))}
-          </nav>
-        )}
+        <nav className={desktopNavClass}>
+          {coreNav.map((item) => (
+            <span key={item.label}>{renderNavItem(item)}</span>
+          ))}
+        </nav>
 
         <div className="flex items-center gap-3">
           {!isAppLayout && (
@@ -153,47 +155,65 @@ const SiteHeader = ({ variant = 'marketing', onOpenPdf, children }) => {
             </div>
           )}
 
-          {!isAppLayout && (
-            <button
-              type="button"
-              className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white/80 p-2 text-slate-700 shadow-sm transition hover:border-slate-300 md:hidden"
-              aria-expanded={isMobileOpen}
-              aria-controls="site-mobile-menu"
-              onClick={handleToggle}
-            >
-              <span className="sr-only">Toggle menu</span>
-              {isMobileOpen ? (
-                <svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <path d="M5 5L15 15" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-                  <path d="M15 5L5 15" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-                </svg>
-              ) : (
-                <svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <path d="M3 5H17" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-                  <path d="M3 10H17" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-                  <path d="M3 15H17" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-                </svg>
-              )}
-            </button>
-          )}
+          <button
+            type="button"
+            className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white/80 p-2 text-slate-700 shadow-sm transition hover:border-slate-300 lg:hidden"
+            aria-expanded={isMobileOpen}
+            aria-controls="site-mobile-menu"
+            onClick={handleToggle}
+          >
+            <span className="sr-only">Toggle menu</span>
+            {isMobileOpen ? (
+              <svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M5 5L15 15" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                <path d="M15 5L5 15" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+              </svg>
+            ) : (
+              <svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M3 5H17" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                <path d="M3 10H17" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                <path d="M3 15H17" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+              </svg>
+            )}
+          </button>
         </div>
       </div>
 
-      {!isAppLayout && (
-        <div id="site-mobile-menu" className={`md:hidden ${isMobileOpen ? 'block' : 'hidden'}`}>
-          <div className="px-6 pb-4 pt-2">
-            <div className="flex flex-col gap-3 text-sm font-semibold text-slate-700">
-              {marketingNav.map((item) => (
-                <span key={item.label}>{renderNavItem(item)}</span>
-              ))}
-            </div>
-            <div className="mt-4 flex flex-col gap-3">
-              {renderAction(secondaryAction, 'w-full justify-center bg-white/60')}
-              {renderAction(primaryAction, 'w-full justify-center')}
-            </div>
+      <div id="site-mobile-menu" className={`lg:hidden ${isMobileOpen ? 'block' : 'hidden'}`}>
+        <div className="px-6 pb-4 pt-2">
+          <div className="flex flex-col gap-3 text-sm font-semibold text-slate-700">
+            {coreNav.map((item) => (
+              <span key={item.label}>{renderNavItem(item)}</span>
+            ))}
+          </div>
+          <div className="mt-4 flex flex-col gap-3">
+            {isAppLayout ? (
+              <>
+                <Link
+                  to="/pricing"
+                  onClick={closeMenu}
+                  className="inline-flex items-center justify-center gap-1.5 rounded-full border border-amber-200/60 bg-amber-50 px-4 py-2 text-sm font-bold text-amber-700 no-underline hover:bg-amber-100"
+                >
+                  <HiSparkles className="h-4 w-4" />
+                  Upgrade
+                </Link>
+                <Link
+                  to="/profile"
+                  onClick={closeMenu}
+                  className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 no-underline hover:bg-slate-50"
+                >
+                  Profile
+                </Link>
+              </>
+            ) : (
+              <>
+                {renderAction(secondaryAction, 'w-full justify-center bg-white/60')}
+                {renderAction(primaryAction, 'w-full justify-center')}
+              </>
+            )}
           </div>
         </div>
-      )}
+      </div>
 
       {children}
     </header>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import HomePage from './components/HomePage.jsx';
 import DocumentViewer from './components/DocumentViewer.jsx';
 import DocumentEditor from './components/DocumentEditor.jsx';
 import AboutPage from './components/AboutPage.jsx';
@@ -11,6 +12,8 @@ import SignInPage from './components/SignInPage.jsx';
 import SignUpPage from './components/SignUpPage.jsx';
 import ProfilePage from './components/ProfilePage.jsx';
 import SignPage from './components/SignPage.jsx';
+import NotFoundPage from './components/NotFoundPage.jsx';
+import ServerErrorPage from './components/ServerErrorPage.jsx';
 import Layout from './components/Layout.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 import AuthErrorNotification from './components/AuthErrorNotification.jsx';
@@ -28,50 +31,53 @@ const PrivateRoute = ({ children }) => {
 const AppRoutes = () => {
   return (
     <Routes>
+      {/* Home */}
+      <Route path="/" element={<HomePage />} />
+
       {/* Pricing Page */}
       <Route path="/pricing" element={
-        <Layout>
+        <Layout showHeader>
           <PricingPage />
         </Layout>
       } />
 
       {/* About Page */}
       <Route path="/about" element={
-        <Layout>
+        <Layout showHeader>
           <AboutPage />
         </Layout>
       } />
 
       {/* Privacy Page */}
       <Route path="/privacy" element={
-        <Layout>
+        <Layout showHeader>
           <PrivacyPage />
         </Layout>
       } />
 
       {/* Terms Page */}
       <Route path="/terms" element={
-        <Layout>
+        <Layout showHeader>
           <TermsPage />
         </Layout>
       } />
 
       {/* Contact Page */}
       <Route path="/contact" element={
-        <Layout>
+        <Layout showHeader>
           <ContactPage />
         </Layout>
       } />
 
       {/* Auth Pages */}
       <Route path="/sign-in" element={
-        <Layout>
+        <Layout showHeader>
           <SignInPage />
         </Layout>
       } />
 
       <Route path="/sign-up" element={
-        <Layout>
+        <Layout showHeader>
           <SignUpPage />
         </Layout>
       } />
@@ -124,8 +130,15 @@ const AppRoutes = () => {
 
       {/* Sign Page */}
       <Route path="/sign" element={
-        <Layout>
+        <Layout showHeader>
           <SignPage />
+        </Layout>
+      } />
+
+      {/* Error Pages */}
+      <Route path="/500" element={
+        <Layout showHeader>
+          <ServerErrorPage />
         </Layout>
       } />
 
@@ -133,7 +146,11 @@ const AppRoutes = () => {
       <Route path="/app" element={<Navigate to="/view" replace />} />
 
       {/* Catch-all */}
-      <Route path="*" element={<Navigate to="/view" replace />} />
+      <Route path="*" element={
+        <Layout showHeader>
+          <NotFoundPage />
+        </Layout>
+      } />
     </Routes>
   );
 };

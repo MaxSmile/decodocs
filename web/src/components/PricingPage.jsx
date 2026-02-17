@@ -1,6 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
+import Card from './ui/Card.jsx';
+import PageSection from './ui/PageSection.jsx';
+import Notice from './ui/Notice.jsx';
 
 const formatAUD = (amount) => {
   try {
@@ -10,10 +13,17 @@ const formatAUD = (amount) => {
   }
 };
 
+const primaryBtnClass = 'dd-btn dd-btn-solid mt-2 w-full';
+
+const billingPillClass = (active) => [
+  'dd-pill',
+  active ? 'dd-pill-active' : '',
+].join(' ');
+
 const FeatureList = ({ items }) => (
-  <ul style={{ margin: 0, paddingLeft: 18, color: '#0f172a', lineHeight: 1.7 }}>
-    {items.map((t) => (
-      <li key={t} style={{ marginBottom: 6 }}>{t}</li>
+  <ul className="m-0 list-disc pl-5 text-slate-900 leading-7">
+    {items.map((text) => (
+      <li key={text} className="mb-1.5">{text}</li>
     ))}
   </ul>
 );
@@ -26,8 +36,8 @@ export default function PricingPage() {
   const { authState } = useAuth();
   const search = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const initialBilling = search.get('billing') === 'annual' ? 'annual' : 'monthly';
-  const [billing, setBilling] = useState(initialBilling); // monthly | annual
-  const [checkoutPlan, setCheckoutPlan] = useState(null); // pro | business | null
+  const [billing, setBilling] = useState(initialBilling);
+  const [checkoutPlan, setCheckoutPlan] = useState(null);
   const [notice, setNotice] = useState(null);
   const autoCheckoutStartedRef = useRef(false);
 
@@ -45,7 +55,6 @@ export default function PricingPage() {
     setNotice(null);
     setCheckoutPlan(plan);
 
-    // Paid plans require a real account so Stripe entitlements map cleanly.
     if (!authState?.user || authState?.user?.isAnonymous) {
       const qp = new URLSearchParams({
         intent: 'upgrade',
@@ -105,97 +114,73 @@ export default function PricingPage() {
 
   const goToSignIn = () => navigate('/sign-in');
 
-  const pageStyle = {
-    padding: '2.5rem 1.5rem',
-    maxWidth: 1100,
-    margin: '0 auto',
-  };
-
-  const cardStyle = {
-    border: '1px solid #e2e8f0',
-    borderRadius: 14,
-    background: '#fff',
-    padding: 18,
-  };
-
-  const pillStyle = (active) => ({
-    padding: '8px 12px',
-    borderRadius: 999,
-    border: `1px solid ${active ? '#0f172a' : '#e2e8f0'}`,
-    background: active ? '#0f172a' : '#ffffff',
-    color: active ? '#ffffff' : '#0f172a',
-    fontWeight: 700,
-    fontSize: 13,
-    cursor: 'pointer',
-  });
-
   return (
-    <div style={pageStyle}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+    <PageSection size="xl">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 style={{ margin: 0 }}>Pricing</h1>
-          <p style={{ marginTop: 10, marginBottom: 0, color: '#334155', lineHeight: 1.6 }}>
+          <h1 className="dd-title">Pricing</h1>
+          <p className="dd-lead mb-0">
             Compare Free, Pro, and Business plans. Enterprise is available for larger teams.
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          <button type="button" onClick={() => setBilling('monthly')} style={pillStyle(billing === 'monthly')}>
+        <div className="flex items-center gap-2.5">
+          <button type="button" onClick={() => setBilling('monthly')} className={billingPillClass(billing === 'monthly')}>
             Monthly
           </button>
-          <button type="button" onClick={() => setBilling('annual')} style={pillStyle(billing === 'annual')}>
+          <button type="button" onClick={() => setBilling('annual')} className={billingPillClass(billing === 'annual')}>
             Annual
           </button>
         </div>
       </div>
 
-      <div style={{ marginTop: 16, padding: 14, borderRadius: 12, background: '#eff6ff', border: '1px solid #bfdbfe', color: '#1e3a8a', lineHeight: 1.65 }}>
+      <Notice tone="info" className="mt-4 text-base">
         DecoDocs is publicly available for anonymous trial use. You can open a PDF and test the core experience instantly,
         then create a free account when you want higher daily limits and cross-device continuity.
-      </div>
+      </Notice>
 
-      {notice && (
-        <div style={{ marginTop: 16, padding: 12, borderRadius: 12, background: '#fff7ed', border: '1px solid #fed7aa', color: '#9a3412' }}>
-          {notice}
-        </div>
-      )}
+      {notice ? (
+        <Notice tone="warning" className="mt-4">{notice}</Notice>
+      ) : null}
 
-      <div style={{ marginTop: 22, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 14 }}>
-        {/* Free */}
-        <div style={cardStyle}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-            <div style={{ fontWeight: 800, fontSize: 16 }}>Free</div>
-            <div style={{ fontWeight: 800, fontSize: 18 }}>{formatAUD(0)}<span style={{ color: '#64748b', fontWeight: 600, fontSize: 12 }}>/forever</span></div>
+      <div className="mt-5 grid grid-cols-1 gap-3.5 md:grid-cols-2 xl:grid-cols-3">
+        <Card>
+          <div className="flex items-baseline justify-between">
+            <div className="text-base font-extrabold">Free</div>
+            <div className="text-lg font-extrabold">
+              {formatAUD(0)}
+              <span className="ml-0.5 text-xs font-semibold text-slate-500">/forever</span>
+            </div>
           </div>
-          <p style={{ marginTop: 10, color: '#475569', lineHeight: 1.6 }}>
+          <p className="mt-2.5 leading-relaxed text-slate-600">
             Create an account to get a bigger daily budget and manage linked sign-in methods.
           </p>
 
-          <button
-            type="button"
-            onClick={goToSignIn}
-            style={{ width: '100%', marginTop: 8, padding: '10px 14px', borderRadius: 12, border: '1px solid #0f172a', background: '#0f172a', color: '#fff', fontWeight: 900, cursor: 'pointer' }}
-          >
+          <button type="button" onClick={goToSignIn} className={primaryBtnClass}>
             Continue for free
           </button>
 
-          <div style={{ marginTop: 14 }}>
-            <FeatureList items={[
-              'AI analysis: 40k tokens/day per uid',
-              'Text-only PDFs (no OCR)',
-              'No storage with us (browser-only)',
-              'Link providers (Google/Email/Apple/Microsoft)',
-            ]} />
+          <div className="mt-3.5">
+            <FeatureList
+              items={[
+                'AI analysis: 40k tokens/day per uid',
+                'Text-only PDFs (no OCR)',
+                'No storage with us (browser-only)',
+                'Link providers (Google/Email/Apple/Microsoft)',
+              ]}
+            />
           </div>
-        </div>
+        </Card>
 
-        {/* Pro */}
-        <div style={{ ...cardStyle, borderColor: '#0f172a' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-            <div style={{ fontWeight: 900, fontSize: 16 }}>Pro</div>
-            <div style={{ fontWeight: 900, fontSize: 18 }}>{prices.pro.label}<span style={{ color: '#64748b', fontWeight: 600, fontSize: 12 }}>{prices.pro.suffix}</span></div>
+        <Card className="border-slate-900">
+          <div className="flex items-baseline justify-between">
+            <div className="text-base font-black">Pro</div>
+            <div className="text-lg font-black">
+              {prices.pro.label}
+              <span className="ml-0.5 text-xs font-semibold text-slate-500">{prices.pro.suffix}</span>
+            </div>
           </div>
-          <p style={{ marginTop: 10, color: '#475569', lineHeight: 1.6 }}>
+          <p className="mt-2.5 leading-relaxed text-slate-600">
             OCR for scanned PDFs, unlimited analysis (for now), better model, and 5GB storage.
           </p>
 
@@ -203,28 +188,32 @@ export default function PricingPage() {
             type="button"
             onClick={() => startCheckout('pro', billing)}
             disabled={checkoutPlan !== null}
-            style={{ width: '100%', marginTop: 8, padding: '10px 14px', borderRadius: 12, border: '1px solid #0f172a', background: '#0f172a', color: '#fff', fontWeight: 900, cursor: 'pointer' }}
+            className={primaryBtnClass}
           >
             {checkoutPlan === 'pro' ? 'Opening checkout...' : 'Upgrade to Pro'}
           </button>
 
-          <div style={{ marginTop: 14 }}>
-            <FeatureList items={[
-              'Unlimited AI (until abuse policy exists)',
-              'OCR / vision model for scanned PDFs',
-              '5GB storage (Contabo VPS)',
-              'Receipts + subscription management in /profile',
-            ]} />
+          <div className="mt-3.5">
+            <FeatureList
+              items={[
+                'Unlimited AI (until abuse policy exists)',
+                'OCR / vision model for scanned PDFs',
+                '5GB storage (Contabo VPS)',
+                'Receipts + subscription management in /profile',
+              ]}
+            />
           </div>
-        </div>
+        </Card>
 
-        {/* Business */}
-        <div style={cardStyle}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-            <div style={{ fontWeight: 900, fontSize: 16 }}>Business</div>
-            <div style={{ fontWeight: 900, fontSize: 18 }}>{prices.business.label}<span style={{ color: '#64748b', fontWeight: 600, fontSize: 12 }}>{prices.business.suffix}</span></div>
+        <Card>
+          <div className="flex items-baseline justify-between">
+            <div className="text-base font-black">Business</div>
+            <div className="text-lg font-black">
+              {prices.business.label}
+              <span className="ml-0.5 text-xs font-semibold text-slate-500">{prices.business.suffix}</span>
+            </div>
           </div>
-          <p style={{ marginTop: 10, color: '#475569', lineHeight: 1.6 }}>
+          <p className="mt-2.5 leading-relaxed text-slate-600">
             Team plan for up to 5 worker accounts with shared billing and team visibility.
           </p>
 
@@ -232,47 +221,49 @@ export default function PricingPage() {
             type="button"
             onClick={() => startCheckout('business', billing)}
             disabled={checkoutPlan !== null}
-            style={{ width: '100%', marginTop: 8, padding: '10px 14px', borderRadius: 12, border: '1px solid #0f172a', background: '#0f172a', color: '#fff', fontWeight: 900, cursor: 'pointer' }}
+            className={primaryBtnClass}
           >
             {checkoutPlan === 'business' ? 'Opening checkout...' : 'Start Business'}
           </button>
 
-          <div style={{ marginTop: 14 }}>
-            <FeatureList items={[
-              'Everything in Pro',
-              'Up to 5 worker accounts',
-              'Shared billing + seat management',
-              'Admin visibility across team docs',
-            ]} />
+          <div className="mt-3.5">
+            <FeatureList
+              items={[
+                'Everything in Pro',
+                'Up to 5 worker accounts',
+                'Shared billing + seat management',
+                'Admin visibility across team docs',
+              ]}
+            />
           </div>
-        </div>
+        </Card>
       </div>
 
-      <div style={{ marginTop: 18, padding: 16, borderRadius: 12, background: '#f8fafc', border: '1px solid #e2e8f0' }}>
-        <div style={{ fontWeight: 900, marginBottom: 8 }}>Enterprise</div>
-        <div style={{ color: '#475569', lineHeight: 1.7 }}>
+      <Card className="mt-4 bg-slate-50">
+        <div className="mb-2 font-black">Enterprise</div>
+        <div className="leading-7 text-slate-600">
           Need more than <strong>5 worker accounts</strong>? Enterprise is for larger teams that need custom security,
           controls, and contracting. Contact us for seat-based pricing.
         </div>
-        <div style={{ marginTop: 8 }}>
-          <Link to="/contact" style={{ color: '#0f172a', fontWeight: 800 }}>Contact sales</Link>
+        <div className="mt-2">
+          <Link to="/contact" className="dd-link-strong">Contact sales</Link>
         </div>
+      </Card>
+
+      <div className="mt-5 flex flex-wrap gap-3">
+        <Link to="/view" className="dd-link-strong">Start anonymous trial</Link>
+        <Link to="/profile" className="dd-link-strong">Go to profile</Link>
+        <Link to="/terms" className="dd-link-muted">Terms</Link>
+        <Link to="/privacy" className="dd-link-muted">Privacy</Link>
       </div>
 
-      <div style={{ marginTop: 22, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-        <Link to="/view" style={{ color: '#0f172a', fontWeight: 800 }}>Start anonymous trial</Link>
-        <Link to="/profile" style={{ color: '#0f172a', fontWeight: 800 }}>Go to profile</Link>
-        <Link to="/terms" style={{ color: '#475569', fontWeight: 700 }}>Terms</Link>
-        <Link to="/privacy" style={{ color: '#475569', fontWeight: 700 }}>Privacy</Link>
-      </div>
-
-      <div style={{ marginTop: 22, padding: 16, borderRadius: 12, background: '#f8fafc', border: '1px solid #e2e8f0' }}>
-        <div style={{ fontWeight: 900, marginBottom: 8 }}>Notes</div>
-        <div style={{ color: '#475569', lineHeight: 1.7 }}>
-          We’ll prompt you to upgrade when you hit limits or when a scanned/OCR-required document is detected. Paid checkout
-          requires a non-anonymous account, and account linking is handled via <code>/sign-in</code>.
+      <Card className="mt-5 bg-slate-50">
+        <div className="mb-2 font-black">Notes</div>
+        <div className="leading-7 text-slate-600">
+          We&apos;ll prompt you to upgrade when you hit limits or when a scanned/OCR-required document is detected. Paid
+          checkout requires a non-anonymous account, and account linking is handled via <code>/sign-in</code>.
         </div>
-      </div>
-    </div>
+      </Card>
+    </PageSection>
   );
 }

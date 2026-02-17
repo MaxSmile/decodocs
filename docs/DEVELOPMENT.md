@@ -62,8 +62,9 @@ Create a local `.env.local` **only if you need overrides** (do not commit it):
 - `VITE_FIREBASE_MESSAGING_SENDER_ID=...`
 - `VITE_FIREBASE_APP_ID=...`
 - `VITE_FIREBASE_MEASUREMENT_ID=...`
+- `VITE_FIREBASE_AUTH_EMULATOR_URL=http://localhost:9099` (optional override when `VITE_USE_FIREBASE_EMULATOR=true`)
 
-If you do not set these, the app uses the baked-in defaults in `web/src/context/AuthContext.jsx`.
+If you do not set these, the app uses baked-in defaults in `web/src/stores/authStore.ts`.
 
 > Note: Only `VITE_*` variables are exposed to the web build. Keep secrets server-side.
 

@@ -24,3 +24,6 @@ Rules:
 - `company-policy.md`
 - `association-constitution.md`
 - `sop-procedure.md`
+- `informational-document.md`
+- `decision-evaluation.md`
+- `representation-cv-bio.md`

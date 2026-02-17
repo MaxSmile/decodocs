@@ -2,22 +2,24 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Dummy PDF Loading Test', () => {
   test('should properly load and render dummy PDF via /view/test-docs/dummy.pdf route', async ({ page }) => {
-    // Start the local development server first
-    // Note: This assumes the app is running locally at http://localhost:3000
-    // You may need to start the server separately before running this test
-    
-    // Navigate to the test PDF route
-    await page.goto('http://localhost:3000/view/test-docs/dummy.pdf');
-    
+    // Navigate to the test PDF route using the app router (ensure router is hydrated)
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(1000);
+    await page.getByRole('link', { name: 'Analyze a Document' }).click();
+    await page.waitForURL('**/view');
+    await page.waitForTimeout(500);
+    await page.evaluate(() => { history.pushState({}, '', '/view/test-docs/dummy.pdf'); window.dispatchEvent(new PopStateEvent('popstate')); });
+    await page.waitForURL('**/view/test-docs/dummy.pdf');
+
     // Wait for the page to load and PDF to render
     await page.waitForLoadState('networkidle');
     
-    // Wait a bit more for PDF to fully load
-    await page.waitForTimeout(3000);
+    // Wait for the PDF.js canvas to appear (allow more time on CI)
+    await page.waitForSelector('canvas', { timeout: 30000 });
     
     // Check if the PDF viewer canvas is present
     const canvas = page.locator('canvas');
-    await expect(canvas).toBeVisible();
+    await expect(canvas).toBeVisible({ timeout: 5000 });
     await expect(canvas).toHaveCount(1);
     
     // Check if PDF controls are present
@@ -43,14 +45,16 @@ test.describe('Dummy PDF Loading Test', () => {
   });
 
   test('should properly load and render dummy PDF via /view route with documentId', async ({ page }) => {
-    // This test ensures that the regular /view route also works properly
-    // For this test, we'll simulate loading the dummy PDF through the standard mechanism
-    await page.goto('http://localhost:3000/view');
-    
+    // Navigate to /view using SPA navigation (avoid dev-server direct GET mismatch)
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(300);
+    await page.evaluate(() => { history.pushState({}, '', '/view'); window.dispatchEvent(new PopStateEvent('popstate')); });
+    await page.waitForURL('**/view');
+
     await page.waitForLoadState('networkidle');
     
-    // Verify initial state
-    const placeholder = page.locator('.pdf-placeholder');
+    // Verify initial state (placeholder present when no file loaded)
+    const placeholder = page.locator('.pdf-placeholder').first();
     await expect(placeholder).toBeVisible();
     
     // The test for actual file loading would require file upload simulation
@@ -59,9 +63,12 @@ test.describe('Dummy PDF Loading Test', () => {
   });
 
   test('should handle invalid PDF file gracefully', async ({ page }) => {
-    // Test that the app handles non-existent PDF files gracefully
-    await page.goto('http://localhost:3000/view/test-docs/nonexistent.pdf');
-    
+    // Test that the app handles non-existent PDF files gracefully (SPA navigation)
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(300);
+    await page.evaluate(() => { history.pushState({}, '', '/view/test-docs/nonexistent.pdf'); window.dispatchEvent(new PopStateEvent('popstate')); });
+    await page.waitForURL('**/view/test-docs/nonexistent.pdf');
+
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
     

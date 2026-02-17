@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { GoogleAuthProvider, linkWithCredential, signInWithCredential } from 'firebase/auth';
 import { useAuth } from '../../context/AuthContext.jsx';
+import { trackAuthEvent } from '../../lib/authTelemetry.js';
 
 const DISMISS_KEY = 'decodocs_gis_one_tap_dismissed_until';
 const SHOWN_KEY = 'decodocs_gis_one_tap_shown';
@@ -92,9 +93,7 @@ export default function GoogleOneTap() {
 
         if (!window.google?.accounts?.id) return;
 
-        if (window.gtag) {
-          window.gtag('event', 'auth_one_tap_shown');
-        }
+        trackAuthEvent('auth_one_tap_shown');
 
         window.google.accounts.id.initialize({
           client_id: clientId,
@@ -112,14 +111,10 @@ export default function GoogleOneTap() {
                 await signInWithCredential(auth, credential);
               }
 
-              if (window.gtag) {
-                window.gtag('event', 'auth_one_tap_success');
-              }
+              trackAuthEvent('auth_one_tap_success');
             } catch (e) {
               // If user closes the One Tap prompt, Google sends a moment notification instead.
-              if (window.gtag) {
-                window.gtag('event', 'auth_one_tap_error');
-              }
+              trackAuthEvent('auth_one_tap_error');
               // eslint-disable-next-line no-console
               console.error('One Tap sign-in failed:', e);
             }
@@ -135,9 +130,7 @@ export default function GoogleOneTap() {
           if (notification?.isDismissedMoment?.()) {
             // Respect dismissal for 7 days.
             setDismissedForDays(7);
-            if (window.gtag) {
-              window.gtag('event', 'auth_one_tap_dismissed');
-            }
+            trackAuthEvent('auth_one_tap_dismissed');
           }
         });
       } catch (e) {

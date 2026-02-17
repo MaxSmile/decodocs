@@ -1,5 +1,3 @@
-import React from 'react';
-
 export default function TextField({ label, type = 'text', value, onChange, placeholder, autoComplete }) {
   return (
     <label style={{ display: 'block', marginTop: 12 }}>

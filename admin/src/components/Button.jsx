@@ -1,5 +1,3 @@
-import React from 'react';
-
 export default function Button({ children, onClick, disabled, variant = 'primary', type = 'button' }) {
   const styles =
     variant === 'primary'

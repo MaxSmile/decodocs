@@ -2,6 +2,13 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { useAuth } from '../context/AuthContext.jsx';
+import Card from './ui/Card.jsx';
+import PageSection from './ui/PageSection.jsx';
+import Notice from './ui/Notice.jsx';
+
+const solidBtnClass = 'dd-btn dd-btn-solid';
+const outlineBtnClass = 'dd-btn dd-btn-outline';
+const subtleBtnClass = 'dd-btn dd-btn-subtle';
 
 export default function ProfilePage() {
   const { authState, auth } = useAuth();
@@ -47,21 +54,19 @@ export default function ProfilePage() {
   };
 
   return (
-    <div style={{ padding: '2.5rem 1.5rem', maxWidth: 900, margin: '0 auto' }}>
-      <h1 style={{ marginTop: 0 }}>Profile</h1>
-      <p style={{ marginTop: 10, color: '#475569', lineHeight: 1.6 }}>
+    <PageSection size="lg">
+      <h1 className="dd-title">Profile</h1>
+      <p className="dd-lead">
         Manage linked accounts and subscription. Receipts and subscription management use Stripe Customer Portal.
       </p>
 
-      {notice && (
-        <div style={{ marginTop: 16, padding: 12, borderRadius: 12, background: '#fff7ed', border: '1px solid #fed7aa', color: '#9a3412' }}>
-          {notice}
-        </div>
-      )}
+      {notice ? (
+        <Notice tone="warning" className="mt-4">{notice}</Notice>
+      ) : null}
 
-      <div style={{ marginTop: 16, padding: 16, borderRadius: 14, border: '1px solid #e2e8f0', background: '#fff' }}>
-        <div style={{ fontWeight: 900 }}>Session</div>
-        <div style={{ marginTop: 10, color: '#0f172a', lineHeight: 1.7 }}>
+      <Card className="mt-4">
+        <div className="font-black">Session</div>
+        <div className="mt-2.5 leading-7 text-slate-900">
           Status: <strong>{authState?.status}</strong>
           <br />
           UID: <code>{user?.uid || 'n/a'}</code>
@@ -69,11 +74,15 @@ export default function ProfilePage() {
           Anonymous: <strong>{String(!!user?.isAnonymous)}</strong>
         </div>
 
-        <div style={{ marginTop: 12, color: '#475569' }}>
-          Linked providers: {user?.providerData?.length ? (
-            <ul style={{ margin: '6px 0 0', paddingLeft: 18 }}>
-              {user.providerData.map((p) => (
-                <li key={p.providerId}><code>{p.providerId}</code>{p.email ? ` — ${p.email}` : ''}</li>
+        <div className="mt-3 text-slate-600">
+          Linked providers:{' '}
+          {user?.providerData?.length ? (
+            <ul className="mb-0 mt-1.5 list-disc pl-5">
+              {user.providerData.map((provider) => (
+                <li key={provider.providerId}>
+                  <code>{provider.providerId}</code>
+                  {provider.email ? ` — ${provider.email}` : ''}
+                </li>
               ))}
             </ul>
           ) : (
@@ -81,35 +90,23 @@ export default function ProfilePage() {
           )}
         </div>
 
-        <div style={{ marginTop: 14, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-          <button
-            type="button"
-            onClick={() => navigate('/sign-in')}
-            style={{ padding: '10px 12px', borderRadius: 12, border: '1px solid #0f172a', background: '#0f172a', color: '#fff', fontWeight: 900, cursor: 'pointer' }}
-          >
+        <div className="mt-3.5 flex flex-wrap gap-2.5">
+          <button type="button" onClick={() => navigate('/sign-in')} className={solidBtnClass}>
             Link accounts
           </button>
-          <button
-            type="button"
-            onClick={openBillingPortal}
-            style={{ padding: '10px 12px', borderRadius: 12, border: '1px solid #0f172a', background: '#fff', fontWeight: 900, cursor: 'pointer' }}
-          >
+          <button type="button" onClick={openBillingPortal} className={outlineBtnClass}>
             Billing & receipts
           </button>
-          <button
-            type="button"
-            onClick={doSignOut}
-            style={{ padding: '10px 12px', borderRadius: 12, border: '1px solid #e2e8f0', background: '#fff', fontWeight: 900, cursor: 'pointer' }}
-          >
+          <button type="button" onClick={doSignOut} className={subtleBtnClass}>
             Sign out
           </button>
         </div>
-      </div>
+      </Card>
 
-      <div style={{ marginTop: 18, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-        <Link to="/pricing" style={{ color: '#0f172a', fontWeight: 800 }}>Pricing</Link>
-        <Link to="/view" style={{ color: '#475569', fontWeight: 700 }}>Analyze a PDF</Link>
+      <div className="mt-4 flex flex-wrap gap-3">
+        <Link to="/pricing" className="dd-link-strong">Pricing</Link>
+        <Link to="/view" className="dd-link-muted">Analyze a PDF</Link>
       </div>
-    </div>
+    </PageSection>
   );
 }

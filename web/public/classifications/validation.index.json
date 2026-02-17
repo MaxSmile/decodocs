@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-02-01T09:24:56.779Z",
+  "generatedAt": "2026-02-17T12:57:26.740Z",
   "items": [
     {
       "id": "association-constitution",
@@ -11,12 +11,24 @@
       "file": "validation/company-policy.json"
     },
     {
+      "id": "decision-evaluation",
+      "file": "validation/decision-evaluation.json"
+    },
+    {
+      "id": "informational-document",
+      "file": "validation/informational-document.json"
+    },
+    {
       "id": "invoice",
       "file": "validation/invoice.json"
     },
     {
       "id": "job-offer",
       "file": "validation/job-offer.json"
+    },
+    {
+      "id": "representation-cv-bio",
+      "file": "validation/representation-cv-bio.json"
     },
     {
       "id": "sop-procedure",

@@ -10,7 +10,7 @@ const __dirname = path.dirname(__filename);
  * Covers: Ingestion -> Analysis -> Visualization
  */
 
-test.describe('Core Document Workflow', () => {
+test.describe.serial('Core Document Workflow', () => {
 
   test.beforeEach(async ({ page }) => {
     // Inject Mock Auth flag
@@ -20,7 +20,7 @@ test.describe('Core Document Workflow', () => {
     page.on('pageerror', err => console.log(`BROWSER ERROR: ${err}`));
 
     // Navigate to the app (uses baseURL from config)
-    await page.goto('/');
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
     // Wait for the app to load
     await expect(page.locator('h1').first()).toBeVisible({ timeout: 10000 });
   });
@@ -29,17 +29,30 @@ test.describe('Core Document Workflow', () => {
   test.describe('3.1 Document Ingestion', () => {
 
     test('ING-01: Initial State', async ({ page }) => {
-      // Navigate to /view directly
-      await page.goto('/view');
+      // Navigate to viewer via client-side route (SPA-friendly)
+      await page.goto('/', { waitUntil: 'domcontentloaded' });
+      // wait for client hydration to attach route handlers
+      await page.waitForTimeout(1000);
+      // Use pushState (client router will handle it once hydrated)
+      await page.evaluate(() => { history.pushState({}, '', '/view'); window.dispatchEvent(new PopStateEvent('popstate')); });
+      await page.waitForURL('**/view');
 
       // The PDFDisplay component shows: "Upload a PDF or .snapsign file"
+      await page.waitForSelector('input[type="file"]', { timeout: 10000 });
       await expect(page.locator('text=Upload a PDF')).toBeVisible({ timeout: 10000 });
     });
 
     test('ING-02 to ING-05: File Selection and Rendering', async ({ page }) => {
-      await page.goto('/view');
+      // Navigate to viewer via client-side route (avoid dev-server 404)
+      await page.goto('/', { waitUntil: 'domcontentloaded' });
+      // wait for client hydration to attach route handlers
+      await page.waitForTimeout(1000);
+      // Use pushState (client router will handle it once hydrated)
+      await page.evaluate(() => { history.pushState({}, '', '/view'); window.dispatchEvent(new PopStateEvent('popstate')); });
+      await page.waitForURL('**/view');
 
       // Use a dummy PDF file from public/test-docs/dummy.pdf
+      await page.waitForSelector('input[type="file"]', { timeout: 10000 });
       const fileInput = page.locator('input[type="file"]');
       const pdfPath = path.join(__dirname, '../public/test-docs/dummy.pdf');
 
@@ -58,8 +71,14 @@ test.describe('Core Document Workflow', () => {
     });
 
     test('ING-06: Zoom Controls', async ({ page }) => {
-      await page.goto('/view');
+      // Navigate to viewer and upload PDF
+      await page.goto('/', { waitUntil: 'domcontentloaded' });
+      // wait for client hydration then pushState to /view
+      await page.waitForTimeout(1000);
+      await page.evaluate(() => { history.pushState({}, '', '/view'); window.dispatchEvent(new PopStateEvent('popstate')); });
+      await page.waitForURL('**/view');
       const pdfPath = path.join(__dirname, '../public/test-docs/dummy.pdf');
+      await page.waitForSelector('input[type="file"]', { timeout: 10000 });
       await page.locator('input[type="file"]').setInputFiles(pdfPath);
       await expect(page.locator('canvas')).toBeVisible({ timeout: 30000 });
 
@@ -88,23 +107,34 @@ test.describe('Core Document Workflow', () => {
       // Override MOCK_AUTH to simulate unauthenticated state
       await page.addInitScript({ content: 'window.MOCK_AUTH = true; window.MOCK_AUTH_USER = null;' });
 
-      await page.goto('/view');
+      // Navigate to viewer and upload
+      await page.goto('/', { waitUntil: 'domcontentloaded' });
+      // wait for client hydration then pushState to /view
+      await page.waitForTimeout(1000);
+      await page.evaluate(() => { history.pushState({}, '', '/view'); window.dispatchEvent(new PopStateEvent('popstate')); });
+      await page.waitForURL('**/view');
       const pdfPath = path.join(__dirname, '../public/test-docs/dummy.pdf');
+      await page.waitForSelector('input[type="file"]', { timeout: 10000 });
       await page.locator('input[type="file"]').setInputFiles(pdfPath);
       await expect(page.locator('canvas')).toBeVisible({ timeout: 30000 });
 
       // Check if buttons are disabled when not authenticated
-      const analyzeBtn = page.locator('button', { hasText: 'Analyze Document' });
+      const analyzeBtn = page.getByRole('button', { name: 'Analyze Document' });
       await expect(analyzeBtn).toBeDisabled();
 
-      const explainBtn = page.locator('button', { hasText: 'Explain Selection' });
+      const explainBtn = page.getByRole('button', { name: 'Explain Selection' });
       await expect(explainBtn).toBeDisabled();
     });
 
     test('BTN-02: Auth Enablement (Authenticated)', async ({ page }) => {
       // Valid PDF loaded state (authenticated via default MOCK_AUTH)
-      await page.goto('/view');
+      await page.goto('/', { waitUntil: 'domcontentloaded' });
+      // wait for client hydration then pushState to /view
+      await page.waitForTimeout(1000);
+      await page.evaluate(() => { history.pushState({}, '', '/view'); window.dispatchEvent(new PopStateEvent('popstate')); });
+      await page.waitForURL('**/view');
       const pdfPath = path.join(__dirname, '../public/test-docs/dummy.pdf');
+      await page.waitForSelector('input[type="file"]', { timeout: 10000 });
       await page.locator('input[type="file"]').setInputFiles(pdfPath);
       await expect(page.locator('canvas')).toBeVisible({ timeout: 30000 });
 
@@ -112,10 +142,10 @@ test.describe('Core Document Workflow', () => {
       await page.waitForTimeout(500);
 
       // Check if buttons are enabled when authenticated
-      const analyzeBtn = page.locator('button', { hasText: 'Analyze Document' });
+      const analyzeBtn = page.getByRole('button', { name: 'Analyze Document' });
       await expect(analyzeBtn).toBeEnabled();
 
-      const explainBtn = page.locator('button', { hasText: 'Explain Selection' });
+      const explainBtn = page.getByRole('button', { name: 'Explain Selection' });
       await expect(explainBtn).toBeEnabled();
     });
   });
@@ -152,15 +182,20 @@ test.describe('Core Document Workflow', () => {
       });
 
 
-      await page.goto('/view');
+      // Navigate to viewer via client-side route (avoid dev-server 404)
+      await page.goto('/', { waitUntil: 'domcontentloaded' });
+      // Click the Analyze CTA so client-side routing is used
+      await page.getByRole('link', { name: 'Analyze a Document' }).click();
+      await page.waitForURL('**/view');
       const pdfPath = path.join(__dirname, '../public/test-docs/dummy.pdf');
+      await page.waitForSelector('input[type="file"]', { timeout: 10000 });
       await page.locator('input[type="file"]').setInputFiles(pdfPath);
       await expect(page.locator('canvas')).toBeVisible({ timeout: 30000 });
     });
 
     test('ANL-01 & ANL-02: Analyze Trigger and Completion', async ({ page }) => {
       // Find the Analyze Document button
-      const analyzeBtn = page.locator('button', { hasText: 'Analyze Document' });
+      const analyzeBtn = page.getByRole('button', { name: 'Analyze Document' });
 
       // Verify button is enabled
       await expect(analyzeBtn).toBeEnabled();
@@ -184,7 +219,7 @@ test.describe('Core Document Workflow', () => {
 
     test('RES-01 to RES-05: Results Visualization', async ({ page }) => {
       // Trigger analysis first
-      const analyzeBtn = page.locator('button', { hasText: 'Analyze Document' });
+      const analyzeBtn = page.getByRole('button', { name: 'Analyze Document' });
       await analyzeBtn.click();
 
       // Wait for analysis to complete
@@ -201,7 +236,7 @@ test.describe('Core Document Workflow', () => {
 
     test('OVL-01 to OVL-03: Canvas Annotations', async ({ page }) => {
       // Trigger analysis first
-      const analyzeBtn = page.locator('button', { hasText: 'Analyze Document' });
+      const analyzeBtn = page.getByRole('button', { name: 'Analyze Document' });
       await analyzeBtn.click();
 
       // Wait for analysis to complete
@@ -218,12 +253,18 @@ test.describe('Core Document Workflow', () => {
   // 3.5 Specific Tools
   test.describe('3.5 Specific Tools', () => {
     test.beforeEach(async ({ page }) => {
-      await page.goto('/view');
+      // Navigate to viewer and upload PDF
+      await page.goto('/', { waitUntil: 'domcontentloaded' });
+      // wait for client hydration then pushState to /view
+      await page.waitForTimeout(1000);
+      await page.evaluate(() => { history.pushState({}, '', '/view'); window.dispatchEvent(new PopStateEvent('popstate')); });
+      await page.waitForURL('**/view');
       const pdfPath = path.join(__dirname, '../public/test-docs/dummy.pdf');
+      await page.waitForSelector('input[type="file"]', { timeout: 10000 });
       await page.locator('input[type="file"]').setInputFiles(pdfPath);
       await expect(page.locator('canvas')).toBeVisible({ timeout: 30000 });
 
-      // Force enable buttons
+      // Force enable buttons (keep existing behaviour)
       await page.evaluate(() => {
         document.querySelectorAll('button').forEach(b => b.removeAttribute('disabled'));
       });
@@ -252,7 +293,7 @@ test.describe('Core Document Workflow', () => {
         await dialog.accept();
       });
 
-      await page.locator('button', { hasText: 'Translate to Plain English' }).click();
+      await page.getByRole('button', { name: 'Translate to Plain English' }).click();
 
       // Wait a bit for dialog to appear
       await page.waitForTimeout(1000);
@@ -286,7 +327,7 @@ test.describe('Core Document Workflow', () => {
         await dialog.accept();
       });
 
-      await page.locator('button', { hasText: 'Highlight Risks' }).click();
+      await page.getByRole('button', { name: 'Highlight Risks' }).click();
 
       // Wait for UI to update
       await page.waitForTimeout(1000);

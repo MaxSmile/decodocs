@@ -20,6 +20,17 @@ export const firebaseAuthStore = atom<any | null>(null);
 
 let watcherStarted = false;
 let authReadyPromise: Promise<any> | null = null;
+let authEmulatorConfigured = false;
+
+const DEFAULT_FIREBASE_CONFIG = {
+  apiKey: 'AIzaSyDqow-DLrBOZGUbGCN2nxpMCqXcbqDQe5Q',
+  authDomain: 'snapsign-au.firebaseapp.com',
+  projectId: 'snapsign-au',
+  storageBucket: 'snapsign-au.firebasestorage.app',
+  messagingSenderId: '388378898686',
+  appId: '1:388378898686:web:ec9931e426c1e7e768b5af',
+  measurementId: 'G-R41Q720M9W',
+};
 
 const isProbablyPlaceholder = (value: string | undefined) => {
   if (!value || typeof value !== 'string') return true;
@@ -32,15 +43,78 @@ const isProbablyPlaceholder = (value: string | undefined) => {
   );
 };
 
-const getFirebaseConfig = () => ({
-  apiKey: 'AIzaSyDqow-DLrBOZGUbGCN2nxpMCqXcbqDQe5Q',
-  authDomain: 'snapsign-au.firebaseapp.com',
-  projectId: 'snapsign-au',
-  storageBucket: 'snapsign-au.firebasestorage.app',
-  messagingSenderId: '388378898686',
-  appId: '1:388378898686:web:ec9931e426c1e7e768b5af',
-  measurementId: 'G-R41Q720M9W',
-});
+const getViteEnv = () => ((import.meta as any)?.env ?? {});
+
+const isTruthyEnvFlag = (value: unknown) => {
+  if (typeof value === 'boolean') return value;
+  if (typeof value !== 'string') return false;
+  const normalized = value.trim().toLowerCase();
+  return ['1', 'true', 'yes', 'on'].includes(normalized);
+};
+
+const getFirebaseConfig = () => {
+  const env = getViteEnv();
+  const read = (key: string, fallback: string) => {
+    const value = env[key];
+    if (typeof value !== 'string') return fallback;
+    return isProbablyPlaceholder(value) ? fallback : value.trim();
+  };
+
+  return {
+    apiKey: read('VITE_FIREBASE_API_KEY', DEFAULT_FIREBASE_CONFIG.apiKey),
+    authDomain: read('VITE_FIREBASE_AUTH_DOMAIN', DEFAULT_FIREBASE_CONFIG.authDomain),
+    projectId: read('VITE_FIREBASE_PROJECT_ID', DEFAULT_FIREBASE_CONFIG.projectId),
+    storageBucket: read('VITE_FIREBASE_STORAGE_BUCKET', DEFAULT_FIREBASE_CONFIG.storageBucket),
+    messagingSenderId: read('VITE_FIREBASE_MESSAGING_SENDER_ID', DEFAULT_FIREBASE_CONFIG.messagingSenderId),
+    appId: read('VITE_FIREBASE_APP_ID', DEFAULT_FIREBASE_CONFIG.appId),
+    measurementId: read('VITE_FIREBASE_MEASUREMENT_ID', DEFAULT_FIREBASE_CONFIG.measurementId),
+  };
+};
+
+const shouldUseAuthEmulator = () => isTruthyEnvFlag(getViteEnv().VITE_USE_FIREBASE_EMULATOR);
+
+const getAuthEmulatorUrl = () => {
+  const value = getViteEnv().VITE_FIREBASE_AUTH_EMULATOR_URL;
+  return typeof value === 'string' && value.trim() ? value.trim() : 'http://localhost:9099';
+};
+
+const maybeConnectAuthEmulator = (auth: any, firebaseAuthModule: any) => {
+  if (authEmulatorConfigured || !shouldUseAuthEmulator()) return;
+  if (typeof firebaseAuthModule.connectAuthEmulator !== 'function') return;
+
+  firebaseAuthModule.connectAuthEmulator(auth, getAuthEmulatorUrl(), { disableWarnings: true });
+  authEmulatorConfigured = true;
+};
+
+const createGoogleProvider = (firebaseAuthModule: any) => {
+  const provider = new firebaseAuthModule.GoogleAuthProvider();
+  if (typeof provider.setCustomParameters === 'function') {
+    provider.setCustomParameters({ prompt: 'select_account' });
+  }
+  return provider;
+};
+
+const createMicrosoftProvider = (firebaseAuthModule: any) => {
+  const provider = new firebaseAuthModule.OAuthProvider('microsoft.com');
+  if (typeof provider.addScope === 'function') {
+    provider.addScope('openid');
+    provider.addScope('email');
+    provider.addScope('profile');
+  }
+  if (typeof provider.setCustomParameters === 'function') {
+    provider.setCustomParameters({ prompt: 'select_account' });
+  }
+  return provider;
+};
+
+const createAppleProvider = (firebaseAuthModule: any) => {
+  const provider = new firebaseAuthModule.OAuthProvider('apple.com');
+  if (typeof provider.addScope === 'function') {
+    provider.addScope('email');
+    provider.addScope('name');
+  }
+  return provider;
+};
 
 const loadFirebaseModules = async () => {
   const [firebaseAppModule, firebaseAuthModule] = await Promise.all([
@@ -72,6 +146,7 @@ const initializeFirebaseClient = async () => {
       ? firebaseAppModule.initializeApp(firebaseConfig)
       : firebaseAppModule.getApp();
     const auth = firebaseAuthModule.getAuth(app);
+    maybeConnectAuthEmulator(auth, firebaseAuthModule);
 
     firebaseAppStore.set(app);
     firebaseAuthStore.set(auth);
@@ -154,17 +229,17 @@ export const authActions = {
   signInWithGoogle: async () => {
     const { auth, firebaseAuthModule } = await getAuthClient();
     await startAuthWatcher();
-    return firebaseAuthModule.signInWithPopup(auth, new firebaseAuthModule.GoogleAuthProvider());
+    return firebaseAuthModule.signInWithPopup(auth, createGoogleProvider(firebaseAuthModule));
   },
   signInWithMicrosoft: async () => {
     const { auth, firebaseAuthModule } = await getAuthClient();
     await startAuthWatcher();
-    return firebaseAuthModule.signInWithPopup(auth, new firebaseAuthModule.OAuthProvider('microsoft.com'));
+    return firebaseAuthModule.signInWithPopup(auth, createMicrosoftProvider(firebaseAuthModule));
   },
   signInWithApple: async () => {
     const { auth, firebaseAuthModule } = await getAuthClient();
     await startAuthWatcher();
-    return firebaseAuthModule.signInWithPopup(auth, new firebaseAuthModule.OAuthProvider('apple.com'));
+    return firebaseAuthModule.signInWithPopup(auth, createAppleProvider(firebaseAuthModule));
   },
   signInWithEmail: async (email: string, password: string) => {
     const { auth, firebaseAuthModule } = await getAuthClient();
@@ -189,19 +264,19 @@ export const authActions = {
     const { auth, firebaseAuthModule } = await getAuthClient();
     const user = auth.currentUser;
     if (!user) throw new Error('No user to link');
-    return firebaseAuthModule.linkWithPopup(user, new firebaseAuthModule.GoogleAuthProvider());
+    return firebaseAuthModule.linkWithPopup(user, createGoogleProvider(firebaseAuthModule));
   },
   linkWithMicrosoft: async () => {
     const { auth, firebaseAuthModule } = await getAuthClient();
     const user = auth.currentUser;
     if (!user) throw new Error('No user to link');
-    return firebaseAuthModule.linkWithPopup(user, new firebaseAuthModule.OAuthProvider('microsoft.com'));
+    return firebaseAuthModule.linkWithPopup(user, createMicrosoftProvider(firebaseAuthModule));
   },
   linkWithApple: async () => {
     const { auth, firebaseAuthModule } = await getAuthClient();
     const user = auth.currentUser;
     if (!user) throw new Error('No user to link');
-    return firebaseAuthModule.linkWithPopup(user, new firebaseAuthModule.OAuthProvider('apple.com'));
+    return firebaseAuthModule.linkWithPopup(user, createAppleProvider(firebaseAuthModule));
   },
   linkWithEmail: async (email: string, password: string) => {
     const { auth, firebaseAuthModule } = await getAuthClient();
@@ -218,5 +293,10 @@ export const getFirebaseSnapshot = () => ({ app: firebaseAppStore.get(), auth: f
 // Testing hooks for pure helpers/internal flows.
 export const __testables = {
   isProbablyPlaceholder,
+  isTruthyEnvFlag,
   getFirebaseConfig,
+  shouldUseAuthEmulator,
+  getAuthEmulatorUrl,
+  createMicrosoftProvider,
+  createAppleProvider,
 };

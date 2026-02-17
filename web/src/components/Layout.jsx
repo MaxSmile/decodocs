@@ -1,6 +1,7 @@
 import React from 'react';
 
 import Footer from './landing/Footer.jsx';
+import GoogleOneTap from './auth/GoogleOneTap.jsx';
 import SiteHeader from './SiteHeader.jsx';
 
 /**
@@ -9,23 +10,39 @@ import SiteHeader from './SiteHeader.jsx';
  * NOTE: This intentionally matches the landing design language (logo + light header)
  * so pages don't feel like separate products.
  */
-const Layout = ({ children, showHeader = false, showFooter = true, variant = 'marketing' }) => {
+const Layout = ({
+  children,
+  showHeader = true,
+  showFooter = true,
+  showOneTap = false,
+  showDecor = false,
+  variant = 'marketing',
+  onOpenPdf,
+}) => {
   const isAppLayout = variant === 'app';
 
   return (
     <div className={`min-h-screen bg-[#f7f6f2] text-slate-900 flex flex-col ${isAppLayout ? 'h-screen overflow-hidden' : ''}`}>
-      {/* Header */}
-      {showHeader && (
-        <SiteHeader variant={variant} />
-      )}
+      {showOneTap ? <GoogleOneTap /> : null}
+      <div className={`relative flex min-h-0 flex-1 flex-col ${showDecor ? 'overflow-hidden' : ''}`}>
+        {showDecor ? (
+          <div className="pointer-events-none absolute inset-0">
+            <div className="absolute -top-32 -right-20 h-72 w-72 rounded-full bg-[#d8e6ff] blur-3xl opacity-60 animate-float-slow" />
+            <div className="absolute top-40 -left-24 h-72 w-72 rounded-full bg-[#fde4c7] blur-3xl opacity-50 animate-float-slow" />
+          </div>
+        ) : null}
 
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col min-h-0">
-        {children}
-      </main>
+        {/* Header */}
+        {showHeader ? <SiteHeader variant={variant} onOpenPdf={onOpenPdf} /> : null}
 
-      {/* Footer */}
-      {showFooter ? <Footer /> : null}
+        {/* Main Content */}
+        <main className={`flex-1 flex flex-col min-h-0 ${showDecor ? 'relative z-10' : ''}`}>
+          {children}
+        </main>
+
+        {/* Footer */}
+        {showFooter ? <Footer /> : null}
+      </div>
     </div>
   );
 };

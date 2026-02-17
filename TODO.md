@@ -1,6 +1,6 @@
 # TODO (DecoDocs)
 
-_Last updated: February 2, 2026_
+_Last updated: February 17, 2026_
 
 This file mirrors `decodocs-repo/docs/ROADMAP.md` and lists actionable engineering + documentation tasks.
 
@@ -8,60 +8,25 @@ This file mirrors `decodocs-repo/docs/ROADMAP.md` and lists actionable engineeri
 
 ### Admin Portal (High priority)
 
-#### Decisions (confirmed)
-- **Admins:** any signed-in user with `@snapsign.com.au` email = **super admin** (single role for now).
-- **Hosting:** start with **staging** at `decadocs-admin.web.app` (new Firebase Hosting target).
-  - Production domain `admin.decodocs.com` later.
-- **Config model:** one Firestore doc per config:
-  - `admin/stripe`, `admin/plans`, `admin/flags`, `admin/policies`
-- **Audit log:** not required yet (add later once testing stabilizes).
+Admin-specific decisions, status, and deploy checklist are tracked in:
+- `admin/README.md`
+- `admin/TODO.md`
 
-#### v1 Scope (must-have)
-- [x] **Stripe config editor** for `admin/stripe`
-  - implemented in `decodocs/admin` as a JSON editor
-  - acceptance: update config without redeploy; webhook keeps working
-- [x] **Plans / entitlements editor** for `admin/plans`
-  - implemented in `decodocs/admin` as a JSON editor
-  - limits: max pages, daily calls, OCR on/off
-  - acceptance: changes reflected in gating + server enforcement
-- [x] **Feature flags editor** for `admin/flags`
-  - implemented in `decodocs/admin` as a JSON editor
-  - enable/disable experimental tools
-  - acceptance: flags are read by web + Functions and affect behavior
-- [x] **Usage policies / rate limits editor** for `admin/policies`
-  - implemented in `decodocs/admin` as a JSON editor
-  - acceptance: policies enforced server-side (Functions)
-
-#### Build plan
-- [x] Create a separate admin web app
-  - Firebase Hosting target: `decodocs-admin` (claimed + deployed)
-  - app scaffold in `decodocs/admin`
-- [x] Admin auth enforcement
-  - **Email/password auth only** (sign-in + simple registration)
-  - client-side gating:
-    - if email endsWith `@snapsign.com.au` → allow
-    - else → show **"Access denied"** (no admin UI)
-  - server-side enforcement (source of truth):
-    - `request.auth.token.email` endsWith `@snapsign.com.au`
-    - applied in Firestore rules for `admin/*`
-  - note: non-allowlisted users may still create accounts, but cannot read/write admin config
-- [x] Minimal UI screens
-  - [x] Dashboard (quick links)
-  - [x] Stripe (`admin/stripe`)
-  - [x] Plans (`admin/plans`)
-  - [x] Flags (`admin/flags`)
-  - [x] Policies (`admin/policies`)
-- [x] Security/rules
-  - Firestore rules: only allowlisted admins can read/write `admin/*`
-  - Next: add schema validation (Functions) for safer writes
+Remaining cross-project dependency:
+- [ ] Add schema validation in Functions for safer writes to `admin/*`.
 
 ### UI Quality & Consistency (High priority refactor)
-- [ ] **Unify layouts**: define one canonical `Layout` (header/footer/nav) and use it across all routes (Home, Pricing, Sign-in, Profile, Viewer, Editor, About/Terms/Privacy/Contact)
-  - Decide: keep landing style vs app style; remove the “two different products” feel
-- [ ] Add **DecoDocs logo + consistent nav** to the canonical layout (match landing brand)
+- [x] **Unify layouts**: define one canonical `Layout` (header/footer/nav) and use it across all routes (Home, Pricing, Sign-in, Profile, Viewer, Editor, About/Terms/Privacy/Contact)
+  - Done via canonical `web/src/components/Layout.jsx` (landing-aligned visual language) used by all React app routes.
+- [x] Add **DecoDocs logo + consistent nav** to the canonical layout (match landing brand)
+  - Canonical `SiteHeader` now uses consistent logo treatment + shared core nav across marketing and app routes.
 - [x] Remove/retire legacy/duplicate pages and styles (e.g. older `web/src/pages/*` vs `web/src/components/*`) to reduce confusion
-- [ ] Reduce inline-style sprawl: migrate repeated inline styles into shared components (Card/Button/Section) or Tailwind classes
-- [ ] Standardize typography + spacing tokens (one design system, even if lightweight)
+- [x] Reduce inline-style sprawl: migrate repeated inline styles into shared components (Card/Button/Section) or Tailwind classes
+  - Added shared `web/src/components/ui/Card.jsx`, `web/src/components/ui/PageSection.jsx`, `web/src/components/ui/Notice.jsx` and migrated Pricing/Sign-in/Sign-up/Profile pages to Tailwind/class-based styling.
+- [x] Standardize typography + spacing tokens (one design system, even if lightweight)
+  - Added global design tokens + component classes in `web/src/index.css` (`:root` typography/spacing/radius tokens + `dd-*` classes) and wired shared UI + key pages to use them.
+- [x] Custom 404 and 500 pages
+  - Added `web/src/components/NotFoundPage.jsx` and `web/src/components/ServerErrorPage.jsx`, routed catch-all to custom 404 and `/500` to custom 500, and wired `ErrorBoundary` to render the same 500 UI.
 
 #### Home page UI issues (as seen on mobile screenshots)
 - [x] Fix landing layout being “squashed”/broken on mobile due to **global CSS leaking onto `<main>`**
@@ -70,14 +35,17 @@ This file mirrors `decodocs-repo/docs/ROADMAP.md` and lists actionable engineeri
   - Scoped legacy `footer { ... }` rule to `.App:not(.homepage-app) footer` to avoid overriding the Tailwind landing/footer.
 - [x] Add a small “visual regression checklist” for mobile (Chrome Android + iOS Safari): Home, Pricing, View PDF, footer links.
   - Added `docs/VISUAL_REGRESSION_CHECKLIST.md`
-- [ ] Ensure hero/logo sizing is responsive on small screens (cap hero image height, prevent overflow, keep CTA visible above the fold).
+- [x] Ensure hero/logo sizing is responsive on small screens (cap hero image height, prevent overflow, keep CTA visible above the fold).
+  - Updated `web/src/components/landing/Hero.jsx` with mobile-first typography/spacing, capped hero visual height on small screens, and compact CTA spacing; adjusted header logo sizing in `SiteHeader`/island header.
 
 - [x] Brand polish: ensure "DecoDocs" and "Snap Sign Pty Ltd" are consistent across UI + docs (no legacy names)
 - [x] Replace placeholder Sign page with a clear "Signing MVP checklist" (show number of remaining tasks + CTA to analyze PDF + join waitlist)
   - Checklist (v1): signature placement UI, signer identity/consent, audit trail, doc hashing/integrity, signature appearance, signed PDF export, verification view, send-for-signing flow, storage/retention, legal/terms UX
 - [x] Add a visible "Free vs Pro" gating UX: explain *why* buttons are disabled + what upgrades unlock
 - [x] Harden analysis flow: loading/error/empty states for analysis results; avoid partial UI renders
-- [ ] **Authentication: add comprehensive sign-in options (Email, Google + One Tap, Microsoft, Apple)**: support real accounts (and upgrading from anonymous) so users can unlock Pro, storage, and cross-device continuity.
+- [~] **Authentication: add comprehensive sign-in options (Email, Google + One Tap, Microsoft, Apple)**: support real accounts (and upgrading from anonymous) so users can unlock Pro, storage, and cross-device continuity.
+  - Implemented in web app: provider buttons + email flows + anonymous linking + Google One Tap + friendly auth errors + Google auth telemetry events.
+  - Remaining: production provider configuration/verification in Firebase/Azure/Apple consoles.
   - [x] Define the exact auth UX + states (no ambiguity)
     - Required entry points:
       - A visible “Sign in” button in the header/footer (always accessible)
@@ -111,7 +79,7 @@ This file mirrors `decodocs-repo/docs/ROADMAP.md` and lists actionable engineeri
         - `auth_google_click`, `auth_google_success`, `auth_google_error`, `auth_one_tap_shown`, `auth_one_tap_success`, `auth_one_tap_dismissed`
     - Acceptance criteria:
       - Returning users see One Tap on Home (when not signed-in) and can complete sign-in without page navigation.
-  - [ ] Implement Microsoft sign-in (Firebase Auth via OAuthProvider `microsoft.com`)
+  - [~] Implement Microsoft sign-in (Firebase Auth via OAuthProvider `microsoft.com`)
     - Tasks:
       - Create an Azure AD app registration with redirect URIs for:
         - `https://decodocs.com/__/auth/handler`
@@ -124,7 +92,8 @@ This file mirrors `decodocs-repo/docs/ROADMAP.md` and lists actionable engineeri
         - Do not request Graph scopes unless Drive/OneDrive integration work begins
     - Acceptance criteria:
       - A new user can sign in with Microsoft and gets a stable Firebase `uid` with email attached (when available).
-  - [ ] Implement Apple sign-in (Firebase Auth via OAuthProvider `apple.com`) with production-ready prerequisites
+    - Status: web-side provider flow + scopes are implemented; Azure/Firebase Console provider setup still required.
+  - [~] Implement Apple sign-in (Firebase Auth via OAuthProvider `apple.com`) with production-ready prerequisites
     - Tasks:
       - Create Apple Service ID + Key; configure:
         - Redirect URI(s) to Firebase auth handler for the production domain(s)
@@ -136,7 +105,8 @@ This file mirrors `decodocs-repo/docs/ROADMAP.md` and lists actionable engineeri
         - Email may be hidden/relay; treat `email` as optional and allow account management without email display
     - Acceptance criteria:
       - Apple sign-in works on Safari and Chrome, and doesn’t break when email is withheld.
-  - [ ] Implement account linking + conflict handling (anonymous → provider)
+    - Status: web-side provider flow + scopes are implemented; Apple Service ID/domain verification/Firebase provider setup still required.
+  - [x] Implement account linking + conflict handling (anonymous → provider)
     - Tasks (explicit behavior):
       - If user is anonymous and chooses a provider, link credentials to the existing user (`linkWithPopup` / `linkWithRedirect`)
       - If credentials already exist on another account:
@@ -144,15 +114,20 @@ This file mirrors `decodocs-repo/docs/ROADMAP.md` and lists actionable engineeri
         - provide a safe merge strategy document (don’t auto-merge data silently)
     - Acceptance criteria:
       - Linking preserves user `uid` when possible; errors are handled with actionable UI (no raw Firebase error strings).
-  - [ ] Update web auth state model and docs (source of truth)
+    - Implemented in `web/src/components/SignInPage.jsx` + `web/src/components/SignUpPage.jsx` with conflict handling and friendly messaging.
+  - [x] Update web auth state model and docs (source of truth)
     - Code references:
-      - Current anonymous-only auth init: `decodocs-repo/web/src/context/AuthContext.jsx:3`, `decodocs-repo/web/src/context/AuthContext.jsx:73`
+      - Auth state + actions: `web/src/stores/authStore.ts`
+      - Auth context wrapper: `web/src/context/AuthContext.jsx`
     - Tasks:
       - Expand `AuthContext` to expose: `signInWithEmail`, `signUpWithEmail`, `signInWithGoogle`, `signInWithMicrosoft`, `signInWithApple`, `signOut`, `linkCurrentUser`
       - Ensure emulator support still works (`VITE_USE_FIREBASE_EMULATOR`)
-  - [ ] Add tests for auth flows (unit + e2e)
+    - Implemented in `web/src/stores/authStore.ts` (env overrides + `connectAuthEmulator`) and `web/src/context/AuthContext.jsx` (actions exposed to UI).
+  - [~] Add tests for auth flows (unit + e2e)
     - Unit:
       - Update/extend: `decodocs-repo/web/src/__tests__/AuthContext.test.jsx` to cover new methods and error cases
+      - Added coverage for provider telemetry/friendly errors in `web/src/components/__tests__/SignInPage.test.jsx`
+      - Added coverage for emulator wiring in `web/src/stores/authStore.test.ts`
     - E2E (Playwright):
       - Add a mock auth mode test that simulates:
         - anonymous → link → authenticated, and analysis gating disappears
@@ -246,12 +221,12 @@ This file mirrors `decodocs-repo/docs/ROADMAP.md` and lists actionable engineeri
 - [x] Docs: `docs/CLASSIFICATIONS_INTEGRATION.md` is the integration plan.
 
 ### Validation schema authoring (docs)
-- [ ] Define prompt-pack output schemas (JSON) for:
+- [x] Define prompt-pack output schemas (JSON) for:
   - [x] Company policies / governance docs (mandatory rules, vague language, conflicts, ownership/enforcement) — docs/validation/company-policy.md
   - [x] SOPs / guides (steps, prerequisites, ambiguous instructions, responsibility gaps, contradictions) — docs/validation/sop-procedure.md
-  - [ ] Informational docs (claims vs evidence, logic gaps)
-  - [ ] Decision/evaluation docs (assumptions, missing data)
-  - [ ] Representation docs (CV/bio: inconsistencies, omissions)
+  - [x] Informational docs (claims vs evidence, logic gaps) — docs/validation/informational-document.md
+  - [x] Decision/evaluation docs (assumptions, missing data) — docs/validation/decision-evaluation.md
+  - [x] Representation docs (CV/bio: inconsistencies, omissions) — docs/validation/representation-cv-bio.md
   - [x] Invoices (totals/tax/entity checks; cross-check vs PO/contract if provided) — docs/validation/invoice.md
   - [x] Job offer / offer letter — docs/validation/job-offer.md
   - [x] Associations constitution/charter — docs/validation/association-constitution.md
