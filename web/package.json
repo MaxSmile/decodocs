@@ -25,11 +25,11 @@
     "dev:spa": "vite",
     "build": "node ./scripts/write-version.mjs && astro build",
     "preview": "astro preview",
-    "test": "vitest",
-    "test:unit": "vitest --run",
+    "test": "vitest run",
+    "test:unit": "vitest run",
     "test:e2e": "playwright test playwright-tests/",
     "test:debug": "vitest --reporter=verbose",
-    "test:coverage": "vitest --coverage",
+    "test:coverage": "vitest run --coverage",
     "classifications:build": "node ./scripts/generate-classifications.mjs"
   },
   "eslintConfig": {
