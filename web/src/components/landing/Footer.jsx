@@ -34,6 +34,7 @@ const FooterLink = ({ href, children }) => {
 };
 
 const Footer = () => {
+  const logoSrc = typeof logo === 'string' ? logo : logo.src;
   const location = useLocation();
   const isHome = location.pathname === '/';
 
@@ -42,7 +43,7 @@ const Footer = () => {
       <div className="mx-auto grid w-full max-w-6xl gap-10 md:grid-cols-[1.2fr_0.8fr_0.8fr_0.8fr]">
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-3">
-            <img src={logo} alt="DecoDocs" className="h-10 w-10" />
+            <img src={logoSrc} alt="DecoDocs" className="h-10 w-10" />
             <div>
               <p className="text-base font-semibold text-slate-900">DecoDocs</p>
               <p className="text-xs text-slate-500">Understand documents before you sign</p>

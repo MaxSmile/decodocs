@@ -18,10 +18,8 @@ This document is the **source of truth** for:
 - Storage with us: **none** (browser-only)
 
 **Limits**
-- **20,000 tokens per Firebase uid-session** (same uid == same anonymous login session)
-
-> Note: Internally, enforcement will be done against **puid** (primary user identifier) once provider-linking is introduced.
-> See docs/AUTH_LINKING.md.
+- **20,000 tokens per identity session**.
+- Current implementation key is **puid** (today `puid == uid`; provider alias resolution can expand later).
 
 ### 1.2 Free
 **Definition:** Firebase Auth user that is **not** anonymous (Google/Email/Microsoft/Apple/etc) AND does **not** have an active subscription.
@@ -34,7 +32,7 @@ This document is the **source of truth** for:
 - Cloud connectors (later): user can connect Google Drive / OneDrive / iCloud as external sources (no storage on our side).
 
 **Limits**
-- **40,000 tokens per day (per Firebase `uid`)**
+- **40,000 tokens per day (UTC) per identity (`puid`)**
 
 ### 1.3 Pro (Individual)
 **Definition:** Non-anonymous Firebase Auth user AND Stripe subscription is **active** on the Pro plan.
@@ -62,6 +60,10 @@ This document is the **source of truth** for:
 - LLM tier: **premium** model.
 - Storage with us: **5 GB per user**.
 
+**Limits**
+- Product policy: Business is a distinct paid tier.
+- Runtime budget behavior today follows the Pro capability path (no hard app-layer token cap), with team/org controls layered on top.
+
 ### 1.5 Enterprise
 **Definition:** Contracted org account (plan flag set by admin/config), non-anonymous users under the org, typically for teams needing **more than 5 worker accounts**.
 
@@ -78,9 +80,11 @@ This document is the **source of truth** for:
 ## 2) Feature Gating Rules
 
 ### 2.1 AI analysis
-- Anonymous: allowed within **20k tokens per uid-session**
-- Free: allowed within **40k tokens/day**
-- Pro / Business / Enterprise: unlimited (subject to fair-use)
+- Anonymous: allowed within **20k tokens per identity session**
+- Free: allowed within **40k tokens/day (UTC)**
+- Pro: no hard app-layer cap (subject to fair-use)
+- Business: Pro-capable budget behavior (plus org/team controls)
+- Enterprise: contract-defined policy
 
 ### 2.2 OCR / scanned PDFs
 - We detect scanned PDFs.

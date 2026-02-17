@@ -13,6 +13,7 @@ const marketingNav = [
 ];
 
 const SiteHeader = ({ variant = 'marketing', onOpenPdf, children }) => {
+  const logoSrc = typeof logo === 'string' ? logo : logo.src;
   const location = useLocation();
   const { authState } = useAuth();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -109,7 +110,7 @@ const SiteHeader = ({ variant = 'marketing', onOpenPdf, children }) => {
     <header className="sticky top-0 z-30 w-full border-b border-white/40 bg-white/70 backdrop-blur-xl">
       <div className={`mx-auto flex w-full items-center justify-between px-6 ${isAppLayout ? 'h-14 py-2' : 'max-w-6xl py-4'}`}>
         <Link to="/" className="flex items-center gap-3 text-lg font-bold tracking-tight text-slate-900 no-underline">
-          <img src={logo} alt="DecoDocs" className="h-9 w-9" />
+          <img src={logoSrc} alt="DecoDocs" className="h-9 w-9" />
           {!isAppLayout && 'DecoDocs'}
         </Link>
 

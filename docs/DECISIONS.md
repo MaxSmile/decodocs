@@ -31,10 +31,13 @@
 - Firestore is used for metadata/ledgers (e.g. docHash), but not required as the canonical file store
 
 ## Entitlements / Tiers (Product + Technical)
-- 3 user types:
+- Core runtime tiers:
   - Anonymous = Firebase Anonymous Auth
   - Free = any non-anonymous Firebase Auth provider without an active subscription
-  - Pro = non-anonymous + Stripe subscription active
+  - Pro-capable paid tier = active paid subscription (includes Pro and Business behavior in current runtime path)
+- Product tiers:
+  - Pro = non-anonymous + active Pro subscription
+  - Business = paid team tier (currently mapped to Pro-capable runtime behavior)
 - Stripe implementation principle: **don’t overcomplicate state mapping**.
   - Stripe webhooks are authoritative.
   - We set user Pro state on subscription activation webhook events.
@@ -43,7 +46,7 @@
 - AI access is available to all tiers, but with limits:
   - Anonymous: **20k tokens per Firebase uid** (same uid == same auth session)
   - Free: **40k tokens/day per uid**
-  - Pro: unlimited (until abuse policy is introduced)
+  - Pro-capable paid tiers (Pro/Business): unlimited in app-layer budget gate (until abuse policy is introduced)
 - OCR/scanned PDFs require Pro (Free/Anonymous must not use a vision model)
 - Pro includes **5GB** storage hosted on Contabo VPS (custom storage)
 - We store `docHash` metadata for all users in Firestore `docshashes` collection with **forever** retention (explicitly documented)
@@ -53,6 +56,7 @@
 - Linking is universal: users may link multiple providers over time.
 - We treat all provider identities as aliases of a **puid (primary user identifier)**, resolved server-side.
 - All counting and enforcement is per **puid** (usage, docHash, Stripe entitlement, storage quota).
+- Today, `puid == uid`; alias expansion is incremental.
 - puid is **not exposed** to the client UI; it is an internal Functions/backend concept.
 - See: docs/AUTH_LINKING.md
 

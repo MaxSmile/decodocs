@@ -10,6 +10,8 @@ const AnalysisToolbox = ({
   onExplainSelection,
   onHighlightRisks,
   onTranslateToPlainEnglish,
+  onSummarizeKeyPoints,
+  onSuggestImprovements,
   isLoading,
   isAuthenticated,
   hasDocument,
@@ -87,12 +89,14 @@ const AnalysisToolbox = ({
           Translate to Plain English
         </button>
         <button
+          onClick={onSummarizeKeyPoints}
           disabled={isDisabled}
           className="w-full bg-gray-600 text-white px-4 py-2.5 text-sm rounded hover:bg-gray-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed text-left"
         >
           Summarize Key Points
         </button>
         <button
+          onClick={onSuggestImprovements}
           disabled={isDisabled}
           className="w-full bg-gray-600 text-white px-4 py-2.5 text-sm rounded hover:bg-gray-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed text-left"
         >

@@ -56,6 +56,23 @@ For each supported type, DecoDocs maintains explicit validation criteria docs:
 
 Prompts must implement these criteria (criteria are not hidden inside prompts).
 
+## Prompt Packs (Required MDX Contract)
+
+Each document type used for analysis must have a matching MDX prompt pack file.
+
+Required structure:
+- Base prompt pack (always present): `docs/prompts/GENERAL_DOC_TYPE.mdx`
+- Type prompt pack (one per type): `docs/prompts/types/<typeId>.mdx`
+
+Required rules:
+- Every `typeId` in the document type registry must have a matching `docs/prompts/types/<typeId>.mdx`.
+- Every type prompt pack must inherit from `GENERAL_DOC_TYPE`.
+- Type prompt packs define only type-specific prompts/overrides; shared prompts stay in `GENERAL_DOC_TYPE`.
+- If a type prompt pack is missing, the type is incomplete and must not be considered production-ready.
+
+Conceptual composition:
+- Final prompt stack = `GENERAL_DOC_TYPE` + `docs/prompts/types/<typeId>.mdx`
+
 ## Routing: actions/prompt packs
 
 ### UNREADABLE
@@ -110,4 +127,3 @@ Prompts must implement these criteria (criteria are not hidden inside prompts).
 ## Storage of classification
 - Store detected type + confidence per `docHash`.
 - Store user override per **puid + docHash** (users are isolated).
-

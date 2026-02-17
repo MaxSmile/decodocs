@@ -27,12 +27,14 @@ import { useValidationSpec } from '../hooks/useValidationSpec';
 import { usePdfJs } from '../hooks/usePdfJs';
 import { useDocumentAnalysis } from '../hooks/useDocumentAnalysis';
 import { useDocumentTypeDetection } from '../hooks/useDocumentTypeDetection';
+import { useTextSelection } from '../hooks/useTextSelection';
 import {
   createUploadUrl,
   createDownloadUrl,
   uploadViaPresignedUrl,
   downloadBlobViaPresignedUrl,
 } from '../services/storageService';
+import { openPdfOrEnvelopeFile } from '../services/envelopeService';
 
 const DocumentViewer = () => {
   const { authState, app } = useAuth();
@@ -73,7 +75,11 @@ const DocumentViewer = () => {
     handleExplainSelection,
     handleHighlightRisks,
     handleTranslateToPlainEnglish,
+    handleSummarizeKeyPoints,
+    handleSuggestImprovements,
   } = useDocumentAnalysis({ functions, authState, isMockMode });
+
+  const textSelection = useTextSelection();
 
   const {
     detectedDocTypeId,
@@ -186,23 +192,32 @@ const DocumentViewer = () => {
   }, [location, fileName, pdfLibLoaded]);
 
   // Handlers
-  const handleFileUpload = (event) => {
+  const handleFileUpload = async (event) => {
     const files = Array.from(event.target.files);
-    const pdfFiles = files.filter((file) => file.type === 'application/pdf');
+    if (files.length === 0) return;
 
-    if (pdfFiles.length > 0) {
-      const file = pdfFiles[0];
+    try {
+      const file = files[0];
+      const opened = await openPdfOrEnvelopeFile(file);
       const newDocument = {
         id: Date.now() + Math.random(),
-        name: file.name,
-        size: file.size,
-        type: file.type,
-        file: file,
+        name: opened.pdfFile.name,
+        size: opened.pdfFile.size,
+        type: opened.pdfFile.type,
+        file: opened.pdfFile,
+        sourceType: opened.source,
+        envelope: opened.envelope || null,
       };
 
       setSelectedDocument(newDocument);
       setCloudObjectKey(null);
       navigate('/view', { state: { document: newDocument } });
+    } catch (err) {
+      setGate({
+        title: 'Unsupported or invalid file',
+        message: err?.message || 'Please upload a valid .pdf or .snapsign file.',
+        primaryLabel: 'OK',
+      });
     }
   };
 
@@ -389,15 +404,14 @@ const DocumentViewer = () => {
       {annotations.filter((a) => a.pageNum === pageNum).map((ann) => (
         <div
           key={ann.id}
-          className={`absolute px-2 py-1 text-sm shadow-sm cursor-move rounded ${
-            ann.type === 'checkmark'
+          className={`absolute px-2 py-1 text-sm shadow-sm cursor-move rounded ${ann.type === 'checkmark'
               ? 'text-green-700 text-2xl font-bold'
               : ann.type === 'date'
-              ? 'bg-amber-50 border border-amber-300 text-amber-800'
-              : ann.type === 'image'
-              ? 'bg-purple-50 border border-purple-300 text-purple-700'
-              : 'bg-yellow-100 border border-yellow-300 text-slate-800'
-          }`}
+                ? 'bg-amber-50 border border-amber-300 text-amber-800'
+                : ann.type === 'image'
+                  ? 'bg-purple-50 border border-purple-300 text-purple-700'
+                  : 'bg-yellow-100 border border-yellow-300 text-slate-800'
+            }`}
           style={{ left: ann.x, top: ann.y, zIndex: 50 }}
           onClick={(e) => e.stopPropagation()}
         >
@@ -510,9 +524,12 @@ const DocumentViewer = () => {
                 <div id="viewer-quick-actions" className="flex items-center gap-0.5 ml-1">
                   <button
                     id="btn-share-link"
-                    onClick={() => alert('Create a shareable link (coming soon)')}
+                    onClick={() => {
+                      if (!selectedDocument) return;
+                      navigate('/sign', { state: { document: selectedDocument } });
+                    }}
                     className="p-1.5 rounded-md text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
-                    title="Create a shareable link"
+                    title="Send for signature"
                   >
                     <HiLink className="w-4 h-4" />
                   </button>
@@ -577,50 +594,50 @@ const DocumentViewer = () => {
 
               {/* Signing & annotation tools */}
               <div id="viewer-signing-tools" className="flex items-center gap-0.5">
-              <ViewerToolButton
-                active={activeTool === 'select'}
-                icon={HiCursorClick}
-                label="Select"
-                onClick={() => setActiveTool('select')}
-              />
-              <div className="w-px h-4 bg-slate-200 mx-1" />
-              <ViewerToolButton
-                active={activeTool === 'signature'}
-                icon={HiPencil}
-                label="Sign"
-                onClick={() => {
-                  if (pendingSignature) {
-                    // Already have a signature adopted, just activate placement
-                    setActiveTool('signature');
-                  } else {
-                    setSignatureModalOpen(true);
-                  }
-                }}
-              />
-              <ViewerToolButton
-                active={activeTool === 'text'}
-                icon={HiAnnotation}
-                label="Text"
-                onClick={() => setActiveTool('text')}
-              />
-              <ViewerToolButton
-                active={activeTool === 'date'}
-                icon={HiCalendar}
-                label="Date"
-                onClick={() => setActiveTool('date')}
-              />
-              <ViewerToolButton
-                active={activeTool === 'image'}
-                icon={HiPhotograph}
-                label="Image"
-                onClick={() => setActiveTool('image')}
-              />
-              <ViewerToolButton
-                active={activeTool === 'checkmark'}
-                icon={HiCheck}
-                label="Check"
-                onClick={() => setActiveTool('checkmark')}
-              />
+                <ViewerToolButton
+                  active={activeTool === 'select'}
+                  icon={HiCursorClick}
+                  label="Select"
+                  onClick={() => setActiveTool('select')}
+                />
+                <div className="w-px h-4 bg-slate-200 mx-1" />
+                <ViewerToolButton
+                  active={activeTool === 'signature'}
+                  icon={HiPencil}
+                  label="Sign"
+                  onClick={() => {
+                    if (pendingSignature) {
+                      // Already have a signature adopted, just activate placement
+                      setActiveTool('signature');
+                    } else {
+                      setSignatureModalOpen(true);
+                    }
+                  }}
+                />
+                <ViewerToolButton
+                  active={activeTool === 'text'}
+                  icon={HiAnnotation}
+                  label="Text"
+                  onClick={() => setActiveTool('text')}
+                />
+                <ViewerToolButton
+                  active={activeTool === 'date'}
+                  icon={HiCalendar}
+                  label="Date"
+                  onClick={() => setActiveTool('date')}
+                />
+                <ViewerToolButton
+                  active={activeTool === 'image'}
+                  icon={HiPhotograph}
+                  label="Image"
+                  onClick={() => setActiveTool('image')}
+                />
+                <ViewerToolButton
+                  active={activeTool === 'checkmark'}
+                  icon={HiCheck}
+                  label="Check"
+                  onClick={() => setActiveTool('checkmark')}
+                />
               </div>
             </div>
           </div>
@@ -691,14 +708,17 @@ const DocumentViewer = () => {
             onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
             onAnalyzeDocument={() => handleAnalyzeDocument({ selectedDocument, pdfTextContent, docHash, numPages, updateAnnotations: updateAnnotationsFromAnalysis })}
             onAnalyzeByType={() => handleAnalyzeByType({ selectedDocument, pdfTextContent, docHash })}
-            onExplainSelection={() => handleExplainSelection({ selectedDocument, docHash, pdfTextContent })}
+            onExplainSelection={() => handleExplainSelection({ selectedDocument, docHash, pdfTextContent, selection: textSelection })}
             onHighlightRisks={() => handleHighlightRisks({ selectedDocument, docHash, pdfTextContent, setRiskBadges })}
             onTranslateToPlainEnglish={() => handleTranslateToPlainEnglish({ selectedDocument, docHash, pdfTextContent })}
+            onSummarizeKeyPoints={() => handleSummarizeKeyPoints({ selectedDocument, docHash, pdfTextContent })}
+            onSuggestImprovements={() => handleSuggestImprovements({ selectedDocument, docHash, pdfTextContent })}
             isLoading={isLoading}
             isAuthenticated={authState.status === 'authenticated'}
             hasDocument={!!selectedDocument}
             selectedDocument={selectedDocument}
             analysisResults={analysisResults}
+            textSelection={textSelection}
           />
         </div>
       </div>
@@ -711,11 +731,10 @@ const ViewerToolButton = ({ active, icon: Icon, label, onClick }) => (
   <button
     onClick={onClick}
     title={label}
-    className={`flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-medium transition-all ${
-      active
+    className={`flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-medium transition-all ${active
         ? 'bg-slate-200/80 text-slate-800'
         : 'text-slate-400 hover:bg-slate-100 hover:text-slate-700'
-    }`}
+      }`}
   >
     <Icon className="w-4 h-4" />
     <span className="hidden sm:inline">{label}</span>

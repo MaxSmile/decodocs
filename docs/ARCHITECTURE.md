@@ -1,236 +1,86 @@
 # DecoDocs Architecture
 
 ## Overview
-
-DecoDocs follows a modern, scalable architecture with a React frontend and Firebase backend services. The system is designed to handle document analysis using AI, with a focus on security, performance, and user experience.
+DecoDocs uses a hybrid web architecture:
+- marketing pages rendered statically for SEO/performance
+- app workflows rendered in React
+- server-authoritative Firebase Functions for AI and entitlements
 
 ## High-Level Architecture
 
-```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   Client       │    │   Frontend       │    │   Backend       │
-│   Applications │◄──►│   (SPA)          │◄──►│   Services      │
-│                │    │                  │    │                 │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
-                              │                          │
-                              ▼                          ▼
-                    ┌──────────────────┐    ┌──────────────────┐
-                    │   State Mgmt     │    │   Data Storage   │
-                    │   (React Hooks)  │    │   (Planned)      │
-                    └──────────────────┘    └──────────────────┘
-                              │
-                              ▼
-                       ┌──────────────────┐
-                       │    AI Service    │
-                       │  (Google Gemini) │
-                       └──────────────────┘
+```text
+Browser
+  ├─ Marketing pages (static HTML)
+  └─ App UI (React)
+        └─ Firebase Functions (callable)
+              ├─ Entitlements / budgets
+              ├─ Analysis orchestration
+              └─ Usage ledgers/events
 ```
 
-## Frontend Architecture
+## Frontend
 
-### React Application Structure
+- Marketing: static-first pages for fast first render and better Core Web Vitals
+- App: React-based document viewer/editor and authenticated workflows
+- Routing:
+  - marketing/documentation paths are static-routed
+  - app paths are served via app shell + client routing
+- State:
+  - local component state/hooks for UI
+  - shared auth state via central store
 
-```
-web/
-├── public/
-├── src/
-│   ├── components/
-│   │   ├── HomePage.js
-│   │   ├── DocumentViewer.js
-│   │   └── DocumentEditor.js
-│   ├── __tests__/
-│   ├── setupTests.js
-│   ├── setupProxy.js
-│   ├── App.js
-│   ├── App.css
-│   └── index.js
-├── package.json
-└── README.md
-```
+## Authentication (Current)
+Authentication is active now (not planned):
+- Firebase Auth providers: anonymous, email/password, Google, Apple, Microsoft
+- Anonymous-first session model
+- Provider linking for continuity
+- Server-side entitlement checks in Functions (client tier is never trusted)
 
-### Component Architecture
+## AI Analysis Pipeline
 
-#### Router Layer
-- **App.js**: Root component with routing configuration
-- **React Router**: Handles navigation between views
-- **Route Components**: Dedicated components for each view
+1. Client extracts text from PDF and computes `docHash`.
+2. Client calls `preflightCheck`.
+3. Client calls `analyzeText` or `analyzeByType`.
+4. Functions enforce tier budgets and OCR gating.
+5. Functions return structured analysis payload.
 
-#### View Components
-- **HomePage**: Landing page with document upload
-- **DocumentViewer**: Analysis-focused document viewing
-- **DocumentEditor**: Editing and signing interface
+## Envelope Pipeline (.snapsign)
 
-#### Reusable Components
-- **PDF Viewer**: Embedded PDF display functionality
-- **Analysis Tools**: Common analysis interfaces
-- **Signing Tools**: Document signing components
+- Envelope processing is client-side only.
+- Browser handles create/extract/validate of `.snapsign` ZIP files via `JSZip`.
+- Integrity is enforced with SHA-256 hash in `manifest.json`.
+- Relevant module: `Decodocs/web/src/services/envelopeService.js`.
+- Current UI entry points: `Decodocs/web/src/components/SignPage.jsx` and `Decodocs/web/src/components/DocumentViewer.jsx`.
+- Sender email flow is manual: user downloads `.snapsign`, then sends from their own email client with manual attachments.
+- Functions do not expose envelope HTTP endpoints and do not orchestrate recipient invite/session lifecycle.
+- Canonical envelope tests are client-side unit tests in `Decodocs/web/src/__tests__/envelopeService.test.js`.
 
-### State Management
+## Tier Budget Enforcement
 
-The application uses React's built-in state management:
+Current enforced budgets:
+- Anonymous: 20k tokens/session identity
+- Free: 40k tokens/day (UTC)
+- Pro: unrestricted in this app-layer budget gate
+- Business: product tier documented as Pro-capable team tier; runtime capability currently follows Pro path until dedicated branching is enabled
 
-- **useState**: Component-level state
-- **useEffect**: Side effects and lifecycle management
-- **useRef**: Access to DOM elements
-- **useNavigate/useParams**: Routing state (React Router)
+## Backend
 
-### Styling Architecture
+- Firebase Functions (Node.js)
+- Firestore collections used for entitlement and usage ledgers:
+  - `users`
+  - `usage_daily`
+  - `usage_events`
+  - `docshashes`
+- Storage for paid tiers is S3-compatible MinIO on VPS using pre-signed URLs
 
-- **CSS Modules**: Component-scoped styles
-- **Responsive Design**: Mobile-first approach
-- **Consistent UI**: Unified design language
+## Security
 
-## Backend Architecture
+- All auth/entitlement checks are server-side
+- No AI provider secrets in client
+- Pre-signed URL access for storage operations
+- Audit-friendly usage events in Firestore
 
-### Firebase Functions Structure
+## Notes
 
-```
-functions/
-├── index.js
-├── package.json
-└── node_modules/
-```
-
-### Admin Configuration (planned)
-- Avoid client `.env` config for feature constants.
-- Use Firestore for admin-managed constants (e.g. `admin_constants`).
-- Provide a separate admin web app:
-  - staging: `decadocs-admin.web.app`
-  - production: `admin.decodocs.com`
-
-### Service Layer
-
-#### AI Processing Service
-- **LLM provider(s)**: Gemini initially (e.g. Gemini 2.x Flash), but designed to be swappable.
-- **DSPy prompt programs (planned)**:
-  - document → structured facts → risks → answers
-  - allows automatic prompt optimization to minimize token waste
-  - improves predictability of token usage over time
-- **Prompt Engineering**: Structured outputs as JSON for consistent rendering and evaluation
-
-#### Document Analysis Service
-- **Text Extraction**: PDF content processing
-- **Risk Assessment**: Automated risk detection
-- **Content Classification**: Document type identification
-
-### API Layer
-
-#### REST API Design
-- **Consistent Response Format**: Standardized JSON responses
-- **Error Handling**: Comprehensive error reporting
-- **Rate Limiting**: Planned for production
-- **CORS Support**: Cross-origin resource sharing
-
-## Data Flow
-
-### Document Analysis Flow
-
-1. **Client Request**: User uploads document or selects text
-2. **Frontend Processing**: Content preparation and validation
-3. **API Call**: Request sent to Firebase Functions
-4. **AI Processing**: Gemini model processes the content
-5. **Response Generation**: Structured JSON response
-6. **Frontend Rendering**: Results displayed to user
-
-### Security Flow
-
-1. **Input Validation**: Client-side validation
-2. **API Authentication**: Planned for production
-3. **Data Sanitization**: Server-side cleaning
-4. **Secure Transmission**: HTTPS encryption
-5. **Output Validation**: Response integrity checks
-
-## Technology Stack
-
-### Frontend Technologies
-- **React 18**: Component-based UI
-- **React Router 6**: Client-side routing
-- **JavaScript ES6+**: Modern language features
-- **CSS3**: Styling and animations
-- **Create React App**: Build tooling
-
-### Backend Technologies
-- **Firebase Functions**: Serverless compute
-- **Node.js 18**: Runtime environment
-- **Google Generative AI SDK**: AI integration
-- **Express.js**: Web framework (built into Firebase Functions)
-
-### Infrastructure
-- **Firebase Hosting**: Static asset delivery
-- **CDN**: Global content distribution
-- **SSL/TLS**: Secure communications
-
-## Storage Architecture
-
-### Pro Tier Storage
-- **Provider**: Contabo VPS (self-hosted)
-- **Technology**: MinIO (S3-compatible object storage)
-- **Capacity**: 5GB per user
-- **Access**: Public via Nginx TLS proxy (API only)
-- **Ports**:
-  - S3 API: `7433` (HTTPS via Nginx → MinIO 9000)
-  - Console: SSH tunnel only (not publicly exposed)
-  - Server URL: `https://storage.smrtai.top` (for pre-signed URLs)
-- **Security**: Pre-signed URLs for client access; credentials never exposed; console admin access via SSH tunnel only
-- **Internal**: MinIO ports 9000/9001 are localhost-only, only accessible via Nginx proxy
-
-### Data Flow
-1. Client requests S3 object via `https://storage.smrtai.top/`
-2. Nginx TLS proxy (port 7433) forwards to MinIO API (127.0.0.1:9000)
-3. MinIO generates pre-signed URL with `https://storage.smrtai.top/` prefix
-4. Client downloads directly using pre-signed URL (no intermediate server)
-
-## Performance Considerations
-
-### Frontend Performance
-- **Code Splitting**: Lazy loading of components
-- **Optimized Bundles**: Minified and compressed assets
-- **Virtual Scrolling**: Efficient rendering for large documents
-- **Memoization**: Prevent unnecessary re-renders
-
-### Backend Performance
-- **AI Model Selection**: Gemini 2.0 Flash for efficiency
-- **Caching Strategy**: Planned for frequently accessed data
-- **Request Optimization**: Minimal data transfer
-- **Function Warm-up**: Cold start mitigation strategies
-
-## Security Architecture
-
-### Data Protection
-- **HTTPS**: Encrypted communication
-- **Input Validation**: Sanitization of user inputs
-- **Content Security Policy**: Prevention of XSS attacks
-- **Secure Headers**: Protection against common vulnerabilities
-
-### Access Control
-- **Authentication**: Planned for user accounts
-- **Authorization**: Role-based access control
-- **Rate Limiting**: Protection against abuse
-- **Audit Logging**: Activity tracking
-
-## Scalability Considerations
-
-### Horizontal Scaling
-- **Stateless Functions**: Easy scaling of backend services
-- **CDN Distribution**: Global content delivery
-- **Database Sharding**: Planned for data storage
-
-### Load Management
-- **Caching Layers**: Reduced computation load
-- **Queue Systems**: Asynchronous processing
-- **Auto-scaling**: Dynamic resource allocation
-
-## Future Architecture Enhancements
-
-### Planned Components
-- **User Authentication System**
-- **Subscription Management**
-- **Document Storage Service**
-- **Real-time Collaboration**
-- **Advanced Analytics Dashboard**
-
-### Infrastructure Improvements
-- **Database Integration**: Persistent data storage
-- **Caching Layer**: Redis or similar
-- **Monitoring**: Application performance tracking
-- **Logging**: Comprehensive system logging
+- Some advanced AI/type-specific execution is still placeholder/heuristic and is documented in roadmap/spec files.
+- See `SUBSCRIPTION_TIERS.md` and `STATUS_SUMMARY.md` for product-policy and status updates.

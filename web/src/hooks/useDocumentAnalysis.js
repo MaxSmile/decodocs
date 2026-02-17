@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { httpsCallable } from 'firebase/functions';
 import { analyzeByTypeCall } from '../services/typeAnalysisService';
 import { preflightCheckCall } from '../services/preflightService';
 import { analyzeTextCall } from '../services/analyzeTextService';
+import { explainSelectionCall, highlightRisksCall, translateToPlainEnglishCall } from '../services/analysisService';
 import { buildDocStats } from '../utils/docStats';
 
 export const useDocumentAnalysis = ({ functions, authState, isMockMode }) => {
@@ -249,7 +249,7 @@ export const useDocumentAnalysis = ({ functions, authState, isMockMode }) => {
                     risks: result.data.result.risks.map((risk) => ({
                         id: risk.id,
                         clause: risk.title,
-                        riskLevel: risk.severity,
+                        riskLevel: risk.severity, // Fixed mapping
                         description: risk.whyItMatters,
                         explanation: risk.whatToCheck.join('; '),
                     })),
@@ -282,6 +282,7 @@ export const useDocumentAnalysis = ({ functions, authState, isMockMode }) => {
                         primaryLabel: 'Upgrade to Pro',
                         primaryTo: '/pricing',
                         secondaryLabel: 'Cancel',
+                        secondaryTo: null,
                         secondaryTo: null,
                     });
                     return;
@@ -353,7 +354,8 @@ export const useDocumentAnalysis = ({ functions, authState, isMockMode }) => {
         }
     };
 
-    const handleExplainSelection = async ({ selectedDocument, docHash, pdfTextContent }) => {
+    const handleExplainSelection = async (args) => {
+        const { selectedDocument, docHash, pdfTextContent } = args;
         if (!selectedDocument || !docHash) return;
 
         if (!isFirebaseAvailable()) {
@@ -361,31 +363,39 @@ export const useDocumentAnalysis = ({ functions, authState, isMockMode }) => {
             return;
         }
 
-        const selection = 'Limitation of liability clause';
+        const selection = args.selection?.text;
+        if (!selection) {
+            setGate({
+                title: 'No selection',
+                message: 'Please select some text in the document first.',
+                primaryLabel: 'OK',
+            });
+            return;
+        }
 
         try {
-            let result;
+            let data;
             if (isMockMode) {
                 const response = await fetch('/explainSelection', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ docHash, selection, documentContext: pdfTextContent }),
                 });
-                result = { data: await response.json() };
+                data = await response.json();
             } else {
-                const explainSelection = httpsCallable(functions, 'explainSelection');
-                result = await explainSelection({
+                data = await explainSelectionCall({
+                    functions,
                     docHash,
                     selection,
                     documentContext: pdfTextContent,
                 });
             }
 
-            if (result.data.success) {
-                alert(`Explanation: ${result.data.explanation.plainExplanation}`);
+            if (data.ok) { // Fixed: check for ok instead of success
+                alert(`Explanation: ${data.explanation.plainExplanation}`);
             } else {
-                console.error('Explanation failed:', result.data);
-                throw new Error(result.data.error || 'Explanation failed');
+                console.error('Explanation failed:', data);
+                throw new Error(data.error || 'Explanation failed');
             }
         } catch (error) {
             console.error('Error explaining selection:', error);
@@ -404,41 +414,41 @@ export const useDocumentAnalysis = ({ functions, authState, isMockMode }) => {
         setIsLoading(true);
 
         try {
-            let result;
+            let data;
             if (isMockMode) {
                 const response = await fetch('/highlightRisks', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ docHash, documentText: pdfTextContent, documentType: 'contract' }),
                 });
-                result = { data: await response.json() };
+                data = await response.json();
             } else {
-                const highlightRisks = httpsCallable(functions, 'highlightRisks');
-                result = await highlightRisks({
+                data = await highlightRisksCall({
+                    functions,
                     docHash,
                     documentText: pdfTextContent,
                     documentType: 'contract',
                 });
             }
 
-            if (result.data.success) {
-                alert(`Found ${result.data.risks.summary.totalRisks} risks in the document.`);
+            if (data.ok) { // Fixed: check for ok
+                alert(`Found ${data.risks.summary.totalRisks} risks in the document.`);
 
                 const newRiskBadges =
-                    result.data.risks.items?.map((risk, idx) => ({
+                    data.risks.items?.map((risk, idx) => ({
                         id: idx,
                         pageNum: 1,
                         x: 150 + idx * 40,
                         y: 150 + idx * 35,
-                        level: risk.riskLevel,
+                        level: risk.severity, // Fixed: map severity to level
                         description: risk.description,
                         explanation: risk.explanation,
                     })) || [];
 
                 setRiskBadges(newRiskBadges);
             } else {
-                console.error('Risk highlighting failed:', result.data);
-                throw new Error(result.data.error || 'Risk highlighting failed');
+                console.error('Risk highlighting failed:', data);
+                throw new Error(data.error || 'Risk highlighting failed');
             }
         } catch (error) {
             console.error('Error highlighting risks:', error);
@@ -459,34 +469,46 @@ export const useDocumentAnalysis = ({ functions, authState, isMockMode }) => {
         try {
             const legalText = pdfTextContent.substring(0, 500);
 
-            let result;
+            let data;
             if (isMockMode) {
                 const response = await fetch('/translateToPlainEnglish', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ docHash, legalText }),
                 });
-                result = { data: await response.json() };
+                data = await response.json();
             } else {
-                const translateToPlainEnglish = httpsCallable(functions, 'translateToPlainEnglish');
-                result = await translateToPlainEnglish({
+                data = await translateToPlainEnglishCall({
+                    functions,
                     docHash,
                     legalText,
                 });
             }
 
-            if (result.data.success) {
+            if (data.ok) { // Fixed: check for ok
                 alert(
-                    `Original: ${result.data.translation.originalText}\n\nPlain English: ${result.data.translation.plainEnglishTranslation}`
+                    `Original: ${data.translation.originalText}\n\nPlain English: ${data.translation.plainEnglishTranslation}`
                 );
             } else {
-                console.error('Translation failed:', result.data);
-                throw new Error(result.data.error || 'Translation failed');
+                console.error('Translation failed:', data);
+                throw new Error(data.error || 'Translation failed');
             }
         } catch (error) {
             console.error('Error translating to plain English:', error);
             throw error;
         }
+    };
+
+    const handleSummarizeKeyPoints = async ({ selectedDocument, docHash, pdfTextContent }) => {
+        // Reuse analyzeText with specific options
+        if (!selectedDocument || !docHash) return;
+        return handleAnalyzeDocument({ selectedDocument, pdfTextContent, docHash, numPages: 1 }); // Simplification: reuse full analysis for now as it includes summary
+    };
+
+    const handleSuggestImprovements = async ({ selectedDocument, docHash, pdfTextContent }) => {
+        // Reuse analyzeText
+        if (!selectedDocument || !docHash) return;
+        return handleAnalyzeDocument({ selectedDocument, pdfTextContent, docHash, numPages: 1 });
     };
 
     return {
@@ -499,5 +521,7 @@ export const useDocumentAnalysis = ({ functions, authState, isMockMode }) => {
         handleExplainSelection,
         handleHighlightRisks,
         handleTranslateToPlainEnglish,
+        handleSummarizeKeyPoints,
+        handleSuggestImprovements,
     };
 };

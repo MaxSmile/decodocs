@@ -17,11 +17,14 @@ const AnalysisSidebar = ({
     onExplainSelection,
     onHighlightRisks,
     onTranslateToPlainEnglish,
+    onSummarizeKeyPoints,
+    onSuggestImprovements,
     isLoading,
     isAuthenticated,
     hasDocument,
     selectedDocument,
-    analysisResults
+    analysisResults,
+    textSelection
 }) => {
     const [activeTab, setActiveTab] = useState('tools'); // 'tools' | 'results'
 
@@ -64,8 +67,8 @@ const AnalysisSidebar = ({
                 <button
                     onClick={() => setActiveTab('tools')}
                     className={`flex-1 py-3 text-sm font-medium transition-colors ${activeTab === 'tools'
-                            ? 'text-purple-600 border-b-2 border-purple-600 bg-purple-50/50'
-                            : 'text-slate-600 hover:bg-slate-50'
+                        ? 'text-purple-600 border-b-2 border-purple-600 bg-purple-50/50'
+                        : 'text-slate-600 hover:bg-slate-50'
                         }`}
                 >
                     Tools
@@ -74,8 +77,8 @@ const AnalysisSidebar = ({
                     onClick={() => setActiveTab('results')}
                     disabled={!selectedDocument || !analysisResults[selectedDocument.id]}
                     className={`flex-1 py-3 text-sm font-medium transition-colors ${activeTab === 'results'
-                            ? 'text-purple-600 border-b-2 border-purple-600 bg-purple-50/50'
-                            : 'text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed'
+                        ? 'text-purple-600 border-b-2 border-purple-600 bg-purple-50/50'
+                        : 'text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed'
                         }`}
                 >
                     Results
@@ -115,10 +118,30 @@ const AnalysisSidebar = ({
                             onClick={onHighlightRisks}
                             disabled={isDisabled}
                         />
+                        <div className="h-px bg-slate-100 my-2" />
+                        <ActionButton
+                            icon={HiSparkles}
+                            label={textSelection ? "Explain Selection" : "Explain Selection (Select text first)"}
+                            sublabel={textSelection ? `"${textSelection.text.substring(0, 30)}..."` : null}
+                            onClick={onExplainSelection}
+                            disabled={isDisabled || !textSelection}
+                        />
                         <ActionButton
                             icon={HiTranslate}
                             label="Plain English"
                             onClick={onTranslateToPlainEnglish}
+                            disabled={isDisabled}
+                        />
+                        <ActionButton
+                            icon={HiLightningBolt}
+                            label="Summarize Key Points"
+                            onClick={onSummarizeKeyPoints}
+                            disabled={isDisabled}
+                        />
+                        <ActionButton
+                            icon={HiSparkles}
+                            label="Suggest Improvements"
+                            onClick={onSuggestImprovements}
                             disabled={isDisabled}
                         />
                     </div>
@@ -141,8 +164,8 @@ const ActionButton = ({ icon: Icon, label, sublabel, onClick, disabled, primary 
         onClick={onClick}
         disabled={disabled}
         className={`w-full flex items-start gap-3 p-3 rounded-xl border text-left transition-all ${primary
-                ? 'bg-slate-900 border-slate-900 text-white hover:bg-slate-800 shadow-md'
-                : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50'
+            ? 'bg-slate-900 border-slate-900 text-white hover:bg-slate-800 shadow-md'
+            : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50'
             } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
     >
         <div className={`p-2 rounded-lg ${primary ? 'bg-white/10' : 'bg-slate-100'} shrink-0`}>

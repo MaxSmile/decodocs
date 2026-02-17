@@ -10,6 +10,7 @@ import PricingPage from './components/PricingPage.jsx';
 import SignInPage from './components/SignInPage.jsx';
 import SignUpPage from './components/SignUpPage.jsx';
 import ProfilePage from './components/ProfilePage.jsx';
+import SignPage from './components/SignPage.jsx';
 import Layout from './components/Layout.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 import AuthErrorNotification from './components/AuthErrorNotification.jsx';
@@ -23,28 +24,6 @@ const PrivateRoute = ({ children }) => {
   if (authState.status !== 'authenticated') return <Navigate to="/sign-in" replace />;
   return children;
 };
-
-// "Sign" roadmap page
-const SignPage = () => {
-  const signMvpTasks = [
-    { title: 'Signature placement UI', detail: 'Place a signature field on a PDF with drag/drop + resize.' },
-    { title: 'Identity & consent', detail: 'Signer authentication + explicit consent.' },
-    { title: 'Audit trail', detail: 'Record who signed, when, and what hash.' },
-  ];
-
-  return (
-    <div style={{ padding: '2.5rem 1.5rem', maxWidth: 900, margin: '0 auto' }}>
-      <h1>Sign PDFs</h1>
-      <p>Signing is not ready yet. This is a roadmap placeholder.</p>
-      <ul>
-        {signMvpTasks.map(t => <li key={t.title}><strong>{t.title}</strong>: {t.detail}</li>)}
-      </ul>
-    </div>
-  );
-};
-
-// Placeholder for SignUp if not imported
-// const SignUp = () => <div>Sign Up Page</div>;
 
 const AppRoutes = () => {
   return (

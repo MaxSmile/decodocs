@@ -7,6 +7,7 @@ This document describes how the **static classification index** and **type-speci
 - Deep validation logic and AI calls must be **server-side** (Functions), enforcing tier limits.
 - Users can override classification per **puid+docHash**.
 - Prompts implement explicit criteria docs; criteria are not hidden inside prompt text.
+- Prompt packs must follow the MDX inheritance contract: each `typeId` maps to its own MDX file and inherits from `GENERAL_DOC_TYPE`.
 
 ## Files / Assets
 
@@ -15,6 +16,15 @@ Location: `web/public/classifications/`
 - `document-types.index.json` — flat list for typeahead
 - `validation.index.json` — list of validation spec files
 - `validation/<slug>.json` — validation specs (compiled from `docs/validation/*.md`)
+
+### Prompt Pack Sources (Docs)
+Location: `docs/prompts/`
+- `GENERAL_DOC_TYPE.mdx` — base prompts inherited by all types
+- `types/<typeId>.mdx` — type-specific prompts (exact filename must match `typeId`)
+
+Prompt pack invariants:
+- every `typeId` has a matching `types/<typeId>.mdx`
+- every `types/<typeId>.mdx` inherits from `GENERAL_DOC_TYPE`
 
 These should be cached aggressively:
 - long-lived cache headers
@@ -105,6 +115,9 @@ Server behavior:
 Behavior:
 - loads the relevant validation spec (server-side) by `typeId`
   - mapping from typeId → validation slug
+- resolves the prompt stack by `typeId`:
+  - base: `GENERAL_DOC_TYPE`
+  - overlay: `types/<typeId>.mdx`
 - uses the validation criteria to run:
   - extraction
   - validation checks

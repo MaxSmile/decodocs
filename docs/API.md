@@ -24,271 +24,166 @@ Tier behavior (high level):
 
 ## Common Response Format
 
-All API responses follow this structure:
+For callable functions, responses are function-specific but generally follow:
 
 ```json
 {
-  "success": true,
-  "data": {},
-  "error": null,
-  "timestamp": "2025-01-28T10:00:00Z"
+  "ok": true,
+  "...": "function-specific payload"
 }
 ```
 
-For errors:
+For denied/failed operations, functions either:
+- return `ok: false` with structured fields like `code`, `message`, `requiredTier`, or
+- throw Firebase callable errors (for invalid input/internal failures).
 
+## Callable Functions
+
+The production app uses Firebase callable functions (`httpsCallable`) rather than public REST `POST /...` routes.
+
+### Core AI Callables
+
+#### `analyzeText`
+Performs primary document analysis.
+
+Input:
+- `docHash` (string, required)
+- `stats` (object, required)
+- `text` (object with `value`, required)
+- `options` (object, optional)
+
+Response shape:
 ```json
 {
-  "success": false,
-  "data": null,
-  "error": "Error message",
-  "details": "Additional error details",
-  "timestamp": "2025-01-28T10:00:00Z"
+  "ok": true,
+  "docHash": "sha256...",
+  "result": {
+    "plainExplanation": "...",
+    "risks": []
+  },
+  "usage": {}
 }
 ```
 
-## Endpoints
+#### `explainSelection`
+Explains selected text in plain language.
 
-### Document Analysis
+Input:
+- `docHash` (string, optional)
+- `selection` (string, required)
+- `documentContext` (string, optional)
 
-#### `POST /analyzeDocument`
-
-Analyzes a document and provides comprehensive insights including summary, key points, risks, and recommendations.
-
-##### Parameters
-
-| Name | Type | Required | Description |
-|------|------|----------|-------------|
-| documentText | string | Yes | The full text content of the document to analyze |
-| documentType | string | No | Type of document (default: "general") |
-
-##### Request Example
-
+Response shape:
 ```json
 {
-  "documentText": "This agreement contains various terms and conditions...",
-  "documentType": "contract"
-}
-```
-
-##### Response Example
-
-```json
-{
-  "success": true,
-  "analysis": {
-    "summary": "This is a sample document containing various clauses and terms that require careful review before signing.",
-    "keyPoints": [
-      "Clause 1: Payment terms require payment within 30 days",
-      "Clause 2: Termination clause allows termination with 30 days notice",
-      "Clause 3: Limitation of liability clause limits damages"
-    ],
-    "risks": [
-      {
-        "id": 1,
-        "clause": "Limitation of liability clause",
-        "riskLevel": "high",
-        "description": "This clause significantly limits the liability of the other party, potentially leaving you exposed to significant losses.",
-        "explanation": "In plain language: If something goes wrong and causes you financial harm, you may not be able to recover your full losses because of this clause."
-      }
-    ],
-    "recommendations": [
-      "Consider negotiating broader liability coverage",
-      "Request shorter automatic renewal periods or removal of automatic renewal"
-    ]
-  }
-}
-```
-
-##### Error Responses
-
-- `400 Bad Request`: Missing required parameters
-- `500 Internal Server Error`: AI processing failure
-
----
-
-### Text Explanation
-
-#### `POST /explainSelection`
-
-Provides plain English explanations for specific text selections within a document context.
-
-##### Parameters
-
-| Name | Type | Required | Description |
-|------|------|----------|-------------|
-| selection | string | Yes | The specific text to explain |
-| documentContext | string | No | Surrounding document context for better understanding |
-
-##### Request Example
-
-```json
-{
-  "selection": "Limitation of liability clause",
-  "documentContext": "This is a contract with standard terms and conditions."
-}
-```
-
-##### Response Example
-
-```json
-{
-  "success": true,
+  "ok": true,
   "explanation": {
-    "originalText": "The limitation of liability clause",
-    "plainExplanation": "This part of the contract restricts how much money one party can claim from the other if something goes wrong.",
-    "keyTerms": [
-      "Liability: Legal responsibility for damages",
-      "Limitation: Restriction or cap"
-    ],
-    "implications": "If issues arise, your ability to seek compensation may be significantly restricted."
-  }
+    "plainExplanation": "...",
+    "examples": []
+  },
+  "usage": {}
 }
 ```
 
-##### Error Responses
+#### `highlightRisks`
+Runs risk extraction over document text.
 
-- `400 Bad Request`: Missing required parameters
-- `500 Internal Server Error`: AI processing failure
+Input:
+- `docHash` (string, optional)
+- `documentText` (string, required)
+- `documentType` (string, optional)
 
----
-
-### Risk Highlighting
-
-#### `POST /highlightRisks`
-
-Identifies and locates potential risks within a document.
-
-##### Parameters
-
-| Name | Type | Required | Description |
-|------|------|----------|-------------|
-| documentText | string | Yes | The full text content of the document to analyze |
-| documentType | string | No | Type of document (default: "general") |
-
-##### Request Example
-
+Response shape:
 ```json
 {
-  "documentText": "This agreement contains various terms and conditions...",
-  "documentType": "contract"
-}
-```
-
-##### Response Example
-
-```json
-{
-  "success": true,
+  "ok": true,
   "risks": {
-    "risks": [
-      {
-        "id": "risk-1",
-        "text": "The limitation of liability clause restricts damages",
-        "startPos": 150,
-        "endPos": 200,
-        "riskLevel": "high",
-        "category": "financial",
-        "description": "Limits the amount of damages that can be claimed",
-        "severity": "high"
-      }
-    ],
     "summary": {
-      "totalRisks": 1,
-      "riskDistribution": {
-        "high": 1,
-        "medium": 0,
-        "low": 0
-      }
-    }
-  }
+      "totalRisks": 0,
+      "overallRiskLevel": "low"
+    },
+    "items": []
+  },
+  "usage": {}
 }
 ```
 
-##### Error Responses
+#### `translateToPlainEnglish`
+Translates legal text into plain English.
 
-- `400 Bad Request`: Missing required parameters
-- `500 Internal Server Error`: AI processing failure
+Input:
+- `docHash` (string, optional)
+- `legalText` (string, required)
 
----
-
-### Plain English Translation
-
-#### `POST /translateToPlainEnglish`
-
-Converts complex legal text into plain English while preserving legal meaning.
-
-##### Parameters
-
-| Name | Type | Required | Description |
-|------|------|----------|-------------|
-| legalText | string | Yes | The legal text to translate to plain English |
-
-##### Request Example
-
+Response shape:
 ```json
 {
-  "legalText": "This Agreement shall commence on the Effective Date and shall continue in full force and effect until terminated in accordance with the provisions hereof."
-}
-```
-
-##### Response Example
-
-```json
-{
-  "success": true,
+  "ok": true,
   "translation": {
-    "originalText": "This Agreement shall commence on the Effective Date and shall continue in full force and effect until terminated in accordance with the provisions hereof.",
-    "plainEnglishTranslation": "This contract starts on the effective date and stays in effect until it's ended according to the terms described in this document.",
-    "keyChanges": [
-      "Simplified formal legal language",
-      "Converted archaic phrasing to modern English"
-    ],
-    "retainedMeaning": "The legal obligation and effective date concept are preserved"
-  }
+    "originalText": "...",
+    "plainEnglishTranslation": "..."
+  },
+  "usage": {}
 }
 ```
 
-##### Error Responses
+#### `analyzeByType`
+Runs type-specific analysis using detected/overridden document type and validation criteria.
 
-- `400 Bad Request`: Missing required parameters
-- `500 Internal Server Error`: AI processing failure
+Input:
+- `docHash` (string, required)
+- `text` (string, required)
 
----
-
-### Health Check
-
-#### `GET /healthCheck`
-
-Monitors the health and availability of the API service.
-
-##### Response Example
-
+Response shape:
 ```json
 {
-  "status": "ok",
-  "timestamp": "2025-01-28T10:00:00Z",
-  "service": "DecoDocs AI Analysis Service"
+  "ok": true,
+  "effectiveTypeId": "legal_job_offer",
+  "validationSlug": "job-offer",
+  "validationSpec": {},
+  "result": {
+    "plainExplanation": "...",
+    "extracted": {},
+    "checks": []
+  },
+  "usage": {}
 }
 ```
 
-##### Error Responses
+### Supporting Callables
+- `preflightCheck`
+- `getEntitlement`
+- `detectDocumentType`
+- `getDocumentTypeState`
+- `saveDocTypeOverride`
 
-- `503 Service Unavailable`: Service is down
+### Legacy Note
+- Older documentation and local mock mode may still reference REST-style paths such as `/explainSelection`.
+- Canonical runtime contract for production is Firebase callable functions and `ok`-based responses.
 
-## Rate Limits
+## Rate Limits / Budgets
 
-Currently, no rate limiting is enforced. This will be implemented in future versions based on usage patterns.
+AI operations are budgeted by entitlement tier:
+
+- Anonymous: 20,000 tokens per identity session
+- Free: 40,000 tokens/day (UTC)
+- Pro: no hard app-layer token cap (fair-use policy may apply)
+- Business: Pro-capable runtime budget behavior plus team/org controls
+
+Notes:
+- OCR/scanned-document processing is gated to paid Pro-capable tiers.
+- Budget enforcement is server-side in Functions; client-side tier claims are not trusted.
 
 ## Error Codes
 
-| Code | Message | Description |
-|------|---------|-------------|
-| 400 | Bad Request | Invalid request parameters |
-| 404 | Not Found | Endpoint does not exist |
-| 405 | Method Not Allowed | HTTP method not supported |
-| 500 | Internal Server Error | Unexpected server error |
-| 503 | Service Unavailable | Service is temporarily down |
+Callable functions use Firebase `HttpsError` codes and/or structured denied responses.
+
+Common codes:
+- `invalid-argument`: malformed or missing input
+- `unauthenticated`: user auth missing/invalid
+- `permission-denied`: entitlement/authorization failure
+- `resource-exhausted`: budget/rate limits exceeded
+- `internal`: unexpected server error
 
 ## Usage Guidelines
 

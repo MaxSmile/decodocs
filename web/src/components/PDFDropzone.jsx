@@ -40,7 +40,7 @@ const PDFDropzone = ({ onFileSelect }) => {
             </div>
 
             <h3 className="text-2xl font-bold text-slate-800 mb-2">
-                Upload a PDF to start
+                Upload a PDF or .snapsign file
             </h3>
 
             <p className="text-slate-500 mb-8 text-center max-w-md px-4">
@@ -59,7 +59,7 @@ const PDFDropzone = ({ onFileSelect }) => {
                 type="file"
                 ref={fileInputRef}
                 onChange={onFileSelect}
-                accept=".pdf"
+                accept=".pdf,.snapsign,application/pdf,application/zip"
                 className="hidden"
             />
         </div>

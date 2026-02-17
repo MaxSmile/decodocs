@@ -1,227 +1,214 @@
-# SnapSign — Email-to-Sign Flow (Free vs Paid) — Technical Spec (MVP)
+# SnapSign Envelope Flow (Frontend-Only)
 
-## 0) Goals
-- Enable "email-to-sign" without requiring users to create accounts (Free).
-- Avoid storing user documents on SnapSign servers in Free.
-- Monetize convenience + cost-heavy operations (storage, OCR, large docs) in Paid tiers.
-- Keep terminology correct:
-  - **Open** = ephemeral processing, no persistence.
-  - **Upload** = persistent storage (Paid only).
+## Scope
+This document defines the canonical `.snapsign` envelope workflow implemented in this project.
 
-## 1) Terms & Entities
+Non-negotiable boundary:
+- envelope technology is frontend/client-side
+- user sends emails manually from their own email client
+- backend does not send envelope invitation emails and does not orchestrate recipient sessions
 
-### 1.1 Envelope file (container)
+## 1) Current Implementation (Live)
+
+### Envelope container
 - Extension: `.snapsign` (ZIP container)
-- Contents (minimum):
-  - `document.pdf` (required)
-  - `manifest.json` (required)
-  - `metadata.json` (optional)
-- Contents (optional; appended by SnapSign):
-  - `analysis.json` (summary results)
-  - `audit.json` (processing log, hashes, timestamps)
-  - `signatures.json` (future signing stage)
+- Required entries:
+  - `document.pdf`
+  - `manifest.json`
+- Optional entries:
+  - `analysis.json`
+  - `audit.json`
 
-### 1.2 Envelope integrity
-- `doc_sha256` = SHA-256(document.pdf bytes)
-- `manifest_sha256` = SHA-256(manifest.json bytes)
-- All processing must validate `doc_sha256` matches actual PDF.
+`manifest.json` includes:
+- `version`
+- `createdAt`
+- `document.path`
+- `document.name`
+- `document.mimeType`
+- `document.sizeBytes`
+- `document.sha256`
 
-### 1.3 Email addresses
-- Inbound: `sign@snapsign.<tld>` (example)
-- Outbound: `noreply@snapsign.<tld>`
-- Optional routing aliases:
-  - `sign+<shortid>@...` (Paid convenience)
-  - `pro+<shortid>@...` (Paid-only features)
+### Integrity model
+- SHA-256 hash is calculated from raw `document.pdf` bytes.
+- On extract/validate, browser recalculates hash and compares with `manifest.document.sha256`.
+- Hash mismatch marks envelope invalid.
 
-## 2) Preflight Analyzer (runs before any AI call)
-Input: `document.pdf`
+### Client modules
+- Primary module: `Decodocs/web/src/services/envelopeService.js`
+- Main APIs:
+  - `openPdfOrEnvelopeFile(file)`
+  - `createEnvelopeFromPdf(...)`
+  - `extractEnvelope(...)`
+  - `validateEnvelopeBytes(...)`
+  - `createEnvelopeFileFromPdfFile(...)`
+  - `runClientPreflight(...)`
+  - `processEmailToSignClient(...)`
+- UI usage:
+  - `Decodocs/web/src/components/SignPage.jsx`
+  - `Decodocs/web/src/components/DocumentViewer.jsx`
+  - `Decodocs/web/src/components/PDFDropzone.jsx`
+- Accepted upload types:
+  - `.pdf`
+  - `.snapsign`
+
+### Current preflight
+Baseline limits:
+- `maxPages = 15`
+- `maxTokens = 20000`
+- `maxScanRatio = 0.20`
+- `maxFileSize = 20MB`
+
+Classifications:
+- `FREE_OK`
+- `PRO_REQUIRED`
+- `BLOCKED`
+
+### Server boundary (current and intended)
+Functions are responsible for:
+- entitlement checks
+- usage budgets
+- analysis calls
+- storage URL signing
+
+Functions do not perform:
+- envelope ZIP parsing
+- envelope validation
+- envelope creation
+- send-for-sign recipient/session orchestration
+- outbound invitation/reminder/completion email delivery for envelopes
+
+## 2) End-to-End Envelope Send-for-Sign Flow (Client-Side)
+
+### 0. Preconditions
+- Sender authenticated.
+- Source document available (uploaded or imported).
+- Sender has their own email client available (Gmail/Outlook/etc.) for manual sending.
+
+### 1. Create envelope
+Input:
+- `document.pdf`
+- optional envelope metadata (title/message)
+- optional recipient metadata for convenience (stored in envelope metadata/audit only)
+
+Browser:
+- computes document hash
+- builds `.snapsign` container with `manifest.json`
+- keeps envelope state locally in app/session until export
+
+### 2. Prepare envelope document
+Sender places fields:
+- signature
+- initials
+- date
+- name
+- text
+- checkbox
+
+Browser validates:
+- required fields complete
+- coordinates valid (no invalid overlap/out-of-bounds)
+- any recipient assignments stored as metadata only (no backend recipient lifecycle)
+
+Envelope remains local draft until exported.
+
+### 3. Add recipients
+For each recipient:
+- `name`
+- `email`
+- `role` (`signer`, `cc`, `viewer`)
+- optional signing order index (informational metadata only)
+
+Browser stores recipient info in envelope metadata/audit for human workflow context.
+No server-issued signing tokens are created.
+
+### 4. Optional AI preflight (DecoDocs differentiator)
+Client and Functions can run non-blocking analysis:
+- obligations
+- risky clauses
+- inconsistencies
+- "questions to clarify"
+
 Outputs:
-- `page_count`
-- `has_extractable_text` (bool)
-- `scan_ratio` (0..1): pages with near-zero extracted text / total pages
-- `estimated_tokens` (based on extracted text length)
-- `pdf_size_bytes`
-- `classification`: {FREE_OK | PRO_REQUIRED | PREMIUM_REQUIRED | BLOCKED}
-- `reasons[]`: machine-readable + user-facing strings
+- `risk_report`
+- `summary`
+- optional shareable explanation view for recipients
 
-Rules baseline (can be config):
-- If `scan_ratio > 0.20` => PRO_REQUIRED (OCR needed) or BLOCKED for Free.
-- If `page_count > 15` => PRO_REQUIRED for Free.
-- If `estimated_tokens > 20_000` => PRO_REQUIRED for Free.
-- If `pdf_size_bytes > 20MB` => BLOCKED for Free email delivery (likely bounce).
+This step is optional and does not auto-send anything.
 
-## 3) FREE Email-to-Sign Flow (Stateless)
+### 5. Finalize envelope
+Sender action:
+- click `Export .snapsign`
 
-### 3.1 Entry points
-A) User emails `.snapsign` envelope as attachment  
-B) User emails a PDF directly (optional MVP: convert into envelope internally)
+Browser action:
+- serializes current envelope (`document.pdf`, `manifest.json`, optional `analysis.json`, optional `audit.json`)
+- returns downloadable `.snapsign` file to sender
 
-### 3.2 Free constraints
-- **No server-side document storage**
-- **No OCR**
-- **No "share links"**
-- Attachment max size: **20 MB**
-- PDF must be **text-based**
-- Limits:
-  - `page_count <= 15`
-  - `estimated_tokens <= 20_000`
-  - `scan_ratio <= 0.20`
+### 6. Manual email by sender
+Sender action (outside system automation):
+- opens personal/work email client
+- composes message manually
+- attaches `.snapsign` (or PDF plus instructions)
+- sends to recipients manually
 
-### 3.3 Processing steps
-1) Receive email
-2) Extract attachment:
-   - If `.snapsign`: unzip; read `document.pdf`; validate manifest hashes if present
-   - If `.pdf`: treat as `document.pdf` (optional) and generate ephemeral manifest
-3) Run **Preflight Analyzer**
-4) If classification != FREE_OK:
-   - Do not call LLM
-   - Reply with "requires Pro" + reason list
-5) If FREE_OK:
-   - Run LLM analysis (single pass):
-     - plain-language explanation
-     - caveats / unusual clauses highlights
-     - basic inconsistency flags (local only, no recursion)
-6) Build response:
-   - Email body: top findings + section/page references
-   - Attach returned envelope:
-     - original `.snapsign` returned unchanged OR
-     - returned with appended `analysis.json` (still no server storage)
-7) Purge all content after send:
-   - Remove files from temp storage
-   - Keep only operational logs without document content (see 3.5)
+System behavior:
+- no automatic invitation emails
+- no automatic reminder emails
+- no automatic completion emails
 
-### 3.4 Free error handling (best-effort)
-- Attachment too large / bounce:
-  - If SMTP bounce received => send short message (if possible) or do nothing
-  - UX messaging on web: "Free email delivery depends on your email provider limits."
-- Unsupported PDF (encrypted / corrupted):
-  - reply with failure reason
-- Rate limiting:
-  - per sender domain/IP heuristics to prevent spam
+### 7. Recipient signing flow
+Recipient action:
+- receives email in their own inbox
+- downloads attachment
+- opens `.snapsign` in DecoDocs by uploading file
+- reviews doc and optional analysis
+- signs/annotates in client
 
-### 3.5 Free logging (allowed, non-content)
-- `received_at`
-- `message_id`
-- `sender_email_hash` (salted hash)
-- `doc_sha256`
-- `page_count`, `estimated_tokens`, `scan_ratio`
-- `classification` + `reasons`
-- **No PDF bytes, no extracted text stored**
+Browser action:
+- validates envelope hash on open
+- records local audit entries in `audit.json`
+- allows export of updated/signed envelope
 
-## 4) PRO Email-to-Sign Flow ($5/month)
+### 8. Return signed envelope manually
+Recipient action:
+- exports signed `.snapsign` or signed PDF
+- replies/forwards manually via email
 
-### 4.1 Pro capabilities
-- OCR enabled (scanned PDFs supported)
-- Persistent storage (**Upload**) enabled
-- Higher limits (unlimited AI for now)
-- 5GB storage quota on Contabo VPS
+Sender action:
+- receives returned files
+- opens and verifies in client
 
-> Note: “exportable report/history” are not assumed unless explicitly requested as product features.
+## 3) Core State Machines
 
-### 4.2 Pro limits (baseline)
-Pro is **unlimited AI for now** (until we have abuse experience and introduce fair-use caps).
+### Envelope (client-local)
+`draft_local -> exported -> sent_manual -> signed_returned | declined_returned | closed`
 
-We still enforce hard safety limits (configurable):
-- `pdf_size_bytes` hard max
-- `page_count` hard max
+### Recipient metadata
+`planned -> emailed_manual -> response_received`
 
-OCR:
-- allowed for Pro
-- future: introduce OCR page soft caps if/when needed
+Important:
+- these are workflow states, not backend-authoritative server states
 
-### 4.3 Identity & entitlement
-- Identity is Firebase Auth; entitlement is resolved server-side.
-- Pro requires Stripe subscription active.
-- We resolve all identities to a server-side **puid** (primary user identifier); entitlements are enforced per puid.
+## 4) Minimum Audit Events
 
-If entitlement missing => treat as Free.
+- `envelope.created`
+- `document.uploaded`
+- `fields.updated`
+- `envelope.exported`
+- `email.sent_manual`
+- `recipient.opened` (if recorded by client/user action)
+- `signer.submitted` or `signer.declined`
+- `signed_copy.received_manual`
 
-### 4.4 Pro processing modes
-- **Open (ephemeral)**: user wants no storage even though Pro
-- **Upload (persistent)**: store envelope + report + audit
+## 5) Edge Cases to Handle Upfront
 
-Default:
-- email flow => **Open** unless user explicitly requests storage (or uses Pro alias)
+- Sender edits after sending -> export new envelope revision and resend manually.
+- Recipient forwards attachment -> no server token binding exists; rely on document hash checks and process controls.
+- Partial completion -> sender decides follow-up/resend manually by email.
+- Delays -> sender sends reminders manually from their own email client.
+- Recipient replacement -> sender reissues envelope and keeps prior audit trail artifacts.
 
-### 4.5 Pro inbound routing (convenience)
-- Support address aliases to set mode:
-  - `open+<id>@...` => ephemeral
-  - `upload+<id>@...` => persistent
-- Subject commands (optional):
-  - `MODE:UPLOAD`, `MODE:OPEN`
+## 6) Delivery Constraints (for this repo)
 
-### 4.6 Pro processing steps
-1) Receive email + attachment
-2) Validate entitlement
-3) Extract attachment -> envelope
-4) Preflight Analyzer
-5) If scan detected and allowed:
-   - OCR pipeline -> text extraction
-6) Multi-pass analysis (up to 3 passes):
-   - summary & explain
-   - caveats/unfair terms detection
-   - deeper consistency (within doc; cross-section references)
-7) If MODE=UPLOAD:
-   - Store envelope + derived artifacts
-   - Assign `doc_id` and `share_token` (if sharing enabled)
-8) Reply:
-   - Email body with findings
-   - Attach updated envelope OR include secure link (Pro-only)
-9) Logging includes doc_id (if stored)
-
-## 5) PREMIUM Email-to-Sign Flow (Business)
-
-### 5.1 Premium capabilities
-- Large PDFs & annex-heavy docs
-- Multi-document bundles (multiple envelopes in one thread)
-- Cross-document contradiction detection
-- Version diff / compare
-- Audit trail & team roles
-- Advanced recursive / iterative analysis when needed
-
-### 5.2 Processing
-- Hierarchical chunking + retrieval-based deep reads
-- Optional RLM-style recursion for:
-  - global contradictions across annexes
-  - definition graph inconsistencies
-- Guaranteed storage + access control
-
-## 6) User Messaging (Email + Web)
-
-### 6.1 Standard gating message (Free -> Pro)
-- Subject: `Action required: Pro needed for this document`
-- Body:
-  - One-line reason summary
-  - Bullet reasons (pages/scan/size)
-  - Pro link
-
-Suggested text:
-- "This document requires deeper analysis, available on the Pro plan."
-
-### 6.2 Free limitation disclosure
-- "Free email delivery is subject to email provider attachment limits."
-
-## 7) Security & Privacy Requirements
-- TLS for inbound/outbound mail infra
-- Temp files encrypted at rest (even if short-lived)
-- Strict TTL purge job for temp directories
-- No document content in logs
-- Hash-based integrity checks for envelopes
-- Rate limiting and spam protection (DMARC/DKIM/SPF for outbound)
-
-## 8) Acceptance Criteria (MVP)
-FREE:
-- Can process a text-based PDF <= 15 pages via email and reply with analysis.
-- Does not store document or extracted text after sending.
-- Blocks scanned PDFs and large PDFs with clear Pro message.
-
-PRO:
-- Can OCR scanned PDF and reply with analysis.
-- Can optionally store envelope and return a share link.
-- Enforces monthly OCR + token caps without silent overage billing.
-
-## 9) Non-Goals (MVP)
-- Multipart envelope splitting in Free
-- Guaranteed delivery for large attachments
-- DOCX support
-- Full legal e-signature compliance (separate phase)
+- Keep static hosting + basic Functions architecture; no SSR/advanced hosting.
+- Keep envelope ZIP parsing/creation/validation in browser for `.snapsign` interoperability.
+- Do not add backend invite-email orchestration for envelope flow.

@@ -181,6 +181,139 @@ const DocumentEditor = () => {
     }
   };
 
+  const loadImageFromDataUrl = (dataUrl) =>
+    new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error('Failed to load image'));
+      img.src = dataUrl;
+    });
+
+  const buildFlattenedPageImageData = async () => {
+    const pageImages = [];
+
+    for (let pageNum = 1; pageNum <= (numPages || 0); pageNum++) {
+      const pageElement = document.getElementById(`pdf-page-${pageNum}`);
+      const baseCanvas = pageElement?.querySelector('canvas');
+      if (!baseCanvas) continue;
+
+      const displayRect = pageElement.getBoundingClientRect();
+      const scaleX = displayRect.width ? baseCanvas.width / displayRect.width : 1;
+      const scaleY = displayRect.height ? baseCanvas.height / displayRect.height : 1;
+
+      const outCanvas = document.createElement('canvas');
+      outCanvas.width = baseCanvas.width;
+      outCanvas.height = baseCanvas.height;
+      const ctx = outCanvas.getContext('2d');
+      if (!ctx) continue;
+
+      ctx.drawImage(baseCanvas, 0, 0);
+
+      const pageSignatures = signatures.filter((sig) => sig.pageNum === pageNum);
+      for (const sig of pageSignatures) {
+        const x = (sig.x || 0) * scaleX;
+        const y = (sig.y || 0) * scaleY;
+        const width = (sig.width || signatureDimensions.width) * scaleX;
+        const height = (sig.height || signatureDimensions.height) * scaleY;
+
+        if (sig.dataUrl) {
+          try {
+            const sigImage = await loadImageFromDataUrl(sig.dataUrl);
+            ctx.drawImage(sigImage, x, y, width, height);
+          } catch {
+            ctx.font = `${Math.max(16, Math.floor(height * 0.5))}px serif`;
+            ctx.fillStyle = '#1d4ed8';
+            ctx.fillText('Signature', x + 4, y + height * 0.65);
+          }
+        } else {
+          ctx.font = `${Math.max(16, Math.floor(height * 0.5))}px serif`;
+          ctx.fillStyle = '#1d4ed8';
+          ctx.fillText(sig.text || 'Signature', x + 4, y + height * 0.65);
+        }
+      }
+
+      const pageAnnotations = annotations.filter((ann) => ann.pageNum === pageNum);
+      for (const ann of pageAnnotations) {
+        const x = (ann.x || 0) * scaleX;
+        const y = (ann.y || 0) * scaleY;
+        const label = ann.text || '';
+
+        if (ann.type === 'checkmark') {
+          ctx.font = `${Math.max(18, Math.floor(28 * scaleY))}px sans-serif`;
+          ctx.fillStyle = '#15803d';
+          ctx.fillText(label || '✓', x, y + 22 * scaleY);
+        } else {
+          ctx.fillStyle = ann.type === 'date' ? '#fef3c7' : '#fef9c3';
+          ctx.fillRect(x - 2, y - 2, Math.max(110 * scaleX, label.length * 7 * scaleX), 24 * scaleY);
+          ctx.strokeStyle = '#e2e8f0';
+          ctx.strokeRect(x - 2, y - 2, Math.max(110 * scaleX, label.length * 7 * scaleX), 24 * scaleY);
+          ctx.font = `${Math.max(12, Math.floor(13 * scaleY))}px sans-serif`;
+          ctx.fillStyle = '#0f172a';
+          ctx.fillText(label, x + 2, y + 14 * scaleY);
+        }
+      }
+
+      pageImages.push(outCanvas.toDataURL('image/png'));
+    }
+
+    return pageImages;
+  };
+
+  const openPrintWindowForPdfSave = (pageImages) => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      throw new Error('Pop-up blocked. Please allow pop-ups to export the edited PDF.');
+    }
+
+    const pagesMarkup = pageImages
+      .map(
+        (src) =>
+          `<div class="page"><img src="${src}" alt="Edited page" /></div>`
+      )
+      .join('');
+
+    printWindow.document.write(`
+      <!doctype html>
+      <html>
+        <head>
+          <title>${(selectedDocument?.name || 'document').replace(/</g, '&lt;')}</title>
+          <style>
+            body { margin: 0; font-family: sans-serif; background: #fff; }
+            .page { page-break-after: always; break-after: page; display: block; }
+            .page img { width: 100%; display: block; }
+            @media print {
+              body { margin: 0; }
+            }
+          </style>
+        </head>
+        <body>${pagesMarkup}</body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+    }, 250);
+  };
+
+  const handleDownloadEditedPdf = async () => {
+    if (!pdfDoc) {
+      alert('Open a PDF first.');
+      return;
+    }
+
+    try {
+      const pageImages = await buildFlattenedPageImageData();
+      if (pageImages.length === 0) {
+        throw new Error('No rendered pages found.');
+      }
+      openPrintWindowForPdfSave(pageImages);
+    } catch (err) {
+      console.error('Failed to export edited PDF:', err);
+      alert(err?.message || 'Unable to export edited PDF.');
+    }
+  };
+
   const renderOverlay = (pageNum) => (
     <>
       {signatures.filter(s => s.pageNum === pageNum).map(sig => (
@@ -257,8 +390,11 @@ const DocumentEditor = () => {
                 Cancel
               </button>
 
-              <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg transition-all shadow-sm">
-                Finish & Download <HiDownload className="w-4 h-4" />
+              <button
+                onClick={handleDownloadEditedPdf}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg transition-all shadow-sm"
+              >
+                Download <HiDownload className="w-4 h-4" />
               </button>
             </div>
           </div>

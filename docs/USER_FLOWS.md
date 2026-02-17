@@ -184,9 +184,9 @@ Outcome:
 
 **Goal:** Finalize agreements.
 
-1. User initiates signing flow
-2. Document is sent to recipient(s)
-3. Status is tracked (sent / viewed / signed)
+1. User creates and prepares a `.snapsign` envelope in the app
+2. User exports the envelope and composes/sends email manually from their own email client
+3. Recipient returns signed files manually; sender tracks progress operationally (not via backend envelope orchestration)
 
 Outcome:
 - Agreements are completed efficiently.
@@ -197,9 +197,9 @@ Outcome:
 
 **Goal:** Legally or formally finalize documents.
 
-1. User signs digitally
-2. Signed version is stored
-3. Audit information is preserved
+1. Recipient opens the received `.snapsign`/PDF in DecoDocs
+2. Recipient fills required fields and signs in the client
+3. Recipient exports signed output and returns it manually (for example, email reply), preserving envelope artifacts and audit data
 
 Outcome:
 - Proof of agreement is retained.

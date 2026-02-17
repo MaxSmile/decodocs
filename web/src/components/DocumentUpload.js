@@ -39,11 +39,11 @@ const DocumentUpload = ({ onFilesSelected, selectedFiles = [], onSelectFile }) =
       },
       el('div', { className: 'upload-icon', 'aria-hidden': true }, 'Document'),
       el('p', null, 'Click to select files or drag and drop'),
-      el('p', { className: 'file-types' }, 'Supports: PDF, DOC, DOCX, TXT'),
+      el('p', { className: 'file-types' }, 'Supports: PDF, .snapsign, DOC, DOCX, TXT'),
       el('input', {
         type: 'file',
         ref: fileInputRef,
-        accept: '.pdf,.doc,.docx,.txt',
+        accept: '.pdf,.snapsign,.doc,.docx,.txt',
         multiple: true,
         onChange: handleFileChange,
         style: { display: 'none' },
