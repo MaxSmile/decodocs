@@ -36,6 +36,7 @@ When canonical and working docs differ, canonical wins.
 ## Feature Specs
 
 - Functional feature inventory: [FEATURES.md](FEATURES.md)
+- Use-case positioning and mapping: [use-cases.md](use-cases.md)
 - User journey mapping: [USER_FLOWS.md](USER_FLOWS.md)
 - Open vs upload storage modes: [OPEN_VS_UPLOAD_SPEC.md](OPEN_VS_UPLOAD_SPEC.md)
 - Document type architecture: [DOCUMENT_TYPE_SYSTEM.md](DOCUMENT_TYPE_SYSTEM.md)

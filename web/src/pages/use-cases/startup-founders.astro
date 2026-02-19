@@ -1,0 +1,353 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import Footer from '../../components/astro/Footer.astro';
+
+const pageTitle = 'Decode Investor Agreements Before You Sign | Startup Founders | DecoDocs';
+const pageDescription =
+  'Understand term sheets, SAFE agreements and investor contracts before signing. Upload your document and get a clear risk breakdown in minutes.';
+const canonical = 'https://decodocs.com/use-cases/startup-founders/';
+
+const workflowSteps = [
+  {
+    title: 'Upload',
+    detail:
+      'Upload a term sheet, SAFE, shareholder agreement, or vendor contract. DecoDocs processes the file securely in seconds.',
+  },
+  {
+    title: 'AI Breakdown',
+    detail:
+      'The document is split into key clauses with plain-English explanations, so you can analyze a term sheet without reading every line twice.',
+  },
+  {
+    title: 'Risk Highlights',
+    detail:
+      'Control terms, liquidation preferences, dilution triggers, penalties, and lock-ins are flagged so high-impact terms are impossible to miss.',
+  },
+  {
+    title: 'Clear Summary & Shareable Report',
+    detail:
+      'Export a structured summary you can send to co-founders, advisors, or counsel before negotiation and signature.',
+  },
+];
+
+const documentCards = [
+  {
+    title: 'Term Sheets',
+    pain: 'Headline numbers can look attractive while preference, control, or participation clauses quietly shift long-term outcomes.',
+    outcome:
+      'Understand valuation mechanics, board rights, liquidation preferences, and downside scenarios before you sign.',
+  },
+  {
+    title: 'SAFE Agreements',
+    pain: 'Conversion terms are often accepted quickly, then revisited too late when dilution is already locked in.',
+    outcome:
+      'Understand SAFE agreement triggers, discount/cap behavior, and likely dilution impact under future funding outcomes.',
+  },
+  {
+    title: 'Shareholder Agreements',
+    pain: 'Voting thresholds, drag-along rights, and transfer limits are easy to skim and hard to unwind later.',
+    outcome:
+      'See where governance and exit terms affect control so you can negotiate from a clear position.',
+  },
+  {
+    title: 'Vendor & Service Contracts',
+    pain: 'Auto-renewals, price escalators, broad indemnities, and lock-in clauses can create expensive operational drag.',
+    outcome:
+      'Spot hidden penalties, long commitments, and one-sided obligations before they become recurring cost centers.',
+  },
+  {
+    title: 'Advisory and Contractor Agreements',
+    pain: 'IP assignment, confidentiality, and milestone language can create future disputes if responsibilities are vague.',
+    outcome:
+      'Clarify obligations and ownership boundaries so everyone aligns before work starts.',
+  },
+];
+
+const founderBenefits = [
+  'Faster funding decisions when you need to review investor agreement online under time pressure.',
+  'Stronger negotiation position because risk, leverage, and fallback points are visible early.',
+  'Reduced legal ambiguity by translating dense clauses into practical business impact.',
+  'Shareable summaries for co-founders, operators, and advisors in one decision-ready brief.',
+  'More confidence before signature, including a cleaner handoff to legal counsel when needed.',
+];
+
+const faqEntries = [
+  {
+    question: 'Can DecoDocs replace a lawyer?',
+    answer:
+      'No. DecoDocs is a startup legal document analysis tool that improves clarity and speeds review, but it does not provide legal advice. Use it to prepare better questions and escalate critical clauses to qualified counsel.',
+  },
+  {
+    question: 'Is my document secure?',
+    answer:
+      'Documents are processed with access controls and are not publicly indexed. DecoDocs does not use your uploaded documents as open training data, and you stay in control of what you upload and share.',
+  },
+  {
+    question: 'What file types are supported?',
+    answer:
+      'PDF is the primary format for investor and contract review workflows. If your file starts as DOCX, export to PDF before upload for consistent clause extraction and summarization.',
+  },
+];
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqEntries.map((item) => ({
+    '@type': 'Question',
+    name: item.question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: item.answer,
+    },
+  })),
+};
+---
+
+<MainLayout title={pageTitle} description={pageDescription} canonical={canonical} image="https://decodocs.com/og.svg">
+  <main class="relative overflow-hidden bg-slate-50/60 px-6 pb-24 pt-12">
+    <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+
+    <div class="pointer-events-none absolute inset-0">
+      <div class="absolute -left-28 top-24 h-72 w-72 rounded-full bg-blue-200/40 blur-3xl" />
+      <div class="absolute -right-20 top-64 h-80 w-80 rounded-full bg-amber-200/40 blur-3xl" />
+    </div>
+
+    <div class="relative mx-auto w-full max-w-6xl space-y-16">
+      <section class="grid gap-10 rounded-3xl border border-slate-200/80 bg-white/90 p-8 shadow-xl shadow-slate-900/5 backdrop-blur-sm lg:grid-cols-[1.1fr_0.9fr] lg:p-12">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">For Startup Founders</p>
+          <h1 class="mt-4 max-w-2xl text-4xl font-bold leading-tight text-slate-900 lg:text-5xl">
+            Decode Investor Agreements Before You Sign
+          </h1>
+          <p class="mt-5 max-w-3xl text-lg leading-relaxed text-slate-600">
+            DecoDocs helps you decode contract before signing by turning legal language into practical decisions. Upload your document. Get a plain-English breakdown, key risks highlighted, and a clear understanding of what you are agreeing to.
+          </p>
+
+          <ul class="mt-6 max-w-2xl space-y-3 list-none p-0 text-base leading-relaxed text-slate-700">
+            <li class="flex items-start gap-3">
+              <span class="mt-2 inline-block h-2.5 w-2.5 rounded-full bg-amber-500" />
+              <span>Spot dilution traps before they become irreversible.</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="mt-2 inline-block h-2.5 w-2.5 rounded-full bg-amber-500" />
+              <span>Understand financial impact, control terms, and downside scenarios.</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="mt-2 inline-block h-2.5 w-2.5 rounded-full bg-amber-500" />
+              <span>Review in minutes, not hours, when your fundraising clock is running.</span>
+            </li>
+          </ul>
+
+          <div class="mt-8 flex flex-wrap gap-3">
+            <a class="inline-flex rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white no-underline transition hover:bg-slate-800" href="/view">Upload Your Document</a>
+            <a class="inline-flex rounded-full border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-900 no-underline transition hover:bg-slate-100" href="#sample-breakdown">See Example Breakdown</a>
+          </div>
+
+          <p class="mt-5 max-w-2xl text-sm text-slate-500">
+            Most funding agreements are signed under time pressure. Clarity early gives you leverage later.
+          </p>
+          <p class="mt-4 max-w-3xl text-sm text-slate-600">
+            New to DecoDocs? Start at <a class="font-semibold text-slate-900 hover:text-slate-700" href="/">the homepage</a>, compare plans on <a class="font-semibold text-slate-900 hover:text-slate-700" href="/pricing">pricing</a>, or browse <a class="font-semibold text-slate-900 hover:text-slate-700" href="/uses-cases">other use cases</a>.
+          </p>
+        </div>
+
+        <aside class="rounded-2xl border border-slate-200 bg-slate-950 p-6 text-slate-100 shadow-lg">
+          <p class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-300">Example Breakdown</p>
+          <h2 class="mt-3 text-xl font-semibold text-white">Seed Term Sheet - Investor Draft</h2>
+          <div class="mt-6 space-y-4 text-sm leading-relaxed">
+            <article class="rounded-xl border border-slate-700 bg-slate-900/80 p-4">
+              <p class="font-semibold text-amber-300">Risk Flag: Participating Preference</p>
+              <p class="mt-2 text-slate-200">Investor receives liquidation preference and still participates in residual proceeds. Founders may see lower exit returns than headline valuation suggests.</p>
+            </article>
+            <article class="rounded-xl border border-slate-700 bg-slate-900/80 p-4">
+              <p class="font-semibold text-amber-300">Risk Flag: Board Control Shift</p>
+              <p class="mt-2 text-slate-200">Board composition rights change after financing milestone. Operational decisions could require investor alignment earlier than expected.</p>
+            </article>
+            <article class="rounded-xl border border-slate-700 bg-slate-900/80 p-4">
+              <p class="font-semibold text-emerald-300">Outcome: Decision Summary Ready</p>
+              <p class="mt-2 text-slate-200">You get a concise brief for co-founders and counsel: accept, negotiate, or escalate, with source clauses attached.</p>
+            </article>
+          </div>
+        </aside>
+      </section>
+
+      <section class="mx-auto w-full max-w-4xl border-b border-slate-200 pb-12">
+        <h2 class="text-3xl font-bold text-slate-900">Why It Matters</h2>
+        <h3 class="mt-3 text-2xl font-semibold text-slate-800">Why Founders Sign What They Do Not Fully Understand</h3>
+        <div class="mt-6 space-y-4 text-[1.05rem] leading-8 text-slate-700">
+          <p>Legal language often hides financial consequences. The number that gets discussed in meetings is rarely the full story in the contract itself.</p>
+          <p>Term sheets can look simple while asymmetric protections sit in preference, pro-rata, control, and transfer clauses that only appear obvious after signature.</p>
+          <p>One clause can materially affect ownership, governance, or liquidation outcomes. What feels like a small compromise now can become a hard ceiling later.</p>
+          <p>Hiring external counsel for every draft is valuable but expensive and sometimes too slow for active fundraising timelines.</p>
+        </div>
+      </section>
+
+      <section class="mx-auto w-full max-w-5xl">
+        <h2 class="text-3xl font-bold text-slate-900">How It Works</h2>
+        <p class="mt-4 max-w-3xl text-[1.05rem] leading-8 text-slate-700">
+          DecoDocs is a structured review layer for decision-critical agreements. It helps founders analyze term sheet language quickly, understand SAFE agreement mechanics, and prepare focused legal questions before final execution.
+        </p>
+        <div class="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {workflowSteps.map((item, index) => (
+            <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-sm font-semibold text-white">{index + 1}</div>
+              <h3 class="mt-4 text-xl font-semibold text-slate-900">{item.title}</h3>
+              <p class="mt-3 text-base leading-7 text-slate-700">{item.detail}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section class="mx-auto w-full max-w-5xl" id="sample-breakdown">
+        <h2 class="text-3xl font-bold text-slate-900">Common Documents</h2>
+        <p class="mt-4 max-w-3xl text-[1.05rem] leading-8 text-slate-700">
+          These are the agreements founders most frequently review in DecoDocs. Each case includes the core pain point and the concrete decision outcome you need before signing.
+        </p>
+        <div class="mt-8 space-y-4">
+          {documentCards.map((card, index) => (
+            <details class="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm" open={index === 0}>
+              <summary class="cursor-pointer list-none text-xl font-semibold text-slate-900">
+                <span class="inline-flex items-center gap-3">
+                  <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-sm font-semibold text-slate-700">{index + 1}</span>
+                  {card.title}
+                </span>
+              </summary>
+              <div class="mt-4 border-t border-slate-200 pt-4 text-base leading-7 text-slate-700">
+                <p><span class="font-semibold text-slate-900">Pain:</span> {card.pain}</p>
+                <p class="mt-3"><span class="font-semibold text-slate-900">Outcome:</span> {card.outcome}</p>
+              </div>
+            </details>
+          ))}
+        </div>
+
+        <article class="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <h3 class="border-b border-slate-200 px-6 py-4 text-xl font-semibold text-slate-900">Problem -> Solution -> Outcome in Practice</h3>
+          <div class="grid gap-px bg-slate-200 md:grid-cols-3">
+            <div class="bg-white p-5">
+              <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Situation</p>
+              <p class="mt-2 text-base leading-7 text-slate-700">You are about to sign a financing term sheet and the headline valuation looks good, but participation and control language is unclear.</p>
+            </div>
+            <div class="bg-white p-5">
+              <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">What DecoDocs Does</p>
+              <p class="mt-2 text-base leading-7 text-slate-700">DecoDocs maps preference, control, and downside clauses into plain-English summaries with source text references and risk flags.</p>
+            </div>
+            <div class="bg-white p-5">
+              <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">The Result</p>
+              <p class="mt-2 text-base leading-7 text-slate-700">You enter negotiation understanding your true economics, escalation points, and what should be reviewed by counsel before signature.</p>
+            </div>
+            <div class="bg-white p-5">
+              <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Situation</p>
+              <p class="mt-2 text-base leading-7 text-slate-700">A vendor agreement must be signed quickly to keep roadmap milestones on track, but auto-renewal and liability boundaries are buried.</p>
+            </div>
+            <div class="bg-white p-5">
+              <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">What DecoDocs Does</p>
+              <p class="mt-2 text-base leading-7 text-slate-700">It surfaces lock-in terms, pricing escalators, termination windows, and indemnity scope in one structured review summary.</p>
+            </div>
+            <div class="bg-white p-5">
+              <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">The Result</p>
+              <p class="mt-2 text-base leading-7 text-slate-700">You avoid expensive long-term commitments and keep procurement aligned with cash, risk tolerance, and operating priorities.</p>
+            </div>
+            <div class="bg-white p-5">
+              <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Situation</p>
+              <p class="mt-2 text-base leading-7 text-slate-700">You need rapid internal alignment before board or advisor calls, but stakeholders are reading different clauses and drawing different conclusions.</p>
+            </div>
+            <div class="bg-white p-5">
+              <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">What DecoDocs Does</p>
+              <p class="mt-2 text-base leading-7 text-slate-700">It creates a consistent clause-by-clause brief with key obligations, risk priority, and recommended next action for each issue.</p>
+            </div>
+            <div class="bg-white p-5">
+              <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">The Result</p>
+              <p class="mt-2 text-base leading-7 text-slate-700">You run cleaner decision meetings, reduce interpretation drift, and shorten time from document receipt to confident go or no-go.</p>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="mx-auto w-full max-w-5xl">
+        <h2 class="text-3xl font-bold text-slate-900">For Startup Founders</h2>
+        <p class="mt-4 max-w-3xl text-[1.05rem] leading-8 text-slate-700">
+          Funding and operating decisions are rarely made alone. DecoDocs helps founders move from uncertainty to alignment by creating evidence-backed summaries that teams can act on quickly.
+        </p>
+        <p class="mt-4 max-w-3xl text-[1.05rem] leading-8 text-slate-700">
+          This is especially useful when multiple stakeholders have different risk tolerance levels. A shared, source-linked summary keeps board conversations focused on outcomes instead of interpretation gaps.
+        </p>
+
+        <div class="mt-8 grid gap-6 lg:grid-cols-2">
+          <article class="rounded-2xl border border-slate-200 bg-white p-6">
+            <h3 class="text-2xl font-semibold text-slate-900">Before DecoDocs</h3>
+            <ul class="mt-4 space-y-3 list-none p-0 text-base leading-7 text-slate-700">
+              <li>Confusion across versions and redlines</li>
+              <li>Legal jargon without business context</li>
+              <li>Fear of hidden terms and irreversible downside</li>
+              <li>High manual review cost per decision cycle</li>
+            </ul>
+          </article>
+
+          <article class="rounded-2xl border border-slate-900 bg-slate-900 p-6 text-slate-100">
+            <h3 class="text-2xl font-semibold text-white">After DecoDocs</h3>
+            <ul class="mt-4 space-y-3 list-none p-0 text-base leading-7 text-slate-100">
+              <li>Clear clause-by-clause explanations</li>
+              <li>Financial and control risk highlighted early</li>
+              <li>Confident decisions with documented rationale</li>
+              <li>Faster negotiations and cleaner legal escalation</li>
+            </ul>
+          </article>
+        </div>
+
+        <article class="mt-8 rounded-2xl border border-slate-200 bg-white p-6">
+          <h3 class="text-2xl font-semibold text-slate-900">What You Gain</h3>
+          <ul class="mt-4 space-y-3 list-none p-0 text-base leading-7 text-slate-700">
+            {founderBenefits.map((benefit) => (
+              <li class="flex items-start gap-3">
+                <span class="mt-2 inline-block h-2.5 w-2.5 rounded-full bg-blue-600" />
+                <span>{benefit}</span>
+              </li>
+            ))}
+          </ul>
+        </article>
+      </section>
+
+      <section class="mx-auto w-full max-w-5xl">
+        <h2 class="text-3xl font-bold text-slate-900">Before You Sign</h2>
+        <div class="mt-6 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+          <article class="rounded-2xl border border-slate-200 bg-white p-6">
+            <h3 class="text-2xl font-semibold text-slate-900">Your Documents Stay Private</h3>
+            <p class="mt-4 text-base leading-7 text-slate-700">
+              Founders regularly review market-sensitive terms before announcements, hiring changes, or fundraising milestones. Confidentiality is not optional in this workflow.
+            </p>
+            <ul class="mt-4 space-y-3 list-none p-0 text-base leading-7 text-slate-700">
+              <li>Secure processing designed for confidential agreement review.</li>
+              <li>No public indexing of your uploaded files.</li>
+              <li>Uploaded content is not reused as open model training data.</li>
+              <li>You control document upload, review, and sharing decisions.</li>
+            </ul>
+          </article>
+
+          <article class="rounded-2xl border border-slate-900 bg-slate-900 p-6 text-slate-100">
+            <h3 class="text-2xl font-semibold text-white">Do Not Guess. Know Before You Sign.</h3>
+            <p class="mt-4 text-base leading-7 text-slate-100">
+              Upload your agreement and see what it really says before committing your company to financial, governance, or operational obligations.
+            </p>
+            <div class="mt-6 flex flex-wrap gap-3">
+              <a class="inline-flex rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-slate-900 no-underline transition hover:bg-slate-100" href="/view">Analyze My Document</a>
+              <a class="inline-flex rounded-full border border-slate-500 px-5 py-2.5 text-sm font-semibold text-white no-underline transition hover:border-slate-300" href="/pricing">View Pricing</a>
+            </div>
+          </article>
+        </div>
+
+        <article class="mt-8 rounded-2xl border border-slate-200 bg-white p-6">
+          <h3 class="text-2xl font-semibold text-slate-900">FAQ</h3>
+          <div class="mt-4 space-y-3">
+            {faqEntries.map((item) => (
+              <details class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <summary class="cursor-pointer list-none text-base font-semibold text-slate-900">{item.question}</summary>
+                <p class="mt-3 text-base leading-7 text-slate-700">{item.answer}</p>
+              </details>
+            ))}
+          </div>
+        </article>
+      </section>
+    </div>
+  </main>
+  <Footer />
+</MainLayout>

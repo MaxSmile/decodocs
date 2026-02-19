@@ -253,8 +253,8 @@ export default function PricingPage() {
       <div className="mt-5 flex flex-wrap gap-3">
         <Link to="/view" className="dd-link-strong">Start anonymous trial</Link>
         <Link to="/profile" className="dd-link-strong">Go to profile</Link>
-        <Link to="/terms" className="dd-link-muted">Terms</Link>
-        <Link to="/privacy" className="dd-link-muted">Privacy</Link>
+        <a href="/terms" className="dd-link-muted">Terms</a>
+        <a href="/privacy" className="dd-link-muted">Privacy</a>
       </div>
 
       <Card className="mt-5 bg-slate-50">

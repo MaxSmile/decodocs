@@ -31,10 +31,10 @@ const Hero = ({ onOpenPdf }) => {
             <Button
               variant="secondary"
               size="lg"
-              to="/view"
+              to="/edit/test-docs/offer.pdf"
               className="w-full sm:w-auto"
             >
-              View Demo
+              Open Editor
             </Button>
           </div>
           <div className="mt-1 flex flex-wrap gap-3 text-xs font-medium text-slate-500 sm:mt-2 sm:gap-6 sm:text-sm">

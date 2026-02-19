@@ -68,7 +68,7 @@ export const useCases = [
   {
     slug: 'procurement-teams',
     title: 'Procurement teams',
-    description: 'Speed up vendor reviews without missing hidden liabilities.',
+    description: 'Speed up vendor contract review across procurement, operations, and vendor teams.',
     audience: 'Procurement',
     heroTitle: 'Review supplier contracts with less back-and-forth',
     heroDescription: 'Get clear obligations, risk hotspots, and negotiation points before legal and finance sign-off.',
@@ -164,6 +164,108 @@ export const useCases = [
       primaryLabel: 'Open founder workflow',
       primaryTo: '/view',
       secondaryLabel: 'Ask a question',
+      secondaryTo: '/contact'
+    }
+  },
+  {
+    slug: 'freelancers-agencies',
+    title: 'Freelancers & agencies',
+    description: 'Review client contracts faster and protect scope, payment, and IP before work starts.',
+    audience: 'Freelancers',
+    heroTitle: 'Contract review for freelancers and agencies who need clear terms before they deliver',
+    heroDescription: 'Decode client agreements, statements of work, and retainers in plain language so you can avoid scope creep, payment disputes, and hidden liability.',
+    documentTypes: [
+      'Master service agreements and statements of work',
+      'Retainer and project contracts',
+      'Creative and marketing service agreements',
+      'Subcontractor and collaboration agreements'
+    ],
+    painPoints: [
+      'Scope language is often vague, leading to unpaid revisions and delivery disputes.',
+      'Payment terms and late-fee clauses are easy to miss in long contracts.',
+      'IP ownership and usage rights are frequently unclear until after delivery.',
+      'Termination and liability terms can expose small teams to outsized risk.'
+    ],
+    workflow: [
+      {
+        step: 'Upload the client contract pack',
+        detail: 'Review the MSA, SOW, and attachment terms together so context is not lost across files.'
+      },
+      {
+        step: 'Surface payment, scope, and IP risk',
+        detail: 'Highlight revision limits, acceptance criteria, ownership rights, and liability boundaries in one summary.'
+      },
+      {
+        step: 'Share a negotiation-ready checklist',
+        detail: 'Send clear contract notes to your team or client before kickoff so expectations are aligned.'
+      }
+    ],
+    deliverables: [
+      'Scope and change-request risk summary',
+      'Payment and renewal term checklist',
+      'IP ownership and licensing clarification notes',
+      'Negotiation points before project kickoff'
+    ],
+    highlights: [
+      { label: 'Main outcome', value: 'Fewer scope and payment surprises' },
+      { label: 'Best for', value: 'Freelancers and small agencies' },
+      { label: 'Team fit', value: 'Founder + Client delivery team' }
+    ],
+    cta: {
+      primaryLabel: 'Open freelancer review',
+      primaryTo: '/view',
+      secondaryLabel: 'See pricing',
+      secondaryTo: '/pricing'
+    }
+  },
+  {
+    slug: 'small-business-owners',
+    title: 'Small business owners',
+    description: 'Understand supplier, service, and lease contracts before they impact cash flow.',
+    audience: 'Small Business',
+    heroTitle: 'Contract analysis for small business owners who cannot afford hidden terms',
+    heroDescription: 'Decode vendor agreements, leases, loans, and service contracts quickly so you can protect margin, cash flow, and daily operations.',
+    documentTypes: [
+      'Supplier and vendor agreements',
+      'Commercial leases and property terms',
+      'Loan, equipment finance, and credit agreements',
+      'Operational service contracts and maintenance agreements'
+    ],
+    painPoints: [
+      'Hidden renewals and fee escalators can erode margin over time.',
+      'Owners often sign under time pressure without clear legal interpretation.',
+      'Operational obligations are spread across clauses that are hard to compare.',
+      'One unclear term can create downstream cash flow and delivery risk.'
+    ],
+    workflow: [
+      {
+        step: 'Upload your agreement',
+        detail: 'Open contracts in one review flow before approval or renewal deadlines.'
+      },
+      {
+        step: 'Highlight cost and obligation terms',
+        detail: 'Surface renewal windows, payment triggers, liability terms, and exit conditions in plain English.'
+      },
+      {
+        step: 'Decide with confidence',
+        detail: 'Share clear notes with partners, advisors, or legal support before committing your business.'
+      }
+    ],
+    deliverables: [
+      'Contract risk summary tied to business impact',
+      'Renewal and notice-date checklist',
+      'Clause list for legal escalation',
+      'Decision-ready owner brief'
+    ],
+    highlights: [
+      { label: 'Main outcome', value: 'Better cash-flow protection' },
+      { label: 'Best for', value: 'Owner-operators and lean teams' },
+      { label: 'Team fit', value: 'Owner + Ops + Finance' }
+    ],
+    cta: {
+      primaryLabel: 'Open business contract review',
+      primaryTo: '/view',
+      secondaryLabel: 'Talk to us',
       secondaryTo: '/contact'
     }
   },
@@ -438,7 +540,7 @@ export const faqs = [
 export const footerLinks = {
   product: [
     { label: 'How it works', href: '#how-it-works' },
-    { label: 'Use cases', href: '#use-cases' },
+    { label: 'Use cases', href: '/uses-cases' },
     { label: 'Pricing', href: '/pricing' },
     { label: 'Open viewer', href: '/view' }
   ],
@@ -449,9 +551,9 @@ export const footerLinks = {
   docs: [
     { label: 'Docs home', href: 'https://docs.decodocs.com/' },
     { label: 'Getting started', href: 'https://docs.decodocs.com/#getting-started' },
-    { label: 'Architecture', href: 'https://docs.decodocs.com/#architecture' },
-    { label: 'API & integrations', href: 'https://docs.decodocs.com/#api-integrations' },
-    { label: 'Deployment', href: 'https://docs.decodocs.com/#deployment' }
+    { label: 'Use cases', href: '/uses-cases' },
+    { label: 'Privacy', href: '/privacy' },
+    { label: 'Contact support', href: '/contact' }
   ],
   legal: [
     { label: 'Privacy', href: '/privacy' },

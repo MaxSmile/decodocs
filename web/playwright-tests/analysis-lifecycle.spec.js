@@ -18,12 +18,15 @@ const uploadDummyPdf = async (page) => {
   await input.setInputFiles(dummyPdfPath);
   await expect(page.locator('canvas').first()).toBeVisible({ timeout: 30000 });
   await expect(page.locator('#viewer-toolbar')).toBeVisible({ timeout: 10000 });
+  // wait for PDF extraction/initial processing to complete so analysis tools become available
+  // wait until the viewer/analysis loading indicator (if any) has cleared
+  await expect(page.getByText('Working…')).not.toBeVisible({ timeout: 20000 });
 };
 
 test.describe('Analysis lifecycle — loading → success (E2E)', () => {
   test.beforeEach(async ({ page }) => {
     // authenticated mock so analysis buttons are enabled
-    await page.addInitScript({ content: 'window.MOCK_AUTH = true;' });
+    await page.addInitScript({ content: 'window.MOCK_AUTH = true; window.MOCK_AUTH_USER = { uid: "e2e-user", email: "e2e+user@example.com", isAnonymous: false };' });
   });
 
   test('shows loading UI during analysis and renders results on success', async ({ page }) => {
@@ -54,7 +57,15 @@ test.describe('Analysis lifecycle — loading → success (E2E)', () => {
       });
     });
 
+    // debug: print disabled-reason and mock/auth state (temporary)
+    const disabledBox = page.locator('.rounded-lg.border').first();
+    const debugState = await page.evaluate(() => ({ MOCK_AUTH: window.MOCK_AUTH, MOCK_AUTH_USER: window.MOCK_AUTH_USER }));
+    console.log('Playwright-debug disabledBox text:', await disabledBox.textContent().catch(() => 'N/A'));
+    console.log('Playwright-debug window state:', debugState);
+
     const summarizeBtn = page.getByRole('button', { name: 'Summarize Key Points' });
+    console.log('Playwright-debug summarize btn disabled attr:', await summarizeBtn.getAttribute('disabled'));
+    console.log('Playwright-debug summarize btn class:', await summarizeBtn.getAttribute('class'));
     await expect(summarizeBtn).toBeEnabled();
 
     // Trigger analysis and assert immediate loading state

@@ -24,6 +24,31 @@
 - clarity over complexity
 - docs before signatures
 
+## Landing CTA Framing
+- secondary CTA on marketing entry points must be action-oriented and aligned with core workflows
+- replaced "View Demo" copy with "Open Editor" to avoid passive/demo framing
+- canonical secondary CTA target is `/edit/test-docs/offer.pdf` so users land in a real editing workflow
+
+## Use-Case Routing for Founder Conversion Page
+- `/use-cases/startup-founders/` is a dedicated, handcrafted SEO/conversion page (not rendered through the generic `[slug]` use-case template)
+- generic use-case rendering remains in `web/src/pages/use-cases/[slug].astro` for all other personas
+- route generation in `[slug].astro` explicitly excludes `startup-founders` to prevent route collisions and preserve tailored founder messaging
+
+## Use-Case Routing for Procurement Conversion Page
+- `/use-cases/procurement-teams/` is a dedicated, handcrafted SEO/conversion page (not rendered through the generic `[slug]` use-case template)
+- this page broadens audience framing from procurement-only to procurement + operations + vendor management contract workflows
+- route generation in `[slug].astro` explicitly excludes `procurement-teams` to prevent route collisions and preserve tailored copy
+
+## Use-Case Routing for Freelancers & Agencies Page
+- `/use-cases/freelancers-agencies/` is a dedicated, handcrafted SEO/conversion page (not rendered through the generic `[slug]` use-case template)
+- page language prioritizes freelancer and agency business pain (scope, payment, IP, liability) over generic document features
+- route generation in `[slug].astro` explicitly excludes `freelancers-agencies`
+
+## Use-Case Routing for Small Business Owners Page
+- `/use-cases/small-business-owners/` is a dedicated, handcrafted SEO/conversion page (not rendered through the generic `[slug]` use-case template)
+- page language prioritizes owner/operator outcomes (cash flow, renewals, fees, operational risk)
+- route generation in `[slug].astro` explicitly excludes `small-business-owners`
+
 ## Constraints
 - no public buckets
 - no secrets in git

@@ -31,3 +31,11 @@ If any hosting or function scripts require Blaze/Cloud Build, re-check your fire
 - Configuration must come from:
   - Firestore admin config documents, and/or
   - platform-provided process environment (CI/runtime/shell), without env files committed or loaded from disk.
+
+## Documentation & product context
+- Both code changes and content/copy updates require project understanding. Consult the umbrella `DOCS_INDEX.md` and `Decodocs/docs/README.md` for the curated docs, ownership, and deployment/runbook guidance before making non-trivial changes.
+- The `DOCS_INDEX.md` is the canonical entry point for locating architecture, deployment, and product documentation.
+
+## Canonical deployment script
+- DecoDocs is deployed as part of the SnapSign-AU umbrella. Use the repo-root `./test-build-deploy.sh` to build and deploy DecoDocs together with the other subprojects.
+- Do NOT deploy `Decodocs` independently using ad-hoc `firebase deploy` — the umbrella script guarantees the expected nested output paths and build verification.

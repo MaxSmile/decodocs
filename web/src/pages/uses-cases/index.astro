@@ -1,0 +1,243 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import Footer from '../../components/astro/Footer.astro';
+
+const title = 'Use Cases | Understand Before You Commit | DecoDocs';
+const description = 'Decision-critical use cases for contracts, governance, finance, startups, HR, and everyday agreements.';
+
+const heroBuckets = [
+  {
+    title: 'Before You Sign a Contract',
+    description: 'Spot risk, hidden clauses, obligations, and unfair terms before commitment.',
+    links: [
+      { label: 'Freelancers & agencies', href: '/use-cases/freelancers-agencies' },
+      { label: 'Small business owners', href: '/use-cases/small-business-owners' },
+      { label: 'Legal teams', href: '/use-cases/legal-teams' },
+    ],
+  },
+  {
+    title: 'When Running a Business',
+    description: 'Summarize governance and operational documents into clear next actions.',
+    links: [
+      { label: 'Startup founders', href: '/use-cases/startup-founders' },
+      { label: 'Procurement teams', href: '/use-cases/procurement-teams' },
+      { label: 'HR & people ops', href: '/use-cases/hr-people-ops' },
+    ],
+  },
+  {
+    title: 'When Reviewing Financial Documents',
+    description: 'Understand penalties, payment terms, and compliance risk faster.',
+    links: [
+      { label: 'Finance teams', href: '/use-cases/finance-teams' },
+      { label: 'Pricing and plans', href: '/pricing' },
+      { label: 'Open a document', href: '/view' },
+    ],
+  },
+];
+
+const useCaseSections = [
+  {
+    id: 'contracts',
+    kicker: 'Core use case',
+    title: 'Contracts & Agreements',
+    angle: 'Spot risks, hidden clauses, and unfair terms before you sign.',
+    items: [
+      'Employment contracts',
+      'Service agreements',
+      'NDAs',
+      'SaaS terms',
+      'Lease agreements',
+      'Vendor contracts',
+      'Partnership agreements',
+    ],
+    images: [
+      'https://plus.unsplash.com/premium_photo-1661331613662-98b07dee7882?fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDI5fHx8ZW58MHx8fHx8&ixlib=rb-4.1.0&q=60&w=3000',
+      'https://blog.lexcheck.com/hubfs/shutterstock_2017272698-jpg.jpeg',
+      'https://images.openai.com/static-rsc-3/QXzL1V7_Xpi9Kjffvhv2oFH0ou7aJ6afPq_-otgYORn6OItLezLZKf5LMV8zzhkXXwRy2pq1tbcnPYOnbuXlkOQ3Lt_-xuGqMQOkZZy1H5I?purpose=fullsize&v=1',
+      'https://images.openai.com/static-rsc-3/NMEiVnyzEpQcgeHEcAjoNgtXHfIWK7wCCBJjytoDaYzdtblRi9sJJ6GVxv_9GoMFoRwkn22dkIFhPXbstG8B57FhTxQuqFPq7_UNLmvBIpI?purpose=fullsize&v=1',
+    ],
+  },
+  {
+    id: 'legal-corporate',
+    kicker: 'SME and enterprise',
+    title: 'Legal & Corporate Documents',
+    angle: 'Summarise complex governance documents in minutes.',
+    items: [
+      'Company policies',
+      'Risk management documents',
+      'Board resolutions',
+      'Shareholder agreements',
+      'Association constitutions',
+      'First meeting minutes',
+    ],
+    images: [
+      'https://www.omron.com/global/en/assets/img/about/corporate/governance/governance_chart03-2.png',
+      'https://imgv2-2-f.scribdassets.com/img/document/514419249/original/215c3a0ef8/1?v=1',
+      'https://www.stamplab.com.au/cdn/shop/files/Pre-inked-ACT-JP-Multi-page-stamps-B_1033-02-_10.webp?v=1752608168&width=1331',
+      'https://www.stamplab.com.au/cdn/shop/files/Australian-Legal-Practitioner-Stamp-Multipage-NSW-1135-03-_1.webp?v=1752608392&width=1361',
+    ],
+  },
+  {
+    id: 'finance-compliance',
+    kicker: 'Founders and finance',
+    title: 'Financial & Compliance Documents',
+    angle: 'Understand obligations, penalties, and payment terms instantly.',
+    items: [
+      'Invoices',
+      'Receipts',
+      'Financial statements',
+      'Compliance reports',
+      'Insurance policies',
+    ],
+    images: [
+      'https://square-mailstrom-production.s3.amazonaws.com/invoices/templates/img/en-us-invoice-template-576474.jpg?v=2',
+      'https://templates.invoicehome.com/receipt-template-us-classic-white-750px.png',
+      'https://images.template.net/421465/Compliance-Review-Template-edit-online.png',
+      'https://images.ctfassets.net/ueprkma36dz5/1Mkd3Ae1A35YhQGIy97a28/661b2b4f439ea0828f9a1d1356a28cbf/Legal-Compliance-Checklist-Sample-Report.png',
+    ],
+  },
+  {
+    id: 'startup-validation',
+    kicker: 'Founder decision support',
+    title: 'Startup & Business Validation',
+    angle: 'Decode investor terms before you dilute yourself.',
+    items: [
+      'Pitch decks',
+      'Business plans',
+      'Investment agreements',
+      'SAFE notes',
+      'Term sheets',
+    ],
+    images: [
+      'https://nulivo.s3.us-east-2.amazonaws.com/media/users/CreativeSlides/products/4892/PowerPoint.jpg',
+      'https://www.mdpi.com/businesses/businesses-05-00010/article_deploy/html/images/businesses-05-00010-g001.png',
+      'https://blog.foundersuite.com/content/images/size/w2000/2022/07/VC-meeting-2.jpeg',
+      'https://kruzeconsulting.com/uploads/the-top-5-venture-capital-pitch-decks.jpg',
+    ],
+  },
+  {
+    id: 'hr-recruitment',
+    kicker: 'Individual + company',
+    title: 'HR & Recruitment',
+    angle: 'Understand what you are accepting: salary, restrictions, and liabilities.',
+    items: [
+      'CV review and feedback',
+      'Offer letters',
+      'Employment contracts',
+      'Contractor agreements',
+    ],
+    images: [
+      'https://storage.googleapis.com/stepfly-partners-v1-prod.appspot.com/preplogics/adminUploads/70%2B%20target%20in%20%2815%29.png',
+      'https://cdn.vertex42.com/WordTemplates/images/job-offer-letter-template.png',
+      'https://venngage-wordpress.s3.amazonaws.com/uploads/2021/09/63dc3b31-7dc7-49c2-b67b-b24758f69ec9-1.png',
+      'https://www.smartsheet.com/sites/default/files/2025-04/IC-Employee-Onboarding-Form-Template.png',
+    ],
+  },
+  {
+    id: 'everyday-docs',
+    kicker: 'Mass-market entry',
+    title: 'Everyday Documents',
+    angle: 'Translate legal language into human language.',
+    items: [
+      'Rental agreements',
+      'Phone contracts',
+      'Loan agreements',
+      'Subscription terms',
+    ],
+    images: [
+      'https://images.openai.com/static-rsc-3/Xq-MnL0NSPLvCBvUuh5eLXSjgB7Qx7cBr7GgzF1mZ8vTnlfzMP7lft-N1Q7g4lA2xOkdQWXELeq6C27ofG0uuPu7y_hJ0AmM8KBwotjxNH8?purpose=fullsize&v=1',
+      'https://cdn.jotfor.ms/templates/screenshot/pdf-templates/cell-phone-contract.png?v=3612633296',
+      'https://cdn.prod.website-files.com/5aa7081220a301f2a3644f3b/60d6436c2956d1577ab021ed_loan-agreements-blog.jpg',
+      'https://www.pandadoc.com/app/uploads/Fill-in-the-lender-and-borrower-information-1400x828.png',
+    ],
+  },
+];
+
+const enterpriseCapabilities = [
+  'Bulk contract analysis',
+  'Internal policy auditing',
+  'Risk pattern detection',
+  'Clause inconsistency detection',
+  'Multi-language compliance review',
+];
+---
+
+<MainLayout title={title} description={description} canonical="https://decodocs.com/uses-cases/" image="https://decodocs.com/og.svg">
+  <main class="bg-white px-6 py-16 md:py-20">
+    <section class="mx-auto max-w-6xl">
+      <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Use Cases</p>
+      <h1 class="mt-4 text-4xl font-black tracking-tight text-slate-900 md:text-6xl">Understand before you commit</h1>
+      <p class="mt-6 max-w-3xl text-lg leading-relaxed text-slate-600">
+        DecoDocs is built for decision-critical moments, not generic document cleanup. Use it when the downside of misunderstanding terms is expensive.
+      </p>
+      <div class="mt-8 flex flex-wrap gap-3">
+        <a href="/view" class="rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white no-underline hover:bg-slate-800">Open a document</a>
+        <a href="/pricing" class="rounded-full border border-slate-300 px-5 py-2.5 text-sm font-semibold text-slate-800 no-underline hover:bg-slate-50">See plans</a>
+      </div>
+    </section>
+
+    <section class="mx-auto mt-14 grid max-w-6xl gap-6 md:grid-cols-3">
+      {heroBuckets.map((bucket) => (
+        <article class="rounded-3xl border border-slate-200 bg-slate-50 p-6">
+          <h2 class="text-xl font-bold text-slate-900">{bucket.title}</h2>
+          <p class="mt-3 text-sm leading-relaxed text-slate-600">{bucket.description}</p>
+          <ul class="mt-5 space-y-2 list-none p-0">
+            {bucket.links.map((link) => (
+              <li>
+                <a href={link.href} class="text-sm font-semibold text-slate-800 no-underline hover:text-slate-900">{link.label} -&gt;</a>
+              </li>
+            ))}
+          </ul>
+        </article>
+      ))}
+    </section>
+
+    <section class="mx-auto mt-16 max-w-6xl space-y-12">
+      {useCaseSections.map((section, idx) => (
+        <article id={section.id} class="rounded-3xl border border-slate-200 bg-white p-6 md:p-8">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <p class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">{section.kicker}</p>
+            <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">{String(idx + 1).padStart(2, '0')}</span>
+          </div>
+          <h3 class="mt-4 text-3xl font-black tracking-tight text-slate-900">{section.title}</h3>
+          <p class="mt-3 text-base font-medium text-slate-700">{section.angle}</p>
+
+          <ul class="mt-5 grid gap-2 text-sm text-slate-700 md:grid-cols-2 list-none p-0">
+            {section.items.map((item) => (
+              <li class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">{item}</li>
+            ))}
+          </ul>
+
+          <div class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {section.images.map((src) => (
+              <img src={src} alt={section.title} loading="lazy" class="h-36 w-full rounded-2xl border border-slate-200 object-cover" />
+            ))}
+          </div>
+        </article>
+      ))}
+    </section>
+
+    <section class="mx-auto mt-16 grid max-w-6xl gap-6 md:grid-cols-2">
+      <article class="rounded-3xl border border-rose-200 bg-rose-50 p-6">
+        <h2 class="text-xl font-bold text-rose-900">What not to over-promote</h2>
+        <ul class="mt-4 space-y-2 text-sm text-rose-900/90">
+          <li>Generic PDF summarizer messaging</li>
+          <li>School essays and casual rewriting</li>
+          <li>Broad non-risk writing tasks</li>
+        </ul>
+        <p class="mt-4 text-sm text-rose-900/90">Positioning stays stronger when DecoDocs is framed as serious, risk-aware, and decision-critical.</p>
+      </article>
+
+      <article class="rounded-3xl border border-slate-200 bg-slate-900 p-6 text-slate-100">
+        <h2 class="text-xl font-bold">Enterprise platform angle</h2>
+        <ul class="mt-4 space-y-2 text-sm text-slate-100/90">
+          {enterpriseCapabilities.map((item) => (
+            <li>{item}</li>
+          ))}
+        </ul>
+        <a href="/contact" class="mt-6 inline-flex rounded-full border border-white/40 px-4 py-2 text-sm font-semibold text-white no-underline hover:bg-white/10">Talk to us</a>
+      </article>
+    </section>
+  </main>
+  <Footer />
+</MainLayout>

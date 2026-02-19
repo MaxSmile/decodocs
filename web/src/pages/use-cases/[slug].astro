@@ -4,10 +4,18 @@ import Footer from '../../components/astro/Footer.astro';
 import { useCases } from '../../lib/landingData.js';
 
 export function getStaticPaths() {
-  return useCases.map((entry) => ({
-    params: { slug: entry.slug },
-    props: { useCase: entry },
-  }));
+  const dedicatedUseCaseSlugs = new Set([
+    'startup-founders',
+    'procurement-teams',
+    'freelancers-agencies',
+    'small-business-owners',
+  ]);
+  return useCases
+    .filter((entry) => !dedicatedUseCaseSlugs.has(entry.slug))
+    .map((entry) => ({
+      params: { slug: entry.slug },
+      props: { useCase: entry },
+    }));
 }
 
 const { useCase } = Astro.props;

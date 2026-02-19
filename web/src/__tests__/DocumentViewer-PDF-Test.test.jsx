@@ -1,7 +1,7 @@
 import React from 'react';
 import { describe, test, expect, beforeEach, vi, afterEach } from 'vitest';
 import { render, screen, waitFor, act } from '@testing-library/react';
-import { BrowserRouter, useParams } from 'react-router-dom';
+import { BrowserRouter, useParams, useNavigate } from 'react-router-dom';
 import DocumentViewer from '../components/DocumentViewer';
 
 // Mock useParams to simulate route parameters
@@ -78,6 +78,9 @@ describe('DocumentViewer PDF Loading Tests', () => {
   beforeEach(() => {
     // Reset all mocks
     vi.clearAllMocks();
+
+    // ensure useNavigate returns a callable function
+    useNavigate.mockReturnValue(vi.fn());
     
     // Set up default mock implementations
     global.fetch.mockResolvedValue({

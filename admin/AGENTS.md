@@ -30,6 +30,7 @@ Current scope:
 - Keep this app as static hosting only.
 - Do not add SSR, Next.js hosting adapters, Cloud Build-triggered hosting flows, or App Hosting features.
 - Keep changes compatible with basic Firebase Hosting + basic gen2 Functions usage in the umbrella repo.
+- Use the umbrella `./test-build-deploy.sh` (repo root) as the canonical deployment method — do not run standalone `firebase deploy` for `decodocs-admin` unless explicitly approved.
 
 ## Operator workflow
 1. Sign in/register with a `@snapsign.com.au` account.
@@ -46,3 +47,7 @@ Current scope:
   - Relevant Firestore rules and docs.
 - Avoid introducing hidden defaults in UI; prefer explicit JSON in Firestore.
 - Do not introduce `.env*` file workflows (`.env`, `.env.local`, etc.) or dotenv loaders.
+
+## Documentation & project context
+- Both code and UI/copy edits require understanding of product intent and ownership. Before changing UI text or adding features, consult `Decodocs/docs/README.md` and the umbrella `DOCS_INDEX.md` to find the right docs and reviewers.
+- Use the index to ensure consistency between implementation and written copy.

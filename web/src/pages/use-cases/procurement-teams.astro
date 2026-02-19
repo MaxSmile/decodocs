@@ -1,0 +1,449 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import Footer from '../../components/astro/Footer.astro';
+
+const pageTitle =
+  'Contract Review and Analysis for Procurement, Operations, and Vendor Teams | DecoDocs';
+const pageDescription =
+  'Speed up vendor contract review with DecoDocs. Understand risks, obligations, renewals and penalties before signing. Ideal for procurement, operations and vendor teams.';
+const canonical = 'https://decodocs.com/use-cases/procurement-teams/';
+
+const workflowSteps = [
+  {
+    title: 'Upload your file',
+    detail:
+      'Upload PDF, Word, or plain-text contracts in one flow so every stakeholder reviews the same source without copy/paste handoffs.',
+    outcome: 'Instantly see what matters.',
+  },
+  {
+    title: 'DecoDocs breaks it down',
+    detail:
+      'Contract analysis for procurement starts with clause extraction and plain-language explanations your teams can use in real business decisions.',
+    outcome: 'Stop guessing what a clause means.',
+  },
+  {
+    title: 'Risk flags appear',
+    detail:
+      'Penalties, renewals, obligations, termination windows, cost escalation language, and one-sided liability terms are highlighted in context.',
+    outcome: 'Know your obligations before signing.',
+  },
+  {
+    title: 'Get clear, shareable summaries',
+    detail:
+      'Produce one summary for procurement, operations, finance, and legal so review cycles are shorter and final decisions are better documented.',
+    outcome: 'Reduce review cycles and mistakes.',
+  },
+];
+
+const scenarios = [
+  {
+    title: 'Vendor Agreement with Auto-Renewal',
+    consequence:
+      'Unexpected renewals can lock teams into avoidable spend and create budget drift that only appears after notice windows close.',
+    outcome:
+      'DecoDocs surfaces auto-renew and notice deadlines clearly so teams can act before commitments roll over.',
+  },
+  {
+    title: 'Service Level Agreement (SLA)',
+    consequence:
+      'When service terms are vague, delivery misses and penalties become hard to enforce and expensive to dispute.',
+    outcome:
+      'SLA metrics, response obligations, remedies, and escalation clauses are structured into measurable checkpoints.',
+  },
+  {
+    title: 'Maintenance and Support Contracts',
+    consequence:
+      'Buried support tiers, hidden overage fees, and upgrade conditions can inflate total cost after initial approval.',
+    outcome:
+      'Cost thresholds, support limits, and renewal triggers are summarized early for cleaner financial sign-off.',
+  },
+  {
+    title: 'Outsourcing and Third-Party Partnerships',
+    consequence:
+      'Unclear responsibilities create delivery gaps, finger-pointing, and operational risk when incidents occur.',
+    outcome:
+      'Responsibilities, dependency clauses, and risk transfer language are mapped so ownership is explicit before execution.',
+  },
+  {
+    title: 'NDAs with Broad Language',
+    consequence:
+      'Overly broad confidentiality terms can block normal workflows, partner conversations, and internal knowledge sharing.',
+    outcome:
+      'Scope, duration, exclusions, and liability limits are explained so teams can negotiate practical boundaries.',
+  },
+];
+
+const teamBenefits = [
+  'Faster vendor onboarding and procurement cycles with fewer blocked approvals.',
+  'Clear, consistent interpretation shared across procurement, operations, finance, and legal.',
+  'Reduced legal dependency for early-stage review without removing legal oversight.',
+  'Better negotiation position because high-risk terms are visible before calls.',
+  'Fewer surprises around renewals, penalties, and hidden operational commitments.',
+];
+
+const credibilityPoints = [
+  {
+    title: 'Built for business teams',
+    detail:
+      'Designed for procurement, operations, and vendor managers who need rapid contract review without legal ambiguity.',
+  },
+  {
+    title: 'Enterprise-ready posture',
+    detail:
+      'Secure processing, controlled access, and document handling aligned with confidentiality-first workflows.',
+  },
+  {
+    title: 'Practical decision output',
+    detail:
+      'Structured summaries that teams can use in approval threads, negotiation meetings, and sign-off records.',
+  },
+];
+
+const faqEntries = [
+  {
+    question: 'Is this a replacement for legal review?',
+    answer:
+      'No. DecoDocs helps teams prepare contracts confidently before legal review. You reduce avoidable back-and-forth and escalate high-impact clauses with better context.',
+  },
+  {
+    question: 'Are my documents safe and private?',
+    answer:
+      'Yes. Documents are processed in a secure workflow. Uploaded files are not publicly indexed and are not reused as open training data.',
+  },
+  {
+    question: 'What file types are supported?',
+    answer:
+      'PDF, Word, and plain-text files are supported for contract analysis and summary generation.',
+  },
+  {
+    question: 'Can I collaborate with my team?',
+    answer:
+      'Yes. DecoDocs generates shareable summaries so procurement, operations, finance, and legal can align from one source of truth.',
+  },
+];
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqEntries.map((item) => ({
+    '@type': 'Question',
+    name: item.question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: item.answer,
+    },
+  })),
+};
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    {
+      '@type': 'ListItem',
+      position: 1,
+      name: 'Home',
+      item: 'https://decodocs.com/',
+    },
+    {
+      '@type': 'ListItem',
+      position: 2,
+      name: 'Use Cases',
+      item: 'https://decodocs.com/use-cases/',
+    },
+    {
+      '@type': 'ListItem',
+      position: 3,
+      name: 'Procurement Teams',
+      item: canonical,
+    },
+  ],
+};
+
+const exampleOutputSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'CreativeWork',
+  name: 'Example Vendor Contract Analysis Output',
+  about: [
+    'vendor contract review',
+    'risk detection in contracts',
+    'contract analysis for procurement',
+  ],
+  description:
+    'Sample plain-language summary highlighting renewals, obligations, penalties, and negotiation points for procurement, operations, and vendor teams.',
+  url: `${canonical}#example-output`,
+};
+---
+
+<MainLayout title={pageTitle} description={pageDescription} canonical={canonical} image="https://decodocs.com/og.svg">
+  <main class="relative overflow-hidden bg-slate-50/60 px-6 pb-28 pt-12">
+    <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+    <script type="application/ld+json" set:html={JSON.stringify(exampleOutputSchema)} />
+
+    <div class="pointer-events-none absolute inset-0">
+      <div class="absolute -left-24 top-24 h-72 w-72 rounded-full bg-blue-200/40 blur-3xl" />
+      <div class="absolute -right-20 top-56 h-80 w-80 rounded-full bg-amber-200/40 blur-3xl" />
+    </div>
+
+    <div class="relative mx-auto w-full max-w-6xl space-y-16">
+      <section class="grid gap-10 rounded-3xl border border-slate-200/80 bg-white/90 p-8 shadow-xl shadow-slate-900/5 backdrop-blur-sm lg:grid-cols-[1.1fr_0.9fr] lg:p-12">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">For Procurement, Operations, and Vendor Teams</p>
+          <h1 class="mt-4 max-w-3xl text-4xl font-bold leading-tight text-slate-900 lg:text-5xl">
+            Contract Review and Analysis for Procurement, Operations, and Vendor Teams
+          </h1>
+          <p class="mt-5 max-w-3xl text-lg leading-relaxed text-slate-600">
+            Upload any agreement or vendor contract and instantly see what matters: costs, obligations, renewals, penalties, and risk explained in plain language. DecoDocs turns legal document understanding into practical actions your team can align on fast.
+          </p>
+          <ul class="mt-6 space-y-3 list-none p-0 text-base leading-7 text-slate-700">
+            <li class="flex items-start gap-3">
+              <span class="mt-2 inline-block h-2.5 w-2.5 rounded-full bg-amber-500" />
+              <span>Spot costly clauses before your business commits.</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="mt-2 inline-block h-2.5 w-2.5 rounded-full bg-amber-500" />
+              <span>Understand vendor obligations, renewals, and termination terms.</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="mt-2 inline-block h-2.5 w-2.5 rounded-full bg-amber-500" />
+              <span>Share clear summaries with procurement, operations, finance, and legal.</span>
+            </li>
+          </ul>
+          <div class="mt-8 flex flex-wrap gap-3">
+            <a class="inline-flex rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white no-underline transition hover:bg-slate-800" href="/view">Upload Contract to Understand</a>
+            <a class="inline-flex rounded-full border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-900 no-underline transition hover:bg-slate-100" href="#example-output">See Example Output</a>
+          </div>
+          <p class="mt-5 max-w-3xl text-sm text-slate-600">
+            Working across teams? Start from <a class="font-semibold text-slate-900 hover:text-slate-700" href="/">the homepage</a>, compare plans on <a class="font-semibold text-slate-900 hover:text-slate-700" href="/pricing">pricing</a>, or explore <a class="font-semibold text-slate-900 hover:text-slate-700" href="/uses-cases">other use cases</a>.
+          </p>
+        </div>
+
+        <aside id="example-output" class="rounded-2xl border border-slate-200 bg-slate-950 p-6 text-slate-100 shadow-lg">
+          <p class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-300">Example Output</p>
+          <h2 class="mt-3 text-xl font-semibold text-white">Vendor MSA - Summary Snapshot</h2>
+          <div class="mt-6 space-y-4 text-sm leading-relaxed">
+            <article class="rounded-xl border border-slate-700 bg-slate-900/80 p-4">
+              <p class="font-semibold text-amber-300">Risk Flag: Auto-Renewal Window</p>
+              <p class="mt-2 text-slate-200">Agreement auto-renews for 12 months unless terminated 45 days before term end. Missing notice creates unplanned spend.</p>
+            </article>
+            <article class="rounded-xl border border-slate-700 bg-slate-900/80 p-4">
+              <p class="font-semibold text-amber-300">Risk Flag: Liability Cap Asymmetry</p>
+              <p class="mt-2 text-slate-200">Vendor liability cap excludes several high-impact failures while customer indemnities remain broad and uncapped.</p>
+            </article>
+            <article class="rounded-xl border border-slate-700 bg-slate-900/80 p-4">
+              <p class="font-semibold text-emerald-300">Team Outcome</p>
+              <p class="mt-2 text-slate-200">Procurement gets a negotiation checklist, finance gets a cost-risk summary, and legal receives clear escalation points.</p>
+            </article>
+          </div>
+        </aside>
+      </section>
+
+      <section class="mx-auto w-full max-w-5xl border-b border-slate-200 pb-12">
+        <h2 class="text-3xl font-bold text-slate-900">Why Contracts Slow Your Team Down</h2>
+        <div class="mt-6 space-y-4 text-[1.05rem] leading-8 text-slate-700">
+          <p>Vendor agreements often use legal language that no single person in the business fully owns, so interpretation changes from reviewer to reviewer.</p>
+          <p>Missed deadlines, penalties, and auto-renew terms create direct financial impact, especially when notice windows are hidden deep in annexes.</p>
+          <p>When procurement, operations, finance, and legal work from different interpretations, decision quality drops and cycle time increases.</p>
+          <p>Manual review remains expensive and error-prone, especially for teams under deadline pressure and high vendor volume.</p>
+          <p class="font-medium text-slate-900">This costs time, money, and confidence, and nobody wants that.</p>
+        </div>
+      </section>
+
+      <section class="mx-auto w-full max-w-6xl">
+        <h2 class="text-3xl font-bold text-slate-900">How It Works - Simple, Fast, Transparent</h2>
+        <p class="mt-4 max-w-4xl text-[1.05rem] leading-8 text-slate-700">
+          DecoDocs is a vendor contract review layer that helps teams understand obligations and risk before signature. It does not replace legal review. It makes legal review more focused by removing noise and exposing the highest-impact terms first.
+        </p>
+        <div class="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {workflowSteps.map((item, index) => (
+            <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-sm font-semibold text-white">{index + 1}</div>
+              <h3 class="mt-4 text-xl font-semibold text-slate-900">{item.title}</h3>
+              <p class="mt-3 text-base leading-7 text-slate-700">{item.detail}</p>
+              <p class="mt-3 text-sm font-semibold text-blue-700">{item.outcome}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section class="mx-auto w-full max-w-5xl">
+        <h2 class="text-3xl font-bold text-slate-900">Common Contract Scenarios Your Team Will Recognize</h2>
+        <p class="mt-4 max-w-4xl text-[1.05rem] leading-8 text-slate-700">
+          High-performing teams are not better because they read faster. They are better because they spot business consequence early and make contract decisions with shared context.
+        </p>
+        <div class="mt-8 space-y-4">
+          {scenarios.map((card, index) => (
+            <details class="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm" open={index === 0}>
+              <summary class="cursor-pointer list-none text-xl font-semibold text-slate-900">
+                <span class="inline-flex items-center gap-3">
+                  <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-sm font-semibold text-slate-700">{index + 1}</span>
+                  {card.title}
+                </span>
+              </summary>
+              <div class="mt-4 border-t border-slate-200 pt-4 text-base leading-7 text-slate-700">
+                <p><span class="font-semibold text-slate-900">Business consequence:</span> {card.consequence}</p>
+                <p class="mt-3"><span class="font-semibold text-slate-900">What DecoDocs reveals:</span> {card.outcome}</p>
+              </div>
+            </details>
+          ))}
+        </div>
+      </section>
+
+      <section class="mx-auto w-full max-w-5xl">
+        <h2 class="text-3xl font-bold text-slate-900">Who Uses This Contract Review Workflow</h2>
+        <p class="mt-4 max-w-4xl text-[1.05rem] leading-8 text-slate-700">
+          This page is intentionally broader than procurement-only use cases. Contract risk often moves across departments, so clarity has to travel with the document, not stay with one reviewer.
+        </p>
+        <div class="mt-6 grid gap-4 md:grid-cols-2">
+          <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h3 class="text-lg font-semibold text-slate-900">Procurement and sourcing managers</h3>
+            <p class="mt-2 text-base leading-7 text-slate-700">Use DecoDocs to speed vendor contract review, tighten negotiation position, and keep approval cycles predictable.</p>
+          </article>
+          <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h3 class="text-lg font-semibold text-slate-900">Operations managers</h3>
+            <p class="mt-2 text-base leading-7 text-slate-700">Validate obligations that affect service delivery, incident response, and execution risk before teams commit.</p>
+          </article>
+          <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h3 class="text-lg font-semibold text-slate-900">Finance and accounts payable</h3>
+            <p class="mt-2 text-base leading-7 text-slate-700">Surface fee triggers, liability asymmetry, and renewal exposure that impact budget and cash planning.</p>
+          </article>
+          <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h3 class="text-lg font-semibold text-slate-900">Project and delivery managers</h3>
+            <p class="mt-2 text-base leading-7 text-slate-700">Clarify scope, timeline obligations, and SLA terms so delivery commitments match contract reality.</p>
+          </article>
+          <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h3 class="text-lg font-semibold text-slate-900">Vendor and partner managers</h3>
+            <p class="mt-2 text-base leading-7 text-slate-700">Maintain consistent interpretation across counterparties, internal teams, and renewal negotiations.</p>
+          </article>
+          <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h3 class="text-lg font-semibold text-slate-900">Small business owners</h3>
+            <p class="mt-2 text-base leading-7 text-slate-700">Get legal document understanding without waiting on long review queues when every decision affects runway.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="mx-auto w-full max-w-5xl">
+        <h2 class="text-3xl font-bold text-slate-900">Risk Signals to Watch Before Signature</h2>
+        <p class="mt-4 max-w-4xl text-[1.05rem] leading-8 text-slate-700">
+          Most expensive contract mistakes come from a short list of repeat patterns. Teams that detect these patterns early protect budget, service continuity, and negotiation leverage.
+        </p>
+        <div class="mt-6 grid gap-4 md:grid-cols-2">
+          <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h3 class="text-lg font-semibold text-slate-900">Notice windows and silent renewals</h3>
+            <p class="mt-2 text-base leading-7 text-slate-700">If notice terms are missed, contracts renew automatically and create avoidable annual spend or lock-in risk.</p>
+          </article>
+          <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h3 class="text-lg font-semibold text-slate-900">One-sided termination rights</h3>
+            <p class="mt-2 text-base leading-7 text-slate-700">Vendors may have broad suspension rights while customers face narrow exit paths and heavy penalties.</p>
+          </article>
+          <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h3 class="text-lg font-semibold text-slate-900">Liability cap exclusions</h3>
+            <p class="mt-2 text-base leading-7 text-slate-700">Caps that exclude key failure scenarios shift disproportionate risk back to your business when incidents occur.</p>
+          </article>
+          <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h3 class="text-lg font-semibold text-slate-900">Scope ambiguity in service definitions</h3>
+            <p class="mt-2 text-base leading-7 text-slate-700">Vague service language creates disputes on deliverables, acceptance criteria, and responsibility for remediation.</p>
+          </article>
+          <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h3 class="text-lg font-semibold text-slate-900">Hidden cost escalators</h3>
+            <p class="mt-2 text-base leading-7 text-slate-700">Indexation clauses, bundled upgrades, and pass-through fees can materially change long-term contract value.</p>
+          </article>
+          <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h3 class="text-lg font-semibold text-slate-900">Operational obligations without ownership</h3>
+            <p class="mt-2 text-base leading-7 text-slate-700">Contracts often assign obligations that are not mapped to internal owners, creating execution gaps post-signature.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="mx-auto w-full max-w-5xl">
+        <h2 class="text-3xl font-bold text-slate-900">Before and After DecoDocs</h2>
+        <div class="mt-6 grid gap-6 lg:grid-cols-2">
+          <article class="rounded-2xl border border-slate-200 bg-white p-6">
+            <h3 class="text-2xl font-semibold text-slate-900">Before DecoDocs</h3>
+            <ul class="mt-4 space-y-3 list-none p-0 text-base leading-7 text-slate-700">
+              <li>Clauses buried in legal language and annexes</li>
+              <li>Multiple revisions with inconsistent interpretation</li>
+              <li>Unexpected costs from missed terms and deadlines</li>
+              <li>Procurement cycles slowed by unclear risk ownership</li>
+            </ul>
+          </article>
+          <article class="rounded-2xl border border-slate-900 bg-slate-900 p-6 text-slate-100">
+            <h3 class="text-2xl font-semibold text-white">After DecoDocs</h3>
+            <ul class="mt-4 space-y-3 list-none p-0 text-base leading-7 text-slate-100">
+              <li>Plain-language summaries with source evidence</li>
+              <li>One source of truth shared across teams</li>
+              <li>Risks flagged before approvals are finalized</li>
+              <li>Faster decisions with stronger negotiation readiness</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="mx-auto w-full max-w-5xl">
+        <h2 class="text-3xl font-bold text-slate-900">Benefits for Procurement, Operations, and Vendor Teams</h2>
+        <ul class="mt-6 space-y-3 list-none p-0 text-base leading-7 text-slate-700">
+          {teamBenefits.map((benefit) => (
+            <li class="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-4">
+              <span class="mt-2 inline-block h-2.5 w-2.5 rounded-full bg-blue-600" />
+              <span>{benefit}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section class="mx-auto w-full max-w-5xl">
+        <h2 class="text-3xl font-bold text-slate-900">Common Questions Teams Ask</h2>
+        <p class="mt-4 max-w-4xl text-[1.05rem] leading-8 text-slate-700">
+          Most objections are about legal scope, privacy, and operational adoption. These answers are designed to remove friction before your first review.
+        </p>
+        <div class="mt-6 space-y-3">
+          {faqEntries.map((item) => (
+            <details class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+              <summary class="cursor-pointer list-none text-base font-semibold text-slate-900">{item.question}</summary>
+              <p class="mt-3 text-base leading-7 text-slate-700">{item.answer}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+
+      <section class="mx-auto w-full max-w-5xl">
+        <h2 class="text-3xl font-bold text-slate-900">Trusted by Business Teams</h2>
+        <p class="mt-4 max-w-4xl text-[1.05rem] leading-8 text-slate-700">
+          Teams choose DecoDocs when they need faster contract review without sacrificing control. The product is built for decision-critical procurement and operations workflows where hidden terms can create outsized downstream cost.
+        </p>
+        <div class="mt-6 grid gap-4 md:grid-cols-3">
+          {credibilityPoints.map((item) => (
+            <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <h3 class="text-lg font-semibold text-slate-900">{item.title}</h3>
+              <p class="mt-3 text-base leading-7 text-slate-700">{item.detail}</p>
+            </article>
+          ))}
+        </div>
+        <div class="mt-6 rounded-2xl border border-slate-200 bg-slate-100/70 p-5 text-sm leading-7 text-slate-700">
+          <p>Used by procurement professionals worldwide. Secure, enterprise-ready document analysis with practical summaries for real business decisions.</p>
+        </div>
+      </section>
+
+      <section class="mx-auto w-full max-w-5xl rounded-3xl border border-slate-900 bg-slate-900 p-8 text-slate-100">
+        <h2 class="text-3xl font-bold text-white">Understand Your Contracts Before You Agree</h2>
+        <p class="mt-4 max-w-3xl text-base leading-7 text-slate-100">
+          Run your first contract review now and align your team around what matters before signing, renewing, or escalating negotiations.
+        </p>
+        <div class="mt-6 flex flex-wrap gap-3">
+          <a class="inline-flex rounded-full bg-white px-6 py-3 text-sm font-semibold text-slate-900 no-underline transition hover:bg-slate-100" href="/view">Upload Your Contract Now</a>
+          <a class="inline-flex rounded-full border border-slate-500 px-6 py-3 text-sm font-semibold text-white no-underline transition hover:border-slate-300" href="/pricing">View Pricing</a>
+        </div>
+        <p class="mt-4 text-sm text-slate-300">No signup required for first review.</p>
+      </section>
+    </div>
+
+    <div class="fixed inset-x-0 bottom-4 z-40 mx-auto w-[calc(100%-1.5rem)] max-w-xl rounded-2xl border border-slate-300 bg-white/95 p-3 shadow-lg backdrop-blur">
+      <div class="flex items-center justify-between gap-3">
+        <p class="text-sm font-medium text-slate-800">Ready to review a contract?</p>
+        <a class="inline-flex rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white no-underline transition hover:bg-slate-800" href="/view">Upload Contract</a>
+      </div>
+    </div>
+  </main>
+  <Footer />
+</MainLayout>

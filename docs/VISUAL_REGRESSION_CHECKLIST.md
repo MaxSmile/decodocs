@@ -17,7 +17,7 @@ If using DevTools:
 - URL: `https://decodocs.com/`
 - Mobile:
   - Header logo not oversized; nav buttons visible
-  - Hero headline + CTAs visible above the fold
+  - Hero headline + CTAs visible above the fold (`Analyze a Document`, `Open Editor`)
   - No horizontal scrolling
   - Pricing section renders when scrolling
 

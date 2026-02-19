@@ -4,8 +4,6 @@ import HomePage from './components/HomePage.jsx';
 import DocumentViewer from './components/DocumentViewer.jsx';
 import DocumentEditor from './components/DocumentEditor.jsx';
 import AboutPage from './components/AboutPage.jsx';
-import PrivacyPage from './components/PrivacyPage.jsx';
-import TermsPage from './components/TermsPage.jsx';
 import ContactPage from './components/ContactPage.jsx';
 import PricingPage from './components/PricingPage.jsx';
 import SignInPage from './components/SignInPage.jsx';
@@ -49,20 +47,6 @@ const AppRoutes = () => {
       <Route path="/about" element={
         <PublicLayout>
           <AboutPage />
-        </PublicLayout>
-      } />
-
-      {/* Privacy Page */}
-      <Route path="/privacy" element={
-        <PublicLayout>
-          <PrivacyPage />
-        </PublicLayout>
-      } />
-
-      {/* Terms Page */}
-      <Route path="/terms" element={
-        <PublicLayout>
-          <TermsPage />
         </PublicLayout>
       } />
 

@@ -144,6 +144,153 @@ Each page has:
 2. one promise
 3. one primary CTA (decode/upload)
 
+Home CTA policy:
+- keep the primary hero CTA focused on decode/upload
+- when a secondary CTA is present, use action copy (`Open Editor`) and route to `/edit/test-docs/offer.pdf`
+- avoid "View Demo" framing because it implies passive viewing instead of real workflow entry
+
+## Startup Founders Use Case Page Blueprint (2026-02-19)
+
+Canonical route:
+- `/use-cases/startup-founders/`
+
+Purpose:
+- conversion-focused founder page for decision-critical agreement review
+- position DecoDocs as clarity + risk identification before signature, not legal advice
+- speak to fundraising time pressure and irreversible downside
+
+Required section sequence:
+1. Hero (2-column): clear value prop + 3 micro-benefits + primary CTA (`Upload Your Document`) + secondary CTA (`See Example Breakdown`)
+2. `Why It Matters`: emotional pain framing (control/dilution/hidden obligations/time pressure)
+3. `How It Works`: 4 explicit steps (Upload, AI Breakdown, Risk Highlights, Clear Summary & Shareable Report)
+4. `Common Documents`: expandable cards with one pain sentence and one outcome sentence per document
+5. `For Startup Founders`: before/after comparison + outcomes list
+6. `Before You Sign`: privacy/security assurances + final CTA (`Analyze My Document`) + FAQ
+
+SEO constraints:
+- H1 must include "Decode" or "Understand" and "Investor Agreements" or "Term Sheets"
+- Use H2 headings: `How It Works`, `For Startup Founders`, `Common Documents`, `Why It Matters`, `Before You Sign`
+- Meta description target:
+  - "Understand term sheets, SAFE agreements and investor contracts before signing. Upload your document and get a clear risk breakdown in minutes."
+- Include FAQ schema covering:
+  - Can DecoDocs replace a lawyer?
+  - Is my document secure?
+  - What file types are supported?
+- Include internal links to `/`, `/uses-cases`, and `/pricing`
+
+Implementation notes:
+- dedicated page source: `web/src/pages/use-cases/startup-founders.astro`
+- keep generic use-case route for other personas only: `web/src/pages/use-cases/[slug].astro`
+
+## Procurement Teams Use Case Page Blueprint (2026-02-19)
+
+Canonical route:
+- `/use-cases/procurement-teams/`
+
+Audience coverage:
+- procurement and sourcing managers
+- operations managers
+- contract administrators
+- finance / accounts payable reviewers
+- project managers and vendor/partner managers
+- small business owners reviewing vendor contracts
+
+Purpose:
+- reposition "procurement" as a broader cross-functional contract-review workflow
+- make business consequence explicit (cost, deadlines, renewals, penalties, liability)
+- increase conversion by mapping pain -> mechanism -> outcome in one page
+
+Required section sequence:
+1. Hero with SEO-aligned H1, 3 micro-benefits, primary CTA (`Upload Contract to Understand`), and secondary CTA (`See Example Output`)
+2. `Why Contracts Slow Your Team Down` pain framing with emotional payoff
+3. `How It Works - Simple, Fast, Transparent` with 4 steps and explicit outcome line per step
+4. `Common Contract Scenarios Your Team Will Recognize` expandable scenario cards
+5. `Before and After DecoDocs` two-column contrast
+6. `Benefits for Procurement, Operations, and Vendor Teams` outcome bullets
+7. `Common Questions Teams Ask` objection handling
+8. `Trusted by Business Teams` credibility block
+9. Final CTA section with upload action and first-review reassurance
+
+SEO constraints:
+- H1 must include "contract review" or "contract analysis"
+- include role language in section headers (`teams`, `procurement`, `operations`)
+- meta description target:
+  - "Speed up vendor contract review with DecoDocs. Understand risks, obligations, renewals and penalties before signing. Ideal for procurement, operations and vendor teams."
+- include JSON-LD: FAQ, Breadcrumb, and example output (`CreativeWork`)
+- include internal links to `/`, `/pricing`, and `/uses-cases`
+
+Implementation notes:
+- dedicated page source: `web/src/pages/use-cases/procurement-teams.astro`
+- exclude slug from dynamic route generation in `web/src/pages/use-cases/[slug].astro`
+
+## Freelancers & Agencies Use Case Page Blueprint (2026-02-19)
+
+Canonical route:
+- `/use-cases/freelancers-agencies/`
+
+Audience coverage:
+- freelancers and consultants
+- boutique agencies and studios
+- client-service delivery teams
+
+Purpose:
+- speak in freelancer/agency language (scope creep, revisions, payment terms, IP ownership, liability)
+- map contract risk directly to margin, delivery pressure, and cash-flow reality
+- increase conversion by making the page feel immediately recognizable to independent service teams
+
+Required section sequence:
+1. Hero with practical freelancer promise, micro-benefits, and immediate upload CTA
+2. Pain section focused on scope creep, payment delay risk, and IP ambiguity
+3. 4-step workflow with explicit outcomes per step
+4. Real scenario cards (SOW, retainers, revisions, indemnity, subcontracting, payment terms)
+5. Role-fit section for freelancers/agencies/studios
+6. Risk signal section (revision caps, IP transfer, liability asymmetry, payment windows)
+7. Before/after comparison + outcomes list
+8. FAQ + credibility + final CTA
+
+SEO constraints:
+- H1 should include "contract review" and audience phrasing (freelancers/agencies)
+- include JSON-LD: FAQ, Breadcrumb, and example-output CreativeWork
+- include internal links to `/`, `/pricing`, and `/uses-cases`
+
+Implementation notes:
+- dedicated page source: `web/src/pages/use-cases/freelancers-agencies.astro`
+- exclude slug from dynamic route generation in `web/src/pages/use-cases/[slug].astro`
+
+## Small Business Owners Use Case Page Blueprint (2026-02-19)
+
+Canonical route:
+- `/use-cases/small-business-owners/`
+
+Audience coverage:
+- owner-operators
+- lean SMB leadership teams
+- businesses handling supplier/lease/service/finance contracts without in-house legal staff
+
+Purpose:
+- use owner language (cash flow, margin pressure, renewal surprise, operational exposure)
+- convert by connecting contract terms to direct business outcomes
+- provide a practical pre-signature risk workflow for real operating conditions
+
+Required section sequence:
+1. Hero with owner-centric value proposition and CTA
+2. Pain section around hidden costs, renewals, and time pressure
+3. 4-step workflow (upload, breakdown, risk flags, decision summary)
+4. Scenario cards (supplier, lease, finance, services, platform terms, franchise/distribution)
+5. Role-fit section for owner/operator contexts
+6. Risk signal section (auto-renew, escalators, personal guarantees, penalties)
+7. Before/after + owner benefits
+8. FAQ + credibility + final CTA
+
+SEO constraints:
+- H1 should include "contract analysis" and "small business owners"
+- include JSON-LD: FAQ, Breadcrumb, and example-output CreativeWork
+- include internal links to `/`, `/pricing`, and `/uses-cases`
+
+Implementation notes:
+- dedicated page source: `web/src/pages/use-cases/small-business-owners.astro`
+- exclude slug from dynamic route generation in `web/src/pages/use-cases/[slug].astro`
+
 Draft landing content lives in:
 - `landings/understand-contracts.md`
 - `landings/explain-documents.md`

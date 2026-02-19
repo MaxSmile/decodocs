@@ -201,3 +201,11 @@ If you change architecture decisions, update this file first.
 - `.env`, `.env.local`, `.env.production`, etc. are prohibited for this app.
 - Runtime toggles may come from platform-provided environment at process start (CI/shell), but never from local env files.
 - Product/runtime secrets and mutable config must stay server-side (Firestore admin docs or backend runtime), not in web env files.
+
+## Canonical deployment script
+- Production deploys for DecoDocs web are performed from the parent SnapSign-AU repo using `./test-build-deploy.sh`. Do not deploy `Decodocs/web` directly using `firebase deploy` from inside this nested repo unless explicitly approved.
+- For local development you may run `npm run dev` or `npm run build`, but integration/production deploys must use the umbrella script.
+
+## Documentation & project context
+- Both code and copy (site content, docs, UI text) require project understanding. Start with `Decodocs/docs/README.md` and the umbrella `DOCS_INDEX.md` for curated documentation, ownership, and style guidance before making changes.
+- Refer to the index when updating copy to keep messaging consistent across DecoDocs and SnapSign.

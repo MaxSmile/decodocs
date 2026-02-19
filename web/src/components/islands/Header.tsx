@@ -11,7 +11,7 @@ type HeaderProps = {
 const marketingNav = [
   { label: 'How it works', href: '/#how-it-works' },
   { label: 'Features', href: '/#features' },
-  { label: 'Use cases', href: '/#use-cases' },
+  { label: 'Use cases', href: '/uses-cases' },
   { label: 'Pricing', href: '/pricing' },
 ];
 
@@ -46,7 +46,7 @@ const Header = ({ showMarketingNav = true }: HeaderProps) => {
   );
 
   const isAuthPage = pathname === '/sign-in' || pathname === '/sign-up';
-  const isAuthenticated = authState?.status === 'authenticated';
+  const isAuthenticated = authState?.status === 'authenticated' && !authState?.user?.isAnonymous;
 
   const primaryAction = (() => {
     if (isAuthPage) {
@@ -88,17 +88,26 @@ const Header = ({ showMarketingNav = true }: HeaderProps) => {
                 <HiSparkles className="w-3.5 h-3.5" />
                 Upgrade
               </a>
-              <a
-                href="/profile"
-                className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 transition-colors border border-slate-200/60"
-                title={authState?.user?.email || 'Profile'}
-              >
-                {authState?.user?.photoURL ? (
-                  <img src={authState.user.photoURL} alt="" className="w-8 h-8 rounded-full object-cover" />
-                ) : (
-                  <HiUser className="w-4 h-4 text-slate-500" />
-                )}
-              </a>
+              {isAuthenticated ? (
+                <a
+                  href="/profile"
+                  className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 transition-colors border border-slate-200/60"
+                  title={authState?.user?.email || 'Profile'}
+                >
+                  {authState?.user?.photoURL ? (
+                    <img src={authState.user.photoURL} alt="" className="w-8 h-8 rounded-full object-cover" />
+                  ) : (
+                    <HiUser className="w-4 h-4 text-slate-500" />
+                  )}
+                </a>
+              ) : (
+                <a
+                  href="/sign-in"
+                  className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-800 no-underline hover:bg-slate-50"
+                >
+                  Sign In
+                </a>
+              )}
             </div>
           ) : (
             <>

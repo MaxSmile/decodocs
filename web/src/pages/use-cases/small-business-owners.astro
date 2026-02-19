@@ -1,0 +1,423 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import Footer from '../../components/astro/Footer.astro';
+
+const pageTitle =
+  'Contract Analysis for Small Business Owners | Protect Cash Flow Before You Commit | DecoDocs';
+const pageDescription =
+  'Analyze contracts faster with DecoDocs. Understand renewals, penalties, obligations, and hidden costs before signing leases, supplier, service, and finance agreements.';
+const canonical = 'https://decodocs.com/use-cases/small-business-owners/';
+
+const workflowSteps = [
+  {
+    title: 'Upload your agreement',
+    detail:
+      'Upload a supplier contract, lease, loan, or service agreement and keep all key terms in one review flow.',
+    outcome: 'See risk before it hits operations.',
+  },
+  {
+    title: 'Get plain-language analysis',
+    detail:
+      'DecoDocs turns dense legal wording into practical business meaning for cost, obligations, renewals, penalties, and exit conditions.',
+    outcome: 'Understand what you are really agreeing to.',
+  },
+  {
+    title: 'Surface cash-flow and liability flags',
+    detail:
+      'Notice windows, escalation clauses, personal guarantees, fee triggers, and one-sided liability terms are highlighted clearly.',
+    outcome: 'Protect margin and downside.',
+  },
+  {
+    title: 'Share and decide quickly',
+    detail:
+      'Create a summary for partners, managers, advisors, or legal support so decisions are aligned and documented before signature.',
+    outcome: 'Move faster with confidence.',
+  },
+];
+
+const scenarios = [
+  {
+    title: 'Supplier Agreement with Minimum Commitments',
+    consequence:
+      'Minimum purchase obligations can create inventory or spend pressure when demand changes.',
+    outcome:
+      'DecoDocs highlights volume commitments, pricing triggers, and termination conditions before approval.',
+  },
+  {
+    title: 'Commercial Lease Renewal and Outgoings',
+    consequence:
+      'Rent reviews, make-good obligations, and outgoings can materially change occupancy cost after signature.',
+    outcome:
+      'Lease cost drivers, renewal terms, and exit obligations are surfaced in one clear summary.',
+  },
+  {
+    title: 'Equipment Finance or Loan Agreement',
+    consequence:
+      'Default triggers and fee structures can strain cash flow when revenue cycles are uneven.',
+    outcome:
+      'Repayment terms, penalty mechanics, and enforcement conditions are translated into practical risk checkpoints.',
+  },
+  {
+    title: 'IT, Maintenance, or Managed Service Contract',
+    consequence:
+      'Undefined service boundaries and support exclusions can create downtime risk and dispute costs.',
+    outcome:
+      'Service obligations, response windows, and remedy terms are mapped for operational planning.',
+  },
+  {
+    title: 'Payment Processor or Platform Terms',
+    consequence:
+      'Fee changes and reserve clauses can erode margin without obvious warning.',
+    outcome:
+      'Fee language, holdback conditions, and termination rights are flagged before account setup.',
+  },
+  {
+    title: 'Franchise or Distribution Agreement',
+    consequence:
+      'Territory, pricing, and exit restrictions can limit strategic flexibility over time.',
+    outcome:
+      'Control clauses and long-term obligations are clarified so growth decisions are based on full visibility.',
+  },
+];
+
+const ownerBenefits = [
+  'Faster contract decisions without relying on ad hoc interpretation.',
+  'Better control over renewals, penalties, and cost escalators.',
+  'Improved cash-flow protection through clearer payment and fee visibility.',
+  'Stronger negotiation position before commitment deadlines.',
+  'Cleaner legal escalation when specialized advice is required.',
+];
+
+const credibilityPoints = [
+  {
+    title: 'Built for owner-operators',
+    detail:
+      'Designed for teams where the person signing the agreement is also responsible for operations and cash flow.',
+  },
+  {
+    title: 'Decision-critical focus',
+    detail:
+      'Prioritizes the clauses most likely to create financial and operational downside in small businesses.',
+  },
+  {
+    title: 'Practical output, not legal noise',
+    detail:
+      'Summaries are structured for action: what to accept, what to renegotiate, and what to escalate.',
+  },
+];
+
+const faqEntries = [
+  {
+    question: 'Can DecoDocs replace legal advice?',
+    answer:
+      'No. DecoDocs helps small business owners understand contracts before legal consultation. It improves clarity and helps you escalate the right clauses faster.',
+  },
+  {
+    question: 'Will this help with renewals and hidden fees?',
+    answer:
+      'Yes. DecoDocs flags notice windows, fee escalators, and penalty language so renewal decisions are not made blind.',
+  },
+  {
+    question: 'Are my business documents secure?',
+    answer:
+      'Yes. Files are processed through secure workflows, are not publicly indexed, and are not reused as open training data.',
+  },
+  {
+    question: 'What file types are supported?',
+    answer:
+      'PDF, Word, and plain-text files are supported for analysis and summary workflows.',
+  },
+];
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqEntries.map((item) => ({
+    '@type': 'Question',
+    name: item.question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: item.answer,
+    },
+  })),
+};
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://decodocs.com/' },
+    { '@type': 'ListItem', position: 2, name: 'Use Cases', item: 'https://decodocs.com/use-cases/' },
+    { '@type': 'ListItem', position: 3, name: 'Small Business Owners', item: canonical },
+  ],
+};
+
+const exampleOutputSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'CreativeWork',
+  name: 'Small Business Contract Risk Summary Example',
+  about: ['small business contract analysis', 'renewal risk', 'cash-flow protection'],
+  description:
+    'Example contract summary showing renewal terms, fee escalators, obligations, and risk flags for small business owners.',
+  url: `${canonical}#example-output`,
+};
+---
+
+<MainLayout title={pageTitle} description={pageDescription} canonical={canonical} image="https://decodocs.com/og.svg">
+  <main class="relative overflow-hidden bg-slate-50/60 px-6 pb-28 pt-12">
+    <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+    <script type="application/ld+json" set:html={JSON.stringify(exampleOutputSchema)} />
+
+    <div class="pointer-events-none absolute inset-0">
+      <div class="absolute -left-24 top-20 h-72 w-72 rounded-full bg-blue-200/40 blur-3xl" />
+      <div class="absolute -right-20 top-60 h-80 w-80 rounded-full bg-amber-200/35 blur-3xl" />
+    </div>
+
+    <div class="relative mx-auto w-full max-w-6xl space-y-16">
+      <section class="grid gap-10 rounded-3xl border border-slate-200/80 bg-white/90 p-8 shadow-xl shadow-slate-900/5 backdrop-blur-sm lg:grid-cols-[1.1fr_0.9fr] lg:p-12">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">For Small Business Owners</p>
+          <h1 class="mt-4 max-w-3xl text-4xl font-bold leading-tight text-slate-900 lg:text-5xl">
+            Contract Analysis for Small Business Owners: Protect Cash Flow Before You Commit
+          </h1>
+          <p class="mt-5 max-w-3xl text-lg leading-relaxed text-slate-600">
+            Upload any business agreement and instantly understand renewals, penalties, obligations, and hidden costs in plain language. DecoDocs helps owners decide with clarity before signing terms that can affect margin and operations for years.
+          </p>
+          <ul class="mt-6 space-y-3 list-none p-0 text-base leading-7 text-slate-700">
+            <li class="flex items-start gap-3">
+              <span class="mt-2 inline-block h-2.5 w-2.5 rounded-full bg-amber-500" />
+              <span>Spot contract terms that can hurt cash flow later.</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="mt-2 inline-block h-2.5 w-2.5 rounded-full bg-amber-500" />
+              <span>Understand obligations, renewals, and penalty clauses before commitment.</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="mt-2 inline-block h-2.5 w-2.5 rounded-full bg-amber-500" />
+              <span>Share clear summaries with partners, managers, and advisors.</span>
+            </li>
+          </ul>
+          <div class="mt-8 flex flex-wrap gap-3">
+            <a class="inline-flex rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white no-underline transition hover:bg-slate-800" href="/view">Upload Contract to Understand</a>
+            <a class="inline-flex rounded-full border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-900 no-underline transition hover:bg-slate-100" href="#example-output">See Example Output</a>
+          </div>
+          <p class="mt-5 max-w-3xl text-sm text-slate-600">
+            Start from <a class="font-semibold text-slate-900 hover:text-slate-700" href="/">homepage</a>, compare <a class="font-semibold text-slate-900 hover:text-slate-700" href="/pricing">pricing</a>, or explore <a class="font-semibold text-slate-900 hover:text-slate-700" href="/uses-cases">other use cases</a>.
+          </p>
+        </div>
+
+        <aside id="example-output" class="rounded-2xl border border-slate-200 bg-slate-950 p-6 text-slate-100 shadow-lg">
+          <p class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-300">Example Output</p>
+          <h2 class="mt-3 text-xl font-semibold text-white">Supplier Agreement - Owner Summary Snapshot</h2>
+          <div class="mt-6 space-y-4 text-sm leading-relaxed">
+            <article class="rounded-xl border border-slate-700 bg-slate-900/80 p-4">
+              <p class="font-semibold text-amber-300">Risk Flag: Price Escalation Clause</p>
+              <p class="mt-2 text-slate-200">Supplier can increase pricing annually based on broad index language without a hard cap.</p>
+            </article>
+            <article class="rounded-xl border border-slate-700 bg-slate-900/80 p-4">
+              <p class="font-semibold text-amber-300">Risk Flag: Early Termination Fee</p>
+              <p class="mt-2 text-slate-200">Exit fee equals remaining contract value if agreement is terminated before minimum term completion.</p>
+            </article>
+            <article class="rounded-xl border border-slate-700 bg-slate-900/80 p-4">
+              <p class="font-semibold text-emerald-300">Outcome: Decision Checklist Ready</p>
+              <p class="mt-2 text-slate-200">You get a summary of renewal deadlines, cost exposure, and negotiation points before signing.</p>
+            </article>
+          </div>
+        </aside>
+      </section>
+
+      <section class="mx-auto w-full max-w-5xl border-b border-slate-200 pb-12">
+        <h2 class="text-3xl font-bold text-slate-900">Why Contracts Create Expensive Surprises for Small Businesses</h2>
+        <div class="mt-6 space-y-4 text-[1.05rem] leading-8 text-slate-700">
+          <p>Owners sign contracts while juggling sales, operations, staffing, and finance. Review time is limited, but contract downside is not.</p>
+          <p>Renewal clauses, fee triggers, and obligation terms can sit in dense legal text that is difficult to decode quickly.</p>
+          <p>Many businesses discover the true cost of an agreement only after invoices rise, service terms shift, or exit options narrow.</p>
+          <p>Without a clear summary, negotiations are rushed and risk tradeoffs are made without full visibility.</p>
+          <p class="font-medium text-slate-900">The result is avoidable cost, slower decisions, and less confidence.</p>
+        </div>
+      </section>
+
+      <section class="mx-auto w-full max-w-6xl">
+        <h2 class="text-3xl font-bold text-slate-900">How It Works - Fast, Practical, Owner-Friendly</h2>
+        <p class="mt-4 max-w-4xl text-[1.05rem] leading-8 text-slate-700">
+          DecoDocs gives owners a structured contract analysis before final commitment. It is not legal advice, but it helps you identify risk early and use legal support where it has the highest leverage.
+        </p>
+        <div class="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {workflowSteps.map((item, index) => (
+            <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-sm font-semibold text-white">{index + 1}</div>
+              <h3 class="mt-4 text-xl font-semibold text-slate-900">{item.title}</h3>
+              <p class="mt-3 text-base leading-7 text-slate-700">{item.detail}</p>
+              <p class="mt-3 text-sm font-semibold text-blue-700">{item.outcome}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section class="mx-auto w-full max-w-5xl">
+        <h2 class="text-3xl font-bold text-slate-900">Common Contract Scenarios Small Business Owners Recognize</h2>
+        <p class="mt-4 max-w-4xl text-[1.05rem] leading-8 text-slate-700">
+          These are the agreements where hidden terms most often create cash-flow and operational pain. Early clarity gives owners more control.
+        </p>
+        <div class="mt-8 space-y-4">
+          {scenarios.map((card, index) => (
+            <details class="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm" open={index === 0}>
+              <summary class="cursor-pointer list-none text-xl font-semibold text-slate-900">
+                <span class="inline-flex items-center gap-3">
+                  <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-sm font-semibold text-slate-700">{index + 1}</span>
+                  {card.title}
+                </span>
+              </summary>
+              <div class="mt-4 border-t border-slate-200 pt-4 text-base leading-7 text-slate-700">
+                <p><span class="font-semibold text-slate-900">Business consequence:</span> {card.consequence}</p>
+                <p class="mt-3"><span class="font-semibold text-slate-900">What DecoDocs reveals:</span> {card.outcome}</p>
+              </div>
+            </details>
+          ))}
+        </div>
+      </section>
+
+      <section class="mx-auto w-full max-w-5xl">
+        <h2 class="text-3xl font-bold text-slate-900">Who Uses This Workflow</h2>
+        <div class="mt-6 grid gap-4 md:grid-cols-2">
+          <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h3 class="text-lg font-semibold text-slate-900">Owner-operators</h3>
+            <p class="mt-2 text-base leading-7 text-slate-700">Make contract decisions quickly when one person is responsible for revenue, cost, and delivery.</p>
+          </article>
+          <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h3 class="text-lg font-semibold text-slate-900">Retail and hospitality businesses</h3>
+            <p class="mt-2 text-base leading-7 text-slate-700">Review supplier and service terms where renewal and fee clauses directly impact margin.</p>
+          </article>
+          <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h3 class="text-lg font-semibold text-slate-900">Trade and field-service teams</h3>
+            <p class="mt-2 text-base leading-7 text-slate-700">Clarify subcontract, maintenance, and equipment obligations before operational commitments are locked in.</p>
+          </article>
+          <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h3 class="text-lg font-semibold text-slate-900">Growing SMB leadership teams</h3>
+            <p class="mt-2 text-base leading-7 text-slate-700">Align owners, finance leads, and managers around one contract interpretation before approval.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="mx-auto w-full max-w-5xl">
+        <h2 class="text-3xl font-bold text-slate-900">Risk Signals to Watch Before You Sign</h2>
+        <div class="mt-6 grid gap-4 md:grid-cols-2">
+          <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h3 class="text-lg font-semibold text-slate-900">Auto-renew and notice windows</h3>
+            <p class="mt-2 text-base leading-7 text-slate-700">Missing one deadline can lock your business into another costly term.</p>
+          </article>
+          <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h3 class="text-lg font-semibold text-slate-900">Price escalators and variable fees</h3>
+            <p class="mt-2 text-base leading-7 text-slate-700">Unbounded pricing clauses can erode profitability over time.</p>
+          </article>
+          <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h3 class="text-lg font-semibold text-slate-900">Termination penalties and lock-in</h3>
+            <p class="mt-2 text-base leading-7 text-slate-700">Exit clauses may be too expensive or too narrow when business priorities change.</p>
+          </article>
+          <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h3 class="text-lg font-semibold text-slate-900">Personal guarantee language</h3>
+            <p class="mt-2 text-base leading-7 text-slate-700">Guarantee terms can transfer business contract risk to personal exposure.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="mx-auto w-full max-w-5xl">
+        <h2 class="text-3xl font-bold text-slate-900">Owner Pre-Sign Checklist</h2>
+        <p class="mt-4 max-w-4xl text-[1.05rem] leading-8 text-slate-700">
+          Before any agreement is approved, owners should confirm commercial impact, operational responsibility, and exit flexibility. This checklist keeps the decision grounded in practical business outcomes, not only legal wording.
+        </p>
+        <ul class="mt-6 space-y-3 list-none p-0 text-base leading-7 text-slate-700">
+          <li class="rounded-xl border border-slate-200 bg-white p-4">What is the maximum total cost if pricing escalators and optional fees are activated?</li>
+          <li class="rounded-xl border border-slate-200 bg-white p-4">Who owns each operational obligation internally, and what happens if delivery fails?</li>
+          <li class="rounded-xl border border-slate-200 bg-white p-4">What notice date must be tracked to avoid auto-renewal or penalty lock-in?</li>
+          <li class="rounded-xl border border-slate-200 bg-white p-4">Which clauses should be renegotiated now versus escalated to legal review?</li>
+          <li class="rounded-xl border border-slate-200 bg-white p-4">If business conditions change, can we exit without harming cash flow?</li>
+        </ul>
+      </section>
+
+      <section class="mx-auto w-full max-w-5xl">
+        <h2 class="text-3xl font-bold text-slate-900">Before and After DecoDocs</h2>
+        <div class="mt-6 grid gap-6 lg:grid-cols-2">
+          <article class="rounded-2xl border border-slate-200 bg-white p-6">
+            <h3 class="text-2xl font-semibold text-slate-900">Before DecoDocs</h3>
+            <ul class="mt-4 space-y-3 list-none p-0 text-base leading-7 text-slate-700">
+              <li>Terms buried in legal wording and annexes</li>
+              <li>Approval decisions made under deadline pressure</li>
+              <li>Renewal and fee risks discovered too late</li>
+              <li>Higher stress and lower confidence before signing</li>
+            </ul>
+          </article>
+          <article class="rounded-2xl border border-slate-900 bg-slate-900 p-6 text-slate-100">
+            <h3 class="text-2xl font-semibold text-white">After DecoDocs</h3>
+            <ul class="mt-4 space-y-3 list-none p-0 text-base leading-7 text-slate-100">
+              <li>Plain-language summary tied to source clauses</li>
+              <li>Clear visibility into cost and obligation exposure</li>
+              <li>Stronger negotiation and cleaner legal escalation</li>
+              <li>Faster, more confident owner decisions</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="mx-auto w-full max-w-5xl">
+        <h2 class="text-3xl font-bold text-slate-900">What Small Business Owners Gain</h2>
+        <ul class="mt-6 space-y-3 list-none p-0 text-base leading-7 text-slate-700">
+          {ownerBenefits.map((benefit) => (
+            <li class="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-4">
+              <span class="mt-2 inline-block h-2.5 w-2.5 rounded-full bg-blue-600" />
+              <span>{benefit}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section class="mx-auto w-full max-w-5xl">
+        <h2 class="text-3xl font-bold text-slate-900">Common Questions Owners Ask</h2>
+        <div class="mt-6 space-y-3">
+          {faqEntries.map((item) => (
+            <details class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+              <summary class="cursor-pointer list-none text-base font-semibold text-slate-900">{item.question}</summary>
+              <p class="mt-3 text-base leading-7 text-slate-700">{item.answer}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+
+      <section class="mx-auto w-full max-w-5xl">
+        <h2 class="text-3xl font-bold text-slate-900">Trusted by Businesses That Need Clarity Before Commitment</h2>
+        <p class="mt-4 max-w-4xl text-[1.05rem] leading-8 text-slate-700">
+          DecoDocs is built for real-world business decisions where one missed clause can affect margin, timing, and operational stability.
+        </p>
+        <div class="mt-6 grid gap-4 md:grid-cols-3">
+          {credibilityPoints.map((item) => (
+            <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <h3 class="text-lg font-semibold text-slate-900">{item.title}</h3>
+              <p class="mt-3 text-base leading-7 text-slate-700">{item.detail}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section class="mx-auto w-full max-w-5xl rounded-3xl border border-slate-900 bg-slate-900 p-8 text-slate-100">
+        <h2 class="text-3xl font-bold text-white">Understand the Terms Before You Commit Your Business</h2>
+        <p class="mt-4 max-w-3xl text-base leading-7 text-slate-100">
+          Review your next contract with clear visibility into financial and operational risk before you sign.
+        </p>
+        <div class="mt-6 flex flex-wrap gap-3">
+          <a class="inline-flex rounded-full bg-white px-6 py-3 text-sm font-semibold text-slate-900 no-underline transition hover:bg-slate-100" href="/view">Upload Contract Now</a>
+          <a class="inline-flex rounded-full border border-slate-500 px-6 py-3 text-sm font-semibold text-white no-underline transition hover:border-slate-300" href="/pricing">See Plans</a>
+        </div>
+        <p class="mt-4 text-sm text-slate-300">No signup required for first review.</p>
+      </section>
+    </div>
+
+    <div class="fixed inset-x-0 bottom-4 z-40 mx-auto w-[calc(100%-1.5rem)] max-w-xl rounded-2xl border border-slate-300 bg-white/95 p-3 shadow-lg backdrop-blur">
+      <div class="flex items-center justify-between gap-3">
+        <p class="text-sm font-medium text-slate-800">Need contract clarity now?</p>
+        <a class="inline-flex rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white no-underline transition hover:bg-slate-800" href="/view">Upload Contract</a>
+      </div>
+    </div>
+  </main>
+  <Footer />
+</MainLayout>

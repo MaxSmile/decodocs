@@ -21,8 +21,8 @@ test.describe('DecoDocs Application Flow', () => {
     await expect(openPdfButton).toBeVisible();
 
     // Verify secondary CTA exists
-    const viewDemoButton = page.locator('a', { hasText: 'View Demo' });
-    await expect(viewDemoButton).toBeVisible();
+    const openEditorButton = page.locator('a', { hasText: 'Open Editor' });
+    await expect(openEditorButton).toBeVisible();
   });
 
   test('should have correct navigation elements', async ({ page }) => {

@@ -160,6 +160,7 @@ Do not add `.env*` files to this repo for infra/runtime configuration.
 - Ansible renders configs, starts/restarts services
 - Background jobs are preferred over synchronous processing
 - Scale vertically first, horizontally only when needed
+- For DecoDocs web/admin hosting, the canonical deployment entrypoint is the parent repo's `./test-build-deploy.sh` (runs build + deploy for nested outputs).
 
 ---
 
@@ -211,5 +212,8 @@ If you change:
 - deployment strategy
 
 **Update this file first.**
+
+## Documentation & project context
+- Both infra changes and documentation/copy updates require consulting the curated docs. Start with `Decodocs/infra/README.md` and the umbrella `DOCS_INDEX.md` to locate runbooks, owner contacts, and cross-project implications before opening PRs.
 
 This document is the contract for how DecoDocs infrastructure works.

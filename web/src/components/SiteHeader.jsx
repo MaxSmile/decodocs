@@ -8,7 +8,7 @@ import logo from '../assets/DecoDocsLogo.svg';
 const coreNav = [
   { label: 'How it works', href: '#how-it-works' },
   { label: 'Features', href: '#features' },
-  { label: 'Use cases', href: '#use-cases' },
+  { label: 'Use cases', to: '/uses-cases' },
   { label: 'Pricing', to: '/pricing' },
   { label: 'About', to: '/about' },
 ];
@@ -22,7 +22,7 @@ const SiteHeader = ({ variant = 'marketing', onOpenPdf, children }) => {
   const isAppLayout = variant === 'app';
   const isHome = location.pathname === '/' || location.pathname === '/app';
   const isAuthPage = location.pathname === '/sign-in' || location.pathname === '/sign-up';
-  const isAuthenticated = authState?.status === 'authenticated';
+  const isAuthenticated = authState?.status === 'authenticated' && !authState?.user?.isAnonymous;
   const desktopNavClass = isAppLayout
     ? 'hidden items-center gap-5 text-sm font-semibold text-slate-600 lg:flex'
     : 'hidden items-center gap-8 text-sm font-semibold text-slate-600 md:flex';
@@ -141,17 +141,26 @@ const SiteHeader = ({ variant = 'marketing', onOpenPdf, children }) => {
                 <HiSparkles className="w-3.5 h-3.5" />
                 Upgrade
               </Link>
-              <Link
-                to="/profile"
-                className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 transition-colors border border-slate-200/60"
-                title={authState?.user?.email || 'Profile'}
-              >
-                {authState?.user?.photoURL ? (
-                  <img src={authState.user.photoURL} alt="" className="w-8 h-8 rounded-full object-cover" />
-                ) : (
-                  <HiUser className="w-4 h-4 text-slate-500" />
-                )}
-              </Link>
+              {isAuthenticated ? (
+                <Link
+                  to="/profile"
+                  className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 transition-colors border border-slate-200/60"
+                  title={authState?.user?.email || 'Profile'}
+                >
+                  {authState?.user?.photoURL ? (
+                    <img src={authState.user.photoURL} alt="" className="w-8 h-8 rounded-full object-cover" />
+                  ) : (
+                    <HiUser className="w-4 h-4 text-slate-500" />
+                  )}
+                </Link>
+              ) : (
+                <Link
+                  to="/sign-in"
+                  className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-800 no-underline hover:bg-slate-50"
+                >
+                  Sign In
+                </Link>
+              )}
             </div>
           )}
 
@@ -197,13 +206,23 @@ const SiteHeader = ({ variant = 'marketing', onOpenPdf, children }) => {
                   <HiSparkles className="h-4 w-4" />
                   Upgrade
                 </Link>
-                <Link
-                  to="/profile"
-                  onClick={closeMenu}
-                  className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 no-underline hover:bg-slate-50"
-                >
-                  Profile
-                </Link>
+                {isAuthenticated ? (
+                  <Link
+                    to="/profile"
+                    onClick={closeMenu}
+                    className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 no-underline hover:bg-slate-50"
+                  >
+                    Profile
+                  </Link>
+                ) : (
+                  <Link
+                    to="/sign-in"
+                    onClick={closeMenu}
+                    className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 no-underline hover:bg-slate-50"
+                  >
+                    Sign In
+                  </Link>
+                )}
               </>
             ) : (
               <>

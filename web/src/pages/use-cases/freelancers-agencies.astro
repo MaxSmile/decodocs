@@ -1,0 +1,409 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import Footer from '../../components/astro/Footer.astro';
+
+const pageTitle =
+  'Contract Review for Freelancers and Agencies | Protect Scope, Payment, and IP | DecoDocs';
+const pageDescription =
+  'Review client contracts faster with DecoDocs. Understand scope, payment terms, IP rights, renewals, and liability before you sign. Built for freelancers and agencies.';
+const canonical = 'https://decodocs.com/use-cases/freelancers-agencies/';
+
+const workflowSteps = [
+  {
+    title: 'Upload your contract',
+    detail:
+      'Upload your client MSA, statement of work, retainer terms, or subcontractor agreement in one review flow.',
+    outcome: 'See what matters before kickoff.',
+  },
+  {
+    title: 'Get a plain-language breakdown',
+    detail:
+      'DecoDocs translates legal contract language into practical business meaning for deliverables, revisions, payment, ownership, and risk.',
+    outcome: 'Stop guessing what a clause means.',
+  },
+  {
+    title: 'Spot high-impact risks',
+    detail:
+      'Scope creep triggers, unpaid revision exposure, broad indemnities, IP transfer language, and auto-renew clauses are flagged clearly.',
+    outcome: 'Protect margin before work starts.',
+  },
+  {
+    title: 'Share and negotiate confidently',
+    detail:
+      'Generate a summary you can share with clients, collaborators, or counsel so everyone aligns on expectations before signature.',
+    outcome: 'Reduce disputes and rework.',
+  },
+];
+
+const scenarios = [
+  {
+    title: 'Statement of Work with Vague Scope',
+    consequence:
+      'Unclear deliverables become unlimited requests, forcing teams to absorb extra work without budget or timeline adjustments.',
+    outcome:
+      'DecoDocs highlights scope boundaries, acceptance criteria, and change-request triggers so paid work stays paid.',
+  },
+  {
+    title: 'Retainer with Silent Auto-Renewal',
+    consequence:
+      'Missed notice windows can lock you into low-margin retainers or unfavorable terms that no longer match capacity.',
+    outcome:
+      'Renewal periods, notice deadlines, and termination mechanics are surfaced so you can renegotiate on time.',
+  },
+  {
+    title: 'Client MSA with Broad Indemnity',
+    consequence:
+      'Open-ended liability clauses can expose small agencies to risk that far exceeds contract value.',
+    outcome:
+      'Indemnity scope, liability caps, and carve-outs are summarized for practical negotiation and legal escalation.',
+  },
+  {
+    title: 'Creative Contract with Unlimited Revisions',
+    consequence:
+      'Unlimited edits collapse profitability and create delivery friction when expectations were never scoped precisely.',
+    outcome:
+      'Revision limits and approval terms are extracted so feedback cycles can be tied to clear contractual boundaries.',
+  },
+  {
+    title: 'Subcontractor and Collaboration Agreement',
+    consequence:
+      'Unclear subcontract terms can create conflicts around ownership, confidentiality, and client communication rights.',
+    outcome:
+      'Responsibilities, IP transfer, non-solicit language, and payment dependency terms are mapped before engagement.',
+  },
+  {
+    title: 'Late-Payment and Fee Terms',
+    consequence:
+      'Payment friction damages cash flow and makes project planning unpredictable, especially for lean teams.',
+    outcome:
+      'Invoice cadence, late-fee clauses, and collection rights are surfaced so payment expectations are enforceable.',
+  },
+];
+
+const teamBenefits = [
+  'Faster contract review before client kickoff and scope commitment.',
+  'Stronger negotiation position on revisions, ownership, and payment terms.',
+  'Fewer disputes from ambiguous wording and undocumented assumptions.',
+  'Better cash-flow predictability with clearer payment and renewal terms.',
+  'Cleaner handoff to legal review when high-impact clauses need escalation.',
+];
+
+const credibilityPoints = [
+  {
+    title: 'Built for client-service work',
+    detail:
+      'Designed for freelancers, studios, and agencies that need quick clarity before contracts become delivery problems.',
+  },
+  {
+    title: 'Risk-first contract analysis',
+    detail:
+      'The workflow prioritizes scope, payment, liability, and IP language where independent teams face the largest downside.',
+  },
+  {
+    title: 'Decision-ready summaries',
+    detail:
+      'Outputs are designed for real conversations with clients, partners, and advisors, not generic legal text dumps.',
+  },
+];
+
+const faqEntries = [
+  {
+    question: 'Can DecoDocs replace a lawyer?',
+    answer:
+      'No. DecoDocs helps freelancers and agencies prepare faster before legal review. Use it to identify risk and focus legal support on the clauses that matter most.',
+  },
+  {
+    question: 'Will this help with scope creep and payment issues?',
+    answer:
+      'Yes. DecoDocs highlights scope, revision, acceptance, and payment terms so you can negotiate practical boundaries before delivery starts.',
+  },
+  {
+    question: 'Are client documents private?',
+    answer:
+      'Yes. Uploaded files are processed in a secure workflow, are not publicly indexed, and are not reused as open training data.',
+  },
+  {
+    question: 'What file types are supported?',
+    answer:
+      'PDF, Word, and plain-text files are supported for review and summary output.',
+  },
+];
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqEntries.map((item) => ({
+    '@type': 'Question',
+    name: item.question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: item.answer,
+    },
+  })),
+};
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://decodocs.com/' },
+    { '@type': 'ListItem', position: 2, name: 'Use Cases', item: 'https://decodocs.com/use-cases/' },
+    { '@type': 'ListItem', position: 3, name: 'Freelancers and Agencies', item: canonical },
+  ],
+};
+
+const exampleOutputSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'CreativeWork',
+  name: 'Freelancer Contract Breakdown Example',
+  about: ['freelancer contract review', 'agency agreement analysis', 'scope and payment risk'],
+  description:
+    'Example plain-language contract review for freelancers and agencies, highlighting scope creep, payment terms, IP ownership, and liability risk.',
+  url: `${canonical}#example-output`,
+};
+---
+
+<MainLayout title={pageTitle} description={pageDescription} canonical={canonical} image="https://decodocs.com/og.svg">
+  <main class="relative overflow-hidden bg-slate-50/60 px-6 pb-28 pt-12">
+    <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+    <script type="application/ld+json" set:html={JSON.stringify(exampleOutputSchema)} />
+
+    <div class="pointer-events-none absolute inset-0">
+      <div class="absolute -left-24 top-24 h-72 w-72 rounded-full bg-blue-200/40 blur-3xl" />
+      <div class="absolute -right-20 top-60 h-80 w-80 rounded-full bg-amber-200/35 blur-3xl" />
+    </div>
+
+    <div class="relative mx-auto w-full max-w-6xl space-y-16">
+      <section class="grid gap-10 rounded-3xl border border-slate-200/80 bg-white/90 p-8 shadow-xl shadow-slate-900/5 backdrop-blur-sm lg:grid-cols-[1.1fr_0.9fr] lg:p-12">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">For Freelancers and Agencies</p>
+          <h1 class="mt-4 max-w-3xl text-4xl font-bold leading-tight text-slate-900 lg:text-5xl">
+            Contract Review for Freelancers and Agencies: Get Paid and Protected Before You Sign
+          </h1>
+          <p class="mt-5 max-w-3xl text-lg leading-relaxed text-slate-600">
+            Upload your client contract and instantly understand scope, payment terms, IP ownership, renewals, and liability in plain language. DecoDocs helps independent teams negotiate clearly before commitment, not after problems begin.
+          </p>
+          <ul class="mt-6 space-y-3 list-none p-0 text-base leading-7 text-slate-700">
+            <li class="flex items-start gap-3">
+              <span class="mt-2 inline-block h-2.5 w-2.5 rounded-full bg-amber-500" />
+              <span>Spot scope and revision terms that can destroy margin.</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="mt-2 inline-block h-2.5 w-2.5 rounded-full bg-amber-500" />
+              <span>Understand payment and late-fee obligations before delivery starts.</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="mt-2 inline-block h-2.5 w-2.5 rounded-full bg-amber-500" />
+              <span>Protect your IP rights and limit one-sided liability terms.</span>
+            </li>
+          </ul>
+          <div class="mt-8 flex flex-wrap gap-3">
+            <a class="inline-flex rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white no-underline transition hover:bg-slate-800" href="/view">Upload Contract to Understand</a>
+            <a class="inline-flex rounded-full border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-900 no-underline transition hover:bg-slate-100" href="#example-output">See Example Output</a>
+          </div>
+          <p class="mt-5 max-w-3xl text-sm text-slate-600">
+            New to DecoDocs? Visit <a class="font-semibold text-slate-900 hover:text-slate-700" href="/">homepage</a>, compare <a class="font-semibold text-slate-900 hover:text-slate-700" href="/pricing">pricing</a>, or browse <a class="font-semibold text-slate-900 hover:text-slate-700" href="/uses-cases">other use cases</a>.
+          </p>
+        </div>
+
+        <aside id="example-output" class="rounded-2xl border border-slate-200 bg-slate-950 p-6 text-slate-100 shadow-lg">
+          <p class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-300">Example Output</p>
+          <h2 class="mt-3 text-xl font-semibold text-white">Client SOW - Risk Summary Snapshot</h2>
+          <div class="mt-6 space-y-4 text-sm leading-relaxed">
+            <article class="rounded-xl border border-slate-700 bg-slate-900/80 p-4">
+              <p class="font-semibold text-amber-300">Risk Flag: Unlimited Revisions</p>
+              <p class="mt-2 text-slate-200">Scope clause allows unlimited change requests without extra fees. Delivery timeline and margin are exposed.</p>
+            </article>
+            <article class="rounded-xl border border-slate-700 bg-slate-900/80 p-4">
+              <p class="font-semibold text-amber-300">Risk Flag: Broad IP Assignment</p>
+              <p class="mt-2 text-slate-200">Ownership language transfers derivative assets and reusable process templates beyond project deliverables.</p>
+            </article>
+            <article class="rounded-xl border border-slate-700 bg-slate-900/80 p-4">
+              <p class="font-semibold text-emerald-300">Outcome: Negotiation Checklist Ready</p>
+              <p class="mt-2 text-slate-200">You get clear edits for scope boundaries, revision caps, payment cadence, and ownership terms before kickoff.</p>
+            </article>
+          </div>
+        </aside>
+      </section>
+
+      <section class="mx-auto w-full max-w-5xl border-b border-slate-200 pb-12">
+        <h2 class="text-3xl font-bold text-slate-900">Why Client Contracts Drain Time and Margin</h2>
+        <div class="mt-6 space-y-4 text-[1.05rem] leading-8 text-slate-700">
+          <p>Freelancers and agencies usually sign under delivery pressure. The client wants a fast start, and review quality drops when timelines are tight.</p>
+          <p>Scope and revision language often looks harmless but expands work without compensation. Many teams only discover this after the first change cycle.</p>
+          <p>Payment clauses, late-fee terms, and suspension rights can be buried in legal sections that do not look urgent until invoices are delayed.</p>
+          <p>IP ownership and licensing terms are frequently broad enough to limit reuse of your own frameworks, templates, or process assets.</p>
+          <p class="font-medium text-slate-900">When terms are unclear, you lose profit, leverage, and confidence.</p>
+        </div>
+      </section>
+
+      <section class="mx-auto w-full max-w-6xl">
+        <h2 class="text-3xl font-bold text-slate-900">How It Works - Simple, Fast, Transparent</h2>
+        <p class="mt-4 max-w-4xl text-[1.05rem] leading-8 text-slate-700">
+          DecoDocs is a contract review layer for independent teams. It does not replace legal advice. It helps you spot costly terms early so legal review is faster, more focused, and easier to act on.
+        </p>
+        <div class="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {workflowSteps.map((item, index) => (
+            <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-sm font-semibold text-white">{index + 1}</div>
+              <h3 class="mt-4 text-xl font-semibold text-slate-900">{item.title}</h3>
+              <p class="mt-3 text-base leading-7 text-slate-700">{item.detail}</p>
+              <p class="mt-3 text-sm font-semibold text-blue-700">{item.outcome}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section class="mx-auto w-full max-w-5xl">
+        <h2 class="text-3xl font-bold text-slate-900">Common Contract Scenarios Freelancers and Agencies Recognize</h2>
+        <p class="mt-4 max-w-4xl text-[1.05rem] leading-8 text-slate-700">
+          These scenarios appear repeatedly in project, retainer, and partner contracts. Early detection changes how you price, negotiate, and deliver.
+        </p>
+        <div class="mt-8 space-y-4">
+          {scenarios.map((card, index) => (
+            <details class="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm" open={index === 0}>
+              <summary class="cursor-pointer list-none text-xl font-semibold text-slate-900">
+                <span class="inline-flex items-center gap-3">
+                  <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-sm font-semibold text-slate-700">{index + 1}</span>
+                  {card.title}
+                </span>
+              </summary>
+              <div class="mt-4 border-t border-slate-200 pt-4 text-base leading-7 text-slate-700">
+                <p><span class="font-semibold text-slate-900">Business consequence:</span> {card.consequence}</p>
+                <p class="mt-3"><span class="font-semibold text-slate-900">What DecoDocs reveals:</span> {card.outcome}</p>
+              </div>
+            </details>
+          ))}
+        </div>
+      </section>
+
+      <section class="mx-auto w-full max-w-5xl">
+        <h2 class="text-3xl font-bold text-slate-900">Who Uses This Workflow</h2>
+        <div class="mt-6 grid gap-4 md:grid-cols-2">
+          <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h3 class="text-lg font-semibold text-slate-900">Independent freelancers</h3>
+            <p class="mt-2 text-base leading-7 text-slate-700">Review client terms quickly when you do not have internal legal resources and every contract impacts income stability.</p>
+          </article>
+          <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h3 class="text-lg font-semibold text-slate-900">Boutique agencies</h3>
+            <p class="mt-2 text-base leading-7 text-slate-700">Align founders, account leads, and delivery teams on one interpretation before kickoff and change cycles.</p>
+          </article>
+          <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h3 class="text-lg font-semibold text-slate-900">Creative studios</h3>
+            <p class="mt-2 text-base leading-7 text-slate-700">Protect reusable assets and portfolio rights while keeping client ownership terms commercially fair.</p>
+          </article>
+          <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h3 class="text-lg font-semibold text-slate-900">Technical service teams</h3>
+            <p class="mt-2 text-base leading-7 text-slate-700">Clarify SLA and support obligations so delivery commitments match staffing and timeline reality.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="mx-auto w-full max-w-5xl">
+        <h2 class="text-3xl font-bold text-slate-900">Risk Signals to Watch Before Signature</h2>
+        <div class="mt-6 grid gap-4 md:grid-cols-2">
+          <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h3 class="text-lg font-semibold text-slate-900">Unlimited or undefined revisions</h3>
+            <p class="mt-2 text-base leading-7 text-slate-700">If revisions are not bounded, project scope becomes open-ended and profitability collapses quickly.</p>
+          </article>
+          <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h3 class="text-lg font-semibold text-slate-900">Payment dependency and long invoice windows</h3>
+            <p class="mt-2 text-base leading-7 text-slate-700">Delayed payment mechanics can create cash-flow strain even when delivery performance is strong.</p>
+          </article>
+          <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h3 class="text-lg font-semibold text-slate-900">Overbroad IP transfer language</h3>
+            <p class="mt-2 text-base leading-7 text-slate-700">Ownership clauses may unintentionally transfer reusable process assets and future leverage.</p>
+          </article>
+          <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h3 class="text-lg font-semibold text-slate-900">Unbalanced indemnity and liability terms</h3>
+            <p class="mt-2 text-base leading-7 text-slate-700">One-sided risk allocation can expose you beyond contract value and insurance comfort levels.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="mx-auto w-full max-w-5xl">
+        <h2 class="text-3xl font-bold text-slate-900">Before and After DecoDocs</h2>
+        <div class="mt-6 grid gap-6 lg:grid-cols-2">
+          <article class="rounded-2xl border border-slate-200 bg-white p-6">
+            <h3 class="text-2xl font-semibold text-slate-900">Before DecoDocs</h3>
+            <ul class="mt-4 space-y-3 list-none p-0 text-base leading-7 text-slate-700">
+              <li>Contract clauses interpreted differently by each reviewer</li>
+              <li>Scope creep and payment risk discovered after project start</li>
+              <li>IP and liability language reviewed too late</li>
+              <li>Negotiation decisions driven by urgency, not clarity</li>
+            </ul>
+          </article>
+          <article class="rounded-2xl border border-slate-900 bg-slate-900 p-6 text-slate-100">
+            <h3 class="text-2xl font-semibold text-white">After DecoDocs</h3>
+            <ul class="mt-4 space-y-3 list-none p-0 text-base leading-7 text-slate-100">
+              <li>Plain-language summaries tied to source text</li>
+              <li>Clear boundaries for scope, revisions, and ownership</li>
+              <li>Early risk flags for payment, renewal, and liability terms</li>
+              <li>Faster, more confident client negotiation</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="mx-auto w-full max-w-5xl">
+        <h2 class="text-3xl font-bold text-slate-900">What Freelancers and Agencies Gain</h2>
+        <ul class="mt-6 space-y-3 list-none p-0 text-base leading-7 text-slate-700">
+          {teamBenefits.map((benefit) => (
+            <li class="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-4">
+              <span class="mt-2 inline-block h-2.5 w-2.5 rounded-full bg-blue-600" />
+              <span>{benefit}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section class="mx-auto w-full max-w-5xl">
+        <h2 class="text-3xl font-bold text-slate-900">Common Questions Independent Teams Ask</h2>
+        <div class="mt-6 space-y-3">
+          {faqEntries.map((item) => (
+            <details class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+              <summary class="cursor-pointer list-none text-base font-semibold text-slate-900">{item.question}</summary>
+              <p class="mt-3 text-base leading-7 text-slate-700">{item.answer}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+
+      <section class="mx-auto w-full max-w-5xl">
+        <h2 class="text-3xl font-bold text-slate-900">Trusted by Teams That Sell Expertise</h2>
+        <p class="mt-4 max-w-4xl text-[1.05rem] leading-8 text-slate-700">
+          DecoDocs is built for people whose revenue depends on clear terms and reliable execution. When contracts are understandable, delivery is smoother and client relationships are stronger.
+        </p>
+        <div class="mt-6 grid gap-4 md:grid-cols-3">
+          {credibilityPoints.map((item) => (
+            <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <h3 class="text-lg font-semibold text-slate-900">{item.title}</h3>
+              <p class="mt-3 text-base leading-7 text-slate-700">{item.detail}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section class="mx-auto w-full max-w-5xl rounded-3xl border border-slate-900 bg-slate-900 p-8 text-slate-100">
+        <h2 class="text-3xl font-bold text-white">Understand the Contract Before You Promise Delivery</h2>
+        <p class="mt-4 max-w-3xl text-base leading-7 text-slate-100">
+          Review your next client agreement with clear scope, payment, and risk visibility before you commit timeline and resources.
+        </p>
+        <div class="mt-6 flex flex-wrap gap-3">
+          <a class="inline-flex rounded-full bg-white px-6 py-3 text-sm font-semibold text-slate-900 no-underline transition hover:bg-slate-100" href="/view">Upload Contract Now</a>
+          <a class="inline-flex rounded-full border border-slate-500 px-6 py-3 text-sm font-semibold text-white no-underline transition hover:border-slate-300" href="/pricing">See Plans</a>
+        </div>
+        <p class="mt-4 text-sm text-slate-300">No signup required for first review.</p>
+      </section>
+    </div>
+
+    <div class="fixed inset-x-0 bottom-4 z-40 mx-auto w-[calc(100%-1.5rem)] max-w-xl rounded-2xl border border-slate-300 bg-white/95 p-3 shadow-lg backdrop-blur">
+      <div class="flex items-center justify-between gap-3">
+        <p class="text-sm font-medium text-slate-800">Client contract to review?</p>
+        <a class="inline-flex rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white no-underline transition hover:bg-slate-800" href="/view">Upload Contract</a>
+      </div>
+    </div>
+  </main>
+  <Footer />
+</MainLayout>
