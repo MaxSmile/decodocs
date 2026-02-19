@@ -43,9 +43,20 @@ export const loadPdf = async (url) => {
  */
 export const renderPdfPage = async (pdf, pageNumber, canvas, scale = 1.0) => {
   try {
+    if (!canvas) {
+      console.error(`renderPdfPage: canvas is null for page ${pageNumber}`);
+      return null;
+    }
+
     const page = await pdf.getPage(pageNumber);
     const viewport = page.getViewport({ scale });
-    const context = canvas.getContext('2d');
+
+    const context = (canvas.getContext && canvas.getContext('2d')) || null;
+    if (!context) {
+      console.error(`renderPdfPage: canvas.getContext() returned null for page ${pageNumber}`);
+      return null;
+    }
+
     canvas.height = viewport.height;
     canvas.width = viewport.width;
     const renderContext = {
@@ -62,7 +73,7 @@ export const renderPdfPage = async (pdf, pageNumber, canvas, scale = 1.0) => {
       scale
     };
   } catch (error) {
-    console.error('Error rendering PDF page:', error);
+    console.error('Error rendering PDF page:', error?.message || error);
     throw error;
   }
 };

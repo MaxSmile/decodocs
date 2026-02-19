@@ -140,7 +140,8 @@ export const useDocumentAnalysis = ({ functions, authState, isMockMode }) => {
     };
 
     const handleAnalyzeDocument = async ({ selectedDocument, pdfTextContent, docHash, numPages, updateAnnotations }) => {
-        if (!selectedDocument || !pdfTextContent || !docHash) return;
+        if (!selectedDocument || !docHash) return;
+        if (!pdfTextContent && !isMockMode) return;
 
         if (!isFirebaseAvailable()) {
             console.warn('Document analysis unavailable: Firebase services not accessible.');
@@ -191,7 +192,8 @@ export const useDocumentAnalysis = ({ functions, authState, isMockMode }) => {
                 pdfSizeBytes: selectedDocument?.size || 0,
             });
 
-            const pages = pdfTextContent.split('\f');
+            const normalizedText = typeof pdfTextContent === 'string' ? pdfTextContent : '';
+            const pages = normalizedText.split('\f');
             const { charsPerPage, totalChars } = stats;
 
             let result;
@@ -202,7 +204,7 @@ export const useDocumentAnalysis = ({ functions, authState, isMockMode }) => {
                     body: JSON.stringify({
                         docHash,
                         stats: { pageCount: numPages, charsPerPage, totalChars, languageHint: 'en' },
-                        text: { format: 'paged', value: pdfTextContent },
+                        text: { format: 'paged', value: normalizedText },
                         options: { tasks: ['explain', 'caveats', 'inconsistencies'], targetLanguage: null },
                     }),
                 });
@@ -220,7 +222,7 @@ export const useDocumentAnalysis = ({ functions, authState, isMockMode }) => {
                         },
                         text: {
                             format: 'paged',
-                            value: pdfTextContent,
+                            value: normalizedText,
                             pageTextIndex: pages.map((text, idx) => ({
                                 page: idx + 1,
                                 start: 0,

@@ -61,7 +61,7 @@ const Header = ({ showMarketingNav = true }: HeaderProps) => {
   })();
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-white/40 bg-white/70 backdrop-blur-xl">
+    <header className="relative z-40 w-full border-b border-white/40 bg-white/70 backdrop-blur-xl">
       <div className={`mx-auto flex w-full items-center justify-between px-5 sm:px-6 ${isAppLayout ? 'h-14 py-2' : 'max-w-6xl py-3 sm:py-4'}`}>
         <a href="/" className="flex items-center gap-2.5 text-base font-bold tracking-tight text-slate-900 no-underline sm:gap-3 sm:text-lg">
           <img src={logoSrc} alt="DecoDocs" className="h-8 w-8 sm:h-9 sm:w-9" />

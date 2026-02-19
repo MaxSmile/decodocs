@@ -50,6 +50,9 @@ const Footer = () => {
               <p className="text-xs text-slate-500">Understand documents before you sign</p>
             </div>
           </div>
+          <div className="mt-2">
+            <Link to="/view" className="inline-flex rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white no-underline hover:bg-slate-800" aria-label="Open DecoDocs Web App">Open DecoDocs Web App</Link>
+          </div>
           <p className="text-sm text-slate-600">
             Privacy-first document understanding by Snap Sign Pty Ltd.
           </p>

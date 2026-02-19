@@ -1,4 +1,4 @@
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useEffect } from 'react';
 
 /**
  * Hook for PDF rendering operations
@@ -55,7 +55,9 @@ export const usePDFRenderer = (pdfDoc, pageScale) => {
         textLayerRef.current.appendChild(span);
       }
     } catch (error) {
+      // preserve original behavior for tests (error object) and also log a concise message
       console.error('Error rendering text layer:', error);
+      console.error('Error rendering text layer message:', error?.message || error);
     }
   }, []);
 
@@ -137,15 +139,48 @@ export const usePDFRenderer = (pdfDoc, pageScale) => {
       });
   }, []);
 
+  // Track the active PDF.js render task for this hook so we can cancel overlapping renders
+  const renderTaskRef = useRef(null);
+
+  // Cancel any in-flight render task when the hook/component unmounts
+  useEffect(() => {
+    return () => {
+      try {
+        renderTaskRef.current?.cancel?.();
+      } catch (e) {
+        /* ignore */
+      }
+      renderTaskRef.current = null;
+    };
+  }, []);
+
   // Render a specific page with text layer and annotations
   const renderPage = useCallback(
     async (pageNum, highlights = [], clauseMarkers = [], riskBadges = []) => {
       if (!pdfDoc || !canvasRef.current) return;
 
+      // If a previous render is still running for this canvas, cancel it first.
+      try {
+        if (renderTaskRef.current && typeof renderTaskRef.current.cancel === 'function') {
+          renderTaskRef.current.cancel();
+          renderTaskRef.current = null;
+        }
+      } catch (e) {
+        // non-fatal
+      }
+
       try {
         const page = await pdfDoc.getPage(pageNum);
         const canvas = canvasRef.current;
-        const context = canvas.getContext('2d');
+        if (!canvas) {
+          console.error(`renderPage: canvasRef is null for page ${pageNum}`);
+          return;
+        }
+        const context = (canvas.getContext && canvas.getContext('2d')) || null;
+        if (!context) {
+          console.error(`renderPage: canvas.getContext() returned null for page ${pageNum}`);
+          return;
+        }
 
         // Calculate viewport
         const scale = pageScale;
@@ -158,13 +193,16 @@ export const usePDFRenderer = (pdfDoc, pageScale) => {
         // Clear canvas
         context.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Render PDF page to canvas
+        // Render PDF page to canvas (track the render task so we can cancel it)
         const renderContext = {
           canvasContext: context,
           viewport: viewport,
         };
 
-        await page.render(renderContext).promise;
+        const renderTask = page.render(renderContext);
+        renderTaskRef.current = renderTask;
+        await renderTask.promise;
+        renderTaskRef.current = null;
 
         // Render text layer for selection and searching
         await renderTextLayer(page, viewport);
@@ -172,7 +210,11 @@ export const usePDFRenderer = (pdfDoc, pageScale) => {
         // Render annotations/highlights if any
         renderAnnotations(pageNum, viewport, highlights, clauseMarkers, riskBadges);
       } catch (error) {
+        // preserve original behavior for tests (error object) and also log a concise message
         console.error('Error rendering page:', error);
+        console.error('Error rendering page message:', error?.message || error);
+      } finally {
+        renderTaskRef.current = null;
       }
     },
     [pdfDoc, pageScale, renderTextLayer, renderAnnotations]

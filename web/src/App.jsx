@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { getFunctions } from 'firebase/functions';
 import HomePage from './components/HomePage.jsx';
 import DocumentViewer from './components/DocumentViewer.jsx';
 import DocumentEditor from './components/DocumentEditor.jsx';
@@ -20,6 +21,8 @@ import WorkspaceLayout from './components/layouts/WorkspaceLayout.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 import AuthErrorNotification from './components/AuthErrorNotification.jsx';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
+import { crashReporter } from './services/crashReporter.js';
+import { actionLogger } from './services/actionLogger.js';
 import './App.css';
 
 // Simple PrivateRoute component
@@ -146,16 +149,33 @@ const AppRoutes = () => {
   );
 };
 
+const CrashReporterBridge = () => {
+  const { app } = useAuth();
+
+  useEffect(() => {
+    crashReporter.installGlobalHandlers();
+    actionLogger.install();
+  }, []);
+
+  useEffect(() => {
+    if (!app) return;
+    crashReporter.configure({ functions: getFunctions(app), source: 'web' });
+  }, [app]);
+
+  return null;
+};
+
 const App = ({ basename = '/' }) => {
   return (
-    <ErrorBoundary>
-      <AuthProvider>
+    <AuthProvider>
+      <CrashReporterBridge />
+      <ErrorBoundary>
         <AuthErrorNotification />
         <Router basename={basename}>
           <AppRoutes />
         </Router>
-      </AuthProvider>
-    </ErrorBoundary>
+      </ErrorBoundary>
+    </AuthProvider>
   );
 };
 

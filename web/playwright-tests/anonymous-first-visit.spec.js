@@ -33,7 +33,7 @@ test.describe('Auth — Anonymous first-visit happy path', () => {
     const viewerContent = page.locator('#viewer-content');
     await expect(viewerContent.getByText('Why are buttons disabled?')).toBeVisible();
     await expect(viewerContent.getByText('Sign in to enable AI analysis (Free)', { exact: false })).toBeVisible();
-    await expect(viewerContent.getByRole('link', { name: 'Sign in' })).toBeVisible();
+    await expect(page.getByRole('link', { name: /sign in/i }).first()).toBeVisible();
 
     // Protected actions remain disabled for signed-out visitors.
     await expect(page.getByRole('button', { name: 'Deep Analysis' })).toBeDisabled();

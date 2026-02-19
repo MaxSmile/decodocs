@@ -48,6 +48,7 @@ const DocumentViewer = () => {
     loadTestPdf,
     navigation,
     loadError,
+    resetPdf,
   } = usePdfJs();
 
   const {
@@ -118,10 +119,12 @@ const DocumentViewer = () => {
     runServerDetection,
     functions,
     pdfDoc,
+    resetPdf,
   });
 
   // Derived State
-  const isLoading = isPdfLoading || isAnalysisLoading;
+  const isPdfBusy = isPdfLoading;
+  const isAnalysisBusy = isAnalysisLoading;
   const { types: documentTypes } = useDocumentTypes();
   const resolveType = (id) => documentTypes.find((t) => t.id === id) || null;
   const effectiveDocTypeId = overrideDocTypeId || detectedDocTypeId;
@@ -262,7 +265,7 @@ const DocumentViewer = () => {
                     pdfDoc={pdfDoc}
                     numPages={numPages}
                     pageScale={pageScale}
-                    isLoading={isLoading}
+                    isLoading={isPdfBusy}
                     loadingMessage={loadingMessage}
                     onPageVisible={handlePageVisible}
                     highlights={highlights}
@@ -306,7 +309,7 @@ const DocumentViewer = () => {
             onTranslateToPlainEnglish={() => handleTranslateToPlainEnglish({ selectedDocument, docHash, pdfTextContent })}
             onSummarizeKeyPoints={() => handleSummarizeKeyPoints({ selectedDocument, docHash, pdfTextContent })}
             onSuggestImprovements={() => handleSuggestImprovements({ selectedDocument, docHash, pdfTextContent })}
-            isLoading={isLoading}
+            isLoading={isAnalysisBusy}
             isAuthenticated={authState.status === 'authenticated'}
             hasDocument={!!selectedDocument}
             selectedDocument={selectedDocument}

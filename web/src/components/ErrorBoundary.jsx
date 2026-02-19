@@ -1,5 +1,6 @@
 import React from 'react';
 import ServerErrorPage from './ServerErrorPage.jsx';
+import { crashReporter } from '../services/crashReporter.js';
 
 /**
  * ErrorBoundary component to catch errors in child components
@@ -21,6 +22,7 @@ class ErrorBoundary extends React.Component {
 
   componentDidCatch(error, errorInfo) {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
+    void crashReporter.reportReactError(error, errorInfo);
     this.setState({
       error,
       errorInfo,

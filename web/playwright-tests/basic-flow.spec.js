@@ -60,8 +60,8 @@ test.describe('DecoDocs Application Flow', () => {
     await expect(footer.locator('a:has-text("About")')).toBeVisible();
 
     // Check legal links are present instead of vendor-specific copy
-    await expect(footer.locator('a:has-text("Privacy")')).toBeVisible();
-    await expect(footer.locator('a:has-text("Terms")')).toBeVisible();
+    await expect(footer.getByRole('link', { name: 'Privacy' }).first()).toBeVisible();
+    await expect(footer.getByRole('link', { name: 'Terms' }).first()).toBeVisible();
   });
 });
 

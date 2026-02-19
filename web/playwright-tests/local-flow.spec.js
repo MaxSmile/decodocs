@@ -33,11 +33,11 @@ test.describe('Local DecoDocs Application Flow', () => {
 
   test('should have proper header and footer', async ({ page }) => {
     // Check header branding (logo + site title) via the home link
-    await expect(page.getByRole('link', { name: /DecoDocs/i })).toBeVisible();
+    await expect(page.getByRole('link', { name: /DecoDocs/i }).first()).toBeVisible();
 
     // Check footer has updated content
     await expect(page.locator('footer')).toContainText('DecoDocs');
-    await expect(page.locator('footer').locator('a:has-text("Privacy")')).toBeVisible();
+    await expect(page.locator('footer').getByRole('link', { name: 'Privacy' }).first()).toBeVisible();
   });
 });
 

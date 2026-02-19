@@ -155,6 +155,20 @@ export const usePdfJs = () => {
         setPageScale,
     };
 
+    const resetPdf = () => {
+        try { pdfDoc?.destroy?.(); } catch (e) { /* ignore */ }
+        setPdfDoc(null);
+        setNumPages(null);
+        setPageNumber(1);
+        setPageScale(1.5);
+        setPdfTextContent('');
+        setDocStats(null);
+        setDocHash(null);
+        setIsLoading(false);
+        setLoadingMessage('');
+        setLoadError(null);
+    };
+
     return {
         pdfLibLoaded,
         pdfDoc,
@@ -170,5 +184,6 @@ export const usePdfJs = () => {
         loadPdfFromBlob,
         loadTestPdf,
         navigation,
+        resetPdf,
     };
 };

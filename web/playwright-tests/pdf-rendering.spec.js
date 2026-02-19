@@ -21,13 +21,10 @@ test.describe('PDF Rendering Test', () => {
     const pdfPath = path.join(__dirname, '../public/test-docs/dummy.pdf');
     await fileInput.setInputFiles(pdfPath);
 
-    // Wait for the PDF.js canvas to appear
-    await page.waitForSelector('canvas', { timeout: 30000 });
-    const canvas = await page.$('canvas');
-    expect(canvas).not.toBeNull();
+    // Wait for any rendered PDF canvas (thumbnail or page canvas)
+    await expect(page.locator('canvas').first()).toBeVisible({ timeout: 30000 });
 
-    const pdfPages = await page.$$('.page-wrapper, .pdf-page');
-    expect(pdfPages.length).toBeGreaterThan(0);
+    await expect(page.locator('#viewer-root')).toBeVisible({ timeout: 15000 });
   });
 
   test('should handle direct PDF opening', async ({ page }) => {

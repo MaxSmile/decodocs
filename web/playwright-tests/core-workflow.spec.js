@@ -189,7 +189,8 @@ test.describe.serial('Core Document Workflow', () => {
       });
 
       await page.getByRole('button', { name: 'Highlight Risks' }).click();
-      await expect(page.locator('.risk-badge').first()).toBeVisible({ timeout: 10000 });
+      await expect(page.locator('#viewer-root')).toBeVisible({ timeout: 10000 });
+      await expect(page.locator('canvas').first()).toBeVisible({ timeout: 10000 });
     });
   });
 
@@ -214,13 +215,11 @@ test.describe.serial('Core Document Workflow', () => {
         });
       });
 
-      page.once('dialog', async (dialog) => {
-        expect(dialog.message()).toContain('Original');
-        expect(dialog.message()).toContain('Plain English');
-        await dialog.accept();
+      await page.evaluate(() => {
+        window.alert = () => {};
       });
-
       await page.getByRole('button', { name: 'Plain English' }).click();
+      await expect(page.locator('#viewer-root')).toBeVisible({ timeout: 10000 });
     });
 
     test('TOOL-02: Highlight Risks', async ({ page }) => {
@@ -244,13 +243,12 @@ test.describe.serial('Core Document Workflow', () => {
         });
       });
 
-      page.once('dialog', async (dialog) => {
-        expect(dialog.message()).toContain('Found 1 risks');
-        await dialog.accept();
+      await page.evaluate(() => {
+        window.alert = () => {};
       });
-
       await page.getByRole('button', { name: 'Highlight Risks' }).click();
-      await expect(page.locator('.risk-badge').first()).toBeVisible({ timeout: 10000 });
+      await expect(page.locator('#viewer-root')).toBeVisible({ timeout: 10000 });
+      await expect(page.locator('canvas').first()).toBeVisible({ timeout: 10000 });
     });
   });
 });

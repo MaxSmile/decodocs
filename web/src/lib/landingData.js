@@ -541,8 +541,7 @@ export const footerLinks = {
   product: [
     { label: 'How it works', href: '#how-it-works' },
     { label: 'Use cases', href: '/uses-cases' },
-    { label: 'Pricing', href: '/pricing' },
-    { label: 'Open viewer', href: '/view' }
+    { label: 'Pricing', href: '/pricing' }
   ],
   company: [
     { label: 'About', href: '/about' },

@@ -24,6 +24,7 @@ export const useViewerDocumentState = ({
   runServerDetection,
   functions,
   pdfDoc,
+  resetPdf, // optional - clears pdf state when finishing
 }) => {
   const [selectedDocument, setSelectedDocument] = useState(null);
   const [cloudObjectKey, setCloudObjectKey] = useState(null);
@@ -221,7 +222,13 @@ export const useViewerDocumentState = ({
   };
 
   const handleFinishDocument = () => {
+    // clear local selection and fully reset any loaded PDF state so /view shows the initial dropzone
     setSelectedDocument(null);
+    try {
+      if (typeof resetPdf === 'function') resetPdf();
+    } catch (e) {
+      /* ignore */
+    }
     navigate('/view');
   };
 

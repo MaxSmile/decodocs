@@ -6,23 +6,54 @@ const PageThumbnail = ({ pdfDoc, pageNum, onClick, isActive }) => {
     useEffect(() => {
         if (!pdfDoc || !canvasRef.current) return;
 
+        let currentRender = null;
+        let cancelled = false;
+
         const renderThumb = async () => {
             try {
                 const page = await pdfDoc.getPage(pageNum);
                 const viewport = page.getViewport({ scale: 0.15 });
+
                 const canvas = canvasRef.current;
-                const context = canvas.getContext('2d');
+                if (!canvas) {
+                    console.error(`PageThumbnail: canvasRef missing for page ${pageNum}`);
+                    return;
+                }
+
+                const context = (canvas.getContext && canvas.getContext('2d')) || null;
+                if (!context) {
+                    console.error(`PageThumbnail: canvas.getContext() returned null for page ${pageNum}`);
+                    return;
+                }
 
                 canvas.height = viewport.height;
                 canvas.width = viewport.width;
 
-                await page.render({ canvasContext: context, viewport }).promise;
+                // Start render and keep a handle so we can cancel if needed
+                currentRender = page.render({ canvasContext: context, viewport });
+                await currentRender.promise;
+                if (cancelled) {
+                    currentRender?.cancel?.();
+                }
             } catch (err) {
-                // ignore errors
+                // Log concise message to client console
+                console.error('Error rendering thumbnail:', err?.message || err);
+            } finally {
+                currentRender = null;
             }
         };
 
         renderThumb();
+
+        return () => {
+            cancelled = true;
+            try {
+                currentRender?.cancel?.();
+            } catch (e) {
+                /* ignore */
+            }
+            currentRender = null;
+        };
     }, [pdfDoc, pageNum]);
 
     return (
