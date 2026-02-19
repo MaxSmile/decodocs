@@ -36,8 +36,6 @@ export default function SignInPage() {
     signInWithMicrosoft,
     signInWithApple,
     signInWithEmail,
-    signUpWithEmail,
-    resetPassword,
   } = useAuth();
   const navigate = useNavigate();
   const q = useQuery();
@@ -142,31 +140,19 @@ export default function SignInPage() {
       }
       navigate(postAuthPath);
     } catch (e) {
+      const code = e?.code || '';
+      if (
+        code === 'auth/email-already-in-use' ||
+        code === 'auth/account-exists-with-different-credential' ||
+        code === 'auth/credential-already-in-use'
+      ) {
+        setStatus({
+          kind: 'error',
+          message: 'This email already has an account. Sign in with the existing method, then link providers in Profile.',
+        });
+        return;
+      }
       setStatus({ kind: 'error', message: toAuthErrorMessage(e, 'Email sign-in failed.') });
-    }
-  };
-
-  const doEmailSignUp = async () => {
-    setStatus({ kind: 'loading', message: 'Creating account…' });
-    try {
-      if (!email || !password) throw new Error('Email and password are required.');
-      if (String(password).length < 10) throw new Error('Password must be at least 10 characters.');
-      await signUpWithEmail(email, password);
-      setStatus({ kind: 'ok', message: 'Account created and signed in.' });
-      navigate(postAuthPath);
-    } catch (e) {
-      setStatus({ kind: 'error', message: toAuthErrorMessage(e, 'Email sign-up failed.') });
-    }
-  };
-
-  const doResetPassword = async () => {
-    setStatus({ kind: 'loading', message: 'Sending reset email…' });
-    try {
-      if (!email) throw new Error('Enter your email first.');
-      await resetPassword(email);
-      setStatus({ kind: 'ok', message: 'Password reset email sent (if the account exists).' });
-    } catch (e) {
-      setStatus({ kind: 'error', message: toAuthErrorMessage(e, 'Password reset failed.') });
     }
   };
 
@@ -255,11 +241,8 @@ export default function SignInPage() {
                 Sign In
               </button>
 
-              <div className="flex justify-between text-sm">
-                <button type="button" onClick={doEmailSignUp} className={textBtnClass}>
-                  Create account
-                </button>
-                <button type="button" onClick={doResetPassword} className={textBtnClass}>
+              <div className="flex justify-end text-sm">
+                <button type="button" onClick={() => navigate('/reset-password')} className={textBtnClass}>
                   Reset password
                 </button>
               </div>
@@ -274,14 +257,16 @@ export default function SignInPage() {
       </div>
 
       <Card className="mt-4 bg-slate-50">
-        <div className="mb-1.5 font-black">Current session</div>
-        <div className="leading-7 text-slate-600">
-          Status: <strong>{authState?.status}</strong>
-          <br />
-          UID: <code>{user?.uid || 'n/a'}</code>
-          <br />
-          Anonymous: <strong>{String(isAnon)}</strong>
-        </div>
+        <details>
+          <summary className="cursor-pointer font-black text-slate-900">Debug info</summary>
+          <div className="mt-2 leading-7 text-slate-600">
+            Status: <strong>{authState?.status}</strong>
+            <br />
+            UID: <code>{user?.uid || 'n/a'}</code>
+            <br />
+            Anonymous: <strong>{String(isAnon)}</strong>
+          </div>
+        </details>
       </Card>
     </PageSection>
   );

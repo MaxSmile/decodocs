@@ -4,7 +4,7 @@ import Layout from '../Layout.jsx';
 
 const AuthLayout = ({ children }) => {
   return (
-    <Layout variant="marketing" showHeader showFooter={false}>
+    <Layout variant="marketing" showHeader showFooter>
       {children}
     </Layout>
   );

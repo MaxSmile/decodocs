@@ -71,7 +71,26 @@ Current enforced budgets:
   - `usage_daily`
   - `usage_events`
   - `docshashes`
+- Firestore collections used for user/admin reporting:
+  - `user_reports` (dedicated feedback + bug intake)
+  - `admin_reports` (operator triage stream, includes user reports and backend/client exceptions)
+  - `crashes` (raw client crash intake)
 - Storage for paid tiers is S3-compatible MinIO on VPS using pre-signed URLs
+
+### User Report Schema (`user_reports`)
+
+Each document in `user_reports` includes:
+- `createdAt`, `updatedAt` (server timestamps)
+- `status` (`open`)
+- `source` (`web`)
+- `kind` (`feedback` | `bug`)
+- `docType` (`report_feedback` | `report_bug`)  // explicit type flag
+- `reportType` (`user_feedback` | `user_bug`)
+- `severity` (`info` for feedback, `warning` for bugs)
+- `ratingStars` (`1..5` for feedback, `null` for bug reports unless explicitly supplied)
+- `message`, `pageUrl`, `userAgent`
+- `uid`, `email`, `authProvider` (nullable auth context)
+- `input` (sanitized metadata object)
 
 ## Security
 

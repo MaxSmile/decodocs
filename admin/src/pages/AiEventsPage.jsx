@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { collection, getDocs, limit, orderBy, query } from 'firebase/firestore';
+import { Grid } from 'gridjs-react';
 
 import { db } from '../firebase.js';
 
@@ -92,32 +93,30 @@ export default function AiEventsPage() {
       ) : null}
 
       {!loading && rows.length > 0 ? (
-        <div style={{ marginTop: 12, border: '1px solid #e2e8f0', borderRadius: 12, overflow: 'hidden' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '200px 140px 130px 110px 1fr', gap: 8, padding: 10, background: '#f8fafc', borderBottom: '1px solid #e2e8f0', fontWeight: 800, fontSize: 12 }}>
-            <div>Time</div>
-            <div>Model</div>
-            <div>Event</div>
-            <div>Status</div>
-            <div>Message</div>
-          </div>
-          {rows.map((row) => (
-            <div key={row.id} style={{ display: 'grid', gridTemplateColumns: '200px 140px 130px 110px 1fr', gap: 8, padding: 10, borderBottom: '1px solid #f1f5f9', fontSize: 12, alignItems: 'start' }}>
-              <div style={{ color: '#334155' }}>{formatTs(row.createdAt)}</div>
-              <div style={{ color: '#0f172a', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }}>{row.model || '—'}</div>
-              <div style={{ color: '#334155', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }}>{row.eventType || '—'}</div>
-              <div style={{ color: '#334155' }}>{row.status ?? '—'}</div>
-              <div style={{ color: '#0f172a', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                {row.message || '—'}
-                {(row.docHash || row.uid) ? (
-                  <div style={{ marginTop: 6, color: '#64748b', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }}>
-                    {row.docHash ? `docHash: ${row.docHash}` : ''}
-                    {row.docHash && row.uid ? ' | ' : ''}
-                    {row.uid ? `uid: ${row.uid}` : ''}
-                  </div>
-                ) : null}
-              </div>
-            </div>
-          ))}
+        <div style={{ marginTop: 12 }}>
+          <Grid
+            data={rows.map((r) => [
+              r.createdAt,
+              r.model || '—',
+              r.eventType || '—',
+              r.status ?? '—',
+              [r.message, r.docHash ? `docHash:${r.docHash}` : null, r.uid ? `uid:${r.uid}` : null].filter(Boolean).join(' | ') || '—',
+            ])}
+            columns={[
+              { name: 'Time',    width: '170px', formatter: (cell) => formatTs(cell) },
+              { name: 'Model',   width: '140px' },
+              { name: 'Event',   width: '130px' },
+              { name: 'Status',  width: '100px' },
+              { name: 'Message' },
+            ]}
+            sort
+            search
+            pagination={{ limit: 50 }}
+            style={{
+              th: { fontSize: '12px', fontWeight: '800', background: '#f8fafc' },
+              td: { fontSize: '12px', verticalAlign: 'top' },
+            }}
+          />
         </div>
       ) : null}
     </div>

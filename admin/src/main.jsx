@@ -1,6 +1,8 @@
 import { StrictMode } from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
+import 'gridjs/dist/theme/mermaid.css';
+import './index.css';
 
 import { AuthProvider } from './AuthContext.jsx';
 import App from './App.jsx';

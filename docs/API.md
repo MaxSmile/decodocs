@@ -157,6 +157,41 @@ Response shape:
 - `getDocumentTypeState`
 - `saveDocTypeOverride`
 
+#### `submitUserReport`
+Captures end-user feedback/bug reports from the web UI.
+
+Input:
+- `kind` (string, required): `feedback` or `bug`
+- `message` (string, required, min 8 chars)
+- `ratingStars` (integer, required for `feedback`, optional for `bug`, range `1..5`)
+- `pageUrl` (string, optional)
+- `userAgent` (string, optional)
+- `extra` (object, optional, sanitized metadata)
+
+Response shape:
+```json
+{
+  "ok": true,
+  "reportId": "firestore_doc_id",
+  "kind": "feedback",
+  "docType": "report_feedback"
+}
+```
+
+Storage behavior:
+- Dedicated intake collection: `user_reports`
+- Admin triage stream: `admin_reports`
+- Doc type flags:
+  - feedback -> `docType: "report_feedback"`
+  - bug -> `docType: "report_bug"`
+
+#### `submitClientCrash`
+Captures client-side crash/exception payloads.
+
+Storage behavior:
+- Dedicated crash intake collection: `crashes`
+- Admin triage stream: `admin_reports` (`reportType: "client_exception"`)
+
 ### Legacy Note
 - Older documentation and local mock mode may still reference REST-style paths such as `/explainSelection`.
 - Canonical runtime contract for production is Firebase callable functions and `ok`-based responses.

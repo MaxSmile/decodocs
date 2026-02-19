@@ -2,9 +2,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
+import { JsonEditor } from 'json-edit-react';
 
 import { db, fn } from '../firebase.js';
-import { parseAndValidateConfig } from '../lib/configValidation.js';
+import { validateConfigDoc } from '../lib/configValidation.js';
 
 const CONFIG_MAP = {
   stripe: 'stripe',
@@ -21,12 +22,13 @@ export default function ConfigEditor() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
-  const [raw, setRaw] = useState('');
+  const [data, setData] = useState({});
   const [savedAt, setSavedAt] = useState(null);
+  const [dirty, setDirty] = useState(false);
 
   const ref = useMemo(() => (docId ? doc(db, 'admin', docId) : null), [docId]);
   const saveConfig = useMemo(() => httpsCallable(fn, 'setAdminConfig'), []);
-  const validation = useMemo(() => parseAndValidateConfig(docId, raw), [docId, raw]);
+  const validation = useMemo(() => validateConfigDoc(docId, data), [docId, data]);
 
   useEffect(() => {
     if (!ref) return;
@@ -34,11 +36,12 @@ export default function ConfigEditor() {
     (async () => {
       setLoading(true);
       setError(null);
+      setDirty(false);
       try {
         const snap = await getDoc(ref);
-        const data = snap.exists() ? snap.data() : {};
+        const loaded = snap.exists() ? snap.data() : {};
         if (!active) return;
-        setRaw(JSON.stringify(data, null, 2));
+        setData(loaded);
       } catch (e) {
         if (!active) return;
         setError(e?.message || 'Failed to load config');
@@ -51,27 +54,24 @@ export default function ConfigEditor() {
     };
   }, [ref]);
 
+  const handleDataChange = (newData) => {
+    setData(newData);
+    setDirty(true);
+    setSavedAt(null);
+  };
+
   const onSave = async () => {
     if (!ref) return;
     setError(null);
+    if (validation.errors.length > 0) {
+      setError(`Fix validation errors before saving:\n- ${validation.errors.join('\n- ')}`);
+      return;
+    }
     setBusy(true);
     try {
-      if (validation.jsonError) {
-        setError(`Invalid JSON: ${validation.jsonError}`);
-        return;
-      }
-      if (validation.errors.length > 0) {
-        setError(`Fix validation errors before saving:\n- ${validation.errors.join('\n- ')}`);
-        return;
-      }
-
-      const parsed = validation.parsed || {};
-      await saveConfig({
-        docId,
-        config: parsed,
-        merge: true,
-      });
+      await saveConfig({ docId, config: data, merge: true });
       setSavedAt(new Date());
+      setDirty(false);
     } catch (e) {
       const details = e?.details?.errors;
       if (Array.isArray(details) && details.length > 0) {
@@ -101,10 +101,13 @@ export default function ConfigEditor() {
         <div>
           <h1 style={{ margin: 0 }}>admin/{docId}</h1>
           <div style={{ marginTop: 6, color: '#475569', fontSize: 13 }}>
-            Edit JSON and save. Firestore rules restrict access to @snapsign.com.au accounts.
+            Interactive editor — add, edit or delete fields then save. Restricted to @snapsign.com.au.
           </div>
           {savedAt ? (
             <div style={{ marginTop: 6, color: '#16a34a', fontSize: 12 }}>Saved {savedAt.toLocaleString()}</div>
+          ) : null}
+          {dirty && !savedAt ? (
+            <div style={{ marginTop: 6, color: '#d97706', fontSize: 12 }}>Unsaved changes</div>
           ) : null}
         </div>
         <div style={{ display: 'flex', gap: 10 }}>
@@ -116,8 +119,8 @@ export default function ConfigEditor() {
           </button>
           <button
             onClick={onSave}
-            disabled={busy}
-            style={{ borderRadius: 999, border: '1px solid #0f172a', background: '#0f172a', color: 'white', padding: '8px 14px', fontWeight: 900, cursor: busy ? 'not-allowed' : 'pointer', opacity: busy ? 0.6 : 1 }}
+            disabled={busy || loading}
+            style={{ borderRadius: 999, border: dirty ? '1px solid #0f172a' : '1px solid #cbd5e1', background: dirty ? '#0f172a' : '#f8fafc', color: dirty ? 'white' : '#94a3b8', padding: '8px 14px', fontWeight: 900, cursor: busy || loading ? 'not-allowed' : 'pointer', opacity: busy ? 0.6 : 1 }}
           >
             {busy ? 'Saving…' : 'Save'}
           </button>
@@ -130,44 +133,41 @@ export default function ConfigEditor() {
         </div>
       ) : null}
 
-      <div style={{ marginTop: 12 }}>
-        <textarea
-          value={raw}
-          onChange={(e) => setRaw(e.target.value)}
-          spellCheck={false}
-          style={{
-            width: '100%',
-            minHeight: 520,
-            fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
-            fontSize: 12,
-            lineHeight: 1.5,
-            padding: 12,
-            borderRadius: 12,
-            border: '1px solid #e2e8f0',
-            outline: 'none',
-            background: '#fff',
-          }}
-          disabled={loading}
-        />
-      </div>
-
-      {loading ? <div style={{ marginTop: 8, color: '#64748b', fontSize: 12 }}>Loading…</div> : null}
-
-      {!loading && validation.jsonError ? (
-        <div style={{ marginTop: 10, color: '#991b1b', fontSize: 12 }}>
-          JSON parse error: {validation.jsonError}
-        </div>
-      ) : null}
-      {!loading && !validation.jsonError && validation.errors.length > 0 ? (
-        <div style={{ marginTop: 10, color: '#991b1b', fontSize: 12 }}>
+      {!loading && validation.errors.length > 0 ? (
+        <div style={{ marginTop: 10, color: '#991b1b', fontSize: 12, background: '#fef2f2', padding: 8, borderRadius: 8, border: '1px solid #fecaca' }}>
           Validation errors: {validation.errors.join(' | ')}
         </div>
       ) : null}
+
       {!loading && validation.warnings.length > 0 ? (
-        <div style={{ marginTop: 10, color: '#92400e', fontSize: 12 }}>
+        <div style={{ marginTop: 10, color: '#92400e', fontSize: 12, background: '#fffbeb', padding: 8, borderRadius: 8, border: '1px solid #fde68a' }}>
           Hints: {validation.warnings.join(' | ')}
         </div>
       ) : null}
+
+      <div style={{ marginTop: 14, border: '1px solid #e2e8f0', borderRadius: 12, overflow: 'hidden', background: '#fff', minHeight: 200 }}>
+        {loading ? (
+          <div style={{ padding: 20, color: '#64748b', fontSize: 13 }}>Loading…</div>
+        ) : (
+          <JsonEditor
+            data={data}
+            setData={handleDataChange}
+            rootName={`admin/${docId}`}
+            indent={3}
+            collapse={1}
+            enableClipboard
+            showCollectionCount="when-closed"
+            theme={{
+              container: {
+                backgroundColor: '#ffffff',
+                fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+                fontSize: '13px',
+                padding: '12px',
+              },
+            }}
+          />
+        )}
+      </div>
     </div>
   );
 }

@@ -4,7 +4,6 @@ import Footer from './landing/Footer.jsx';
 import GoogleOneTap from './auth/GoogleOneTap.jsx';
 import SiteHeader from './SiteHeader.jsx';
 import ReportWidget from './ReportWidget.jsx';
-import BugReportBubble from './BugReportBubble.jsx';
 
 /**
  * Shared app layout.
@@ -45,8 +44,7 @@ const Layout = ({
         {/* Footer */}
         {showFooter ? <Footer /> : null}
       </div>
-      {!isAppLayout ? <ReportWidget /> : null}
-      {isAppLayout ? <BugReportBubble /> : null}
+      <ReportWidget />
     </div>
   );
 };

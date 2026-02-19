@@ -9,6 +9,7 @@ import ContactPage from './components/ContactPage.jsx';
 import PricingPage from './components/PricingPage.jsx';
 import SignInPage from './components/SignInPage.jsx';
 import SignUpPage from './components/SignUpPage.jsx';
+import ResetPasswordPage from './components/ResetPasswordPage.jsx';
 import ProfilePage from './components/ProfilePage.jsx';
 import SignPage from './components/SignPage.jsx';
 import UseCasePage from './components/landing/UseCasePage.jsx';
@@ -73,6 +74,12 @@ const AppRoutes = () => {
       <Route path="/sign-up" element={
         <AuthLayout>
           <SignUpPage />
+        </AuthLayout>
+      } />
+
+      <Route path="/reset-password" element={
+        <AuthLayout>
+          <ResetPasswordPage />
         </AuthLayout>
       } />
 

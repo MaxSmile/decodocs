@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { collection, doc, getDocs, limit, orderBy, query, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { Grid } from 'gridjs-react';
+import { h } from 'gridjs';
 
 import { db } from '../firebase.js';
 import { useAuth } from '../AuthContext.jsx';
@@ -67,19 +69,44 @@ export default function ReportsPage() {
     return ['all', ...Array.from(set)];
   }, [rows]);
 
-  const setStatus = async (row, status) => {
+  const setStatus = async (rowId, status) => {
     try {
       const email = state.user?.email || null;
-      await updateDoc(doc(db, 'admin_reports', row.id), {
+      await updateDoc(doc(db, 'admin_reports', rowId), {
         status,
         updatedAt: serverTimestamp(),
         updatedBy: email,
       });
-      setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, status, updatedBy: email } : r)));
+      setRows((prev) => prev.map((r) => (r.id === rowId ? { ...r, status } : r)));
     } catch (e) {
       setError(e?.message || 'Failed to update status.');
     }
   };
+
+  // Keep a stable ref so gridjs formatters always call the latest version
+  const setStatusRef = useRef(setStatus);
+  useEffect(() => { setStatusRef.current = setStatus; });
+
+  const columns = useMemo(() => [
+    { id: 'rowid',      name: 'ID',      hidden: true },
+    { id: 'createdAt',  name: 'Time',    width: '160px', formatter: (cell) => formatTs(cell) },
+    { id: 'reportType', name: 'Type',    width: '120px' },
+    {
+      id: 'status',
+      name: 'Status',
+      width: '140px',
+      formatter: (cell, row) => h('select', {
+        defaultValue: cell || 'open',
+        onChange: (e) => setStatusRef.current(row.cells[0].data, e.target.value),
+        style: 'border:1px solid #cbd5e1;border-radius:6px;padding:2px 4px;font-size:11px;cursor:pointer',
+      }, STATUS_OPTIONS.map((s) => h('option', { value: s }, s))),
+    },
+    {
+      id: 'details',
+      name: 'Details',
+      formatter: (cell) => cell,
+    },
+  ], []);
 
   return (
     <div style={{ maxWidth: 1180, margin: '30px auto', padding: 24 }}>
@@ -127,51 +154,25 @@ export default function ReportsPage() {
       {!loading && filtered.length === 0 ? <div style={{ marginTop: 16, color: '#475569', fontSize: 13 }}>No reports found.</div> : null}
 
       {!loading && filtered.length > 0 ? (
-        <div style={{ marginTop: 12, border: '1px solid #e2e8f0', borderRadius: 12, overflow: 'hidden' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '170px 110px 110px 1fr 200px', gap: 8, padding: 10, background: '#f8fafc', borderBottom: '1px solid #e2e8f0', fontWeight: 800, fontSize: 12 }}>
-            <div>Time</div>
-            <div>Type</div>
-            <div>Status</div>
-            <div>Details</div>
-            <div>Manage</div>
-          </div>
-          {filtered.map((row) => (
-            <div key={row.id} style={{ display: 'grid', gridTemplateColumns: '170px 110px 110px 1fr 200px', gap: 8, padding: 10, borderBottom: '1px solid #f1f5f9', fontSize: 12, alignItems: 'start' }}>
-              <div style={{ color: '#334155' }}>{formatTs(row.createdAt)}</div>
-              <div style={{ color: '#334155', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }}>
-                {row.reportType || '—'}
-              </div>
-              <div style={{ color: '#0f172a' }}>{row.status || 'open'}</div>
-              <div style={{ color: '#0f172a', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                {row.message || '—'}
-                <div style={{ marginTop: 6, color: '#64748b' }}>
-                  {row.functionName ? `fn: ${row.functionName} ` : ''}
-                  {row.uid ? `uid: ${row.uid} ` : ''}
-                  {row.pageUrl ? `url: ${row.pageUrl}` : ''}
-                </div>
-              </div>
-              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                {STATUS_OPTIONS.map((status) => (
-                  <button
-                    key={`${row.id}_${status}`}
-                    type="button"
-                    onClick={() => setStatus(row, status)}
-                    style={{
-                      borderRadius: 999,
-                      border: row.status === status ? '1px solid #0f172a' : '1px solid #cbd5e1',
-                      background: row.status === status ? '#0f172a' : 'white',
-                      color: row.status === status ? 'white' : '#0f172a',
-                      padding: '3px 8px',
-                      fontSize: 11,
-                      cursor: 'pointer',
-                    }}
-                  >
-                    {status}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ))}
+        <div style={{ marginTop: 12 }}>
+          <Grid
+            key={filtered.map((r) => r.id + (r.status || 'open')).join(',')}
+            data={filtered.map((r) => [
+              r.id,
+              r.createdAt,
+              r.reportType || '—',
+              r.status || 'open',
+              [r.message, r.functionName, r.uid, r.pageUrl].filter(Boolean).join(' │ ') || '—',
+            ])}
+            columns={columns}
+            sort
+            search
+            pagination={{ limit: 50 }}
+            style={{
+              th: { fontSize: '12px', fontWeight: '800', background: '#f8fafc' },
+              td: { fontSize: '12px', verticalAlign: 'top' },
+            }}
+          />
         </div>
       ) : null}
     </div>

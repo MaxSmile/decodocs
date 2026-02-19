@@ -17,6 +17,7 @@ export default function ReportWidget() {
 
   const [openKind, setOpenKind] = useState(null);
   const [message, setMessage] = useState('');
+  const [ratingStars, setRatingStars] = useState(0);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [done, setDone] = useState('');
@@ -24,6 +25,7 @@ export default function ReportWidget() {
   const openDialog = (kind) => {
     setOpenKind(kind);
     setMessage('');
+    setRatingStars(0);
     setBusy(false);
     setError('');
     setDone('');
@@ -32,6 +34,7 @@ export default function ReportWidget() {
   const closeDialog = () => {
     setOpenKind(null);
     setMessage('');
+    setRatingStars(0);
     setBusy(false);
     setError('');
     setDone('');
@@ -52,11 +55,16 @@ export default function ReportWidget() {
       setError('Please provide at least 8 characters.');
       return;
     }
+    if (openKind === 'feedback' && (ratingStars < 1 || ratingStars > 5)) {
+      setError('Please rate your experience from 1 to 5 stars.');
+      return;
+    }
 
     try {
       setBusy(true);
       await submitUserReport(functions, {
         kind: openKind,
+        ratingStars: openKind === 'feedback' ? ratingStars : undefined,
         message: trimmed,
         pageUrl: window.location.href,
         userAgent: navigator.userAgent,
@@ -99,6 +107,33 @@ export default function ReportWidget() {
             </p>
 
             <form onSubmit={onSubmit} className="mt-4">
+              {openKind === 'feedback' ? (
+                <div className="mb-3">
+                  <p className="mb-2 text-sm font-medium text-slate-800">Rate your experience</p>
+                  <div className="flex items-center gap-2" role="radiogroup" aria-label="Rate your experience from 1 to 5 stars">
+                    {[1, 2, 3, 4, 5].map((value) => {
+                      const selected = ratingStars === value;
+                      return (
+                        <button
+                          key={value}
+                          type="button"
+                          role="radio"
+                          aria-checked={selected}
+                          onClick={() => setRatingStars(value)}
+                          className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                            selected
+                              ? 'border-slate-900 bg-slate-900 text-white'
+                              : 'border-slate-300 bg-white text-slate-700 hover:border-slate-400'
+                          }`}
+                        >
+                          {value} star{value === 1 ? '' : 's'}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : null}
+
               <textarea
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}

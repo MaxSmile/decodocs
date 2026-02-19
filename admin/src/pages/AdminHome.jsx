@@ -35,6 +35,7 @@ export default function AdminHome() {
         <Card title="Policies" desc="Edit admin/policies" to="/config/policies" />
         <Card title="Crash & Reports" desc="Manage backend exceptions + user reports" to="/reports" />
         <Card title="AI Error Events" desc="View function-side Gemini failures" to="/ai-events" />
+        <Card title="Users" desc="List, disable, enable, delete Firebase Auth users" to="/users" />
       </div>
 
       <div style={{ marginTop: 18, color: '#64748b', fontSize: 12 }}>

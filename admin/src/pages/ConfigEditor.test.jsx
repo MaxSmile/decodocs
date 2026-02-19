@@ -4,6 +4,19 @@ import { vi } from 'vitest';
 
 import ConfigEditor from './ConfigEditor.jsx';
 
+// Mock json-edit-react so tests can drive data changes without rendering the full editor tree
+vi.mock('json-edit-react', () => ({
+  JsonEditor: ({ data, setData }) => (
+    <textarea
+      data-testid="json-editor"
+      value={JSON.stringify(data)}
+      onChange={(e) => {
+        try { setData(JSON.parse(e.target.value)); } catch (_) {}
+      }}
+    />
+  ),
+}));
+
 const getDocMock = vi.fn();
 const setAdminConfigMock = vi.fn();
 
@@ -36,33 +49,29 @@ describe('ConfigEditor', () => {
     setAdminConfigMock.mockReset();
   });
 
-  it('loads existing config JSON', async () => {
+  it('loads existing config into the editor', async () => {
     getDocMock.mockResolvedValue({
       exists: () => true,
       data: () => ({ enableOcr: true }),
     });
 
     renderEditor();
-    const textarea = await screen.findByRole('textbox');
+    const editor = await screen.findByTestId('json-editor');
     await waitFor(() => {
-      expect(textarea.value).toContain('"enableOcr": true');
+      expect(editor.value).toContain('enableOcr');
     });
   });
 
-  it('blocks save when JSON is invalid', async () => {
+  it('triggers unsaved changes state when data changes', async () => {
     getDocMock.mockResolvedValue({
       exists: () => true,
       data: () => ({ enableOcr: true }),
     });
 
     renderEditor();
-    const textarea = await screen.findByRole('textbox');
-
-    fireEvent.change(textarea, { target: { value: '{"broken":' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
-
-    expect(await screen.findByText(/Invalid JSON/i)).toBeInTheDocument();
-    expect(setAdminConfigMock).not.toHaveBeenCalled();
+    const editor = await screen.findByTestId('json-editor');
+    fireEvent.change(editor, { target: { value: '{"enableOcr": false}' } });
+    expect(await screen.findByText(/Unsaved changes/i)).toBeInTheDocument();
   });
 
   it('writes config through callable function', async () => {
@@ -73,9 +82,9 @@ describe('ConfigEditor', () => {
     setAdminConfigMock.mockResolvedValue({ data: { ok: true } });
 
     renderEditor();
-    const textarea = await screen.findByRole('textbox');
+    const editor = await screen.findByTestId('json-editor');
 
-    fireEvent.change(textarea, { target: { value: '{ "enableOcr": true }' } });
+    fireEvent.change(editor, { target: { value: '{ "enableOcr": true }' } });
     fireEvent.click(screen.getByRole('button', { name: 'Save' }));
 
     await waitFor(() => {
