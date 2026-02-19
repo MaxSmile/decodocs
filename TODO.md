@@ -1,6 +1,6 @@
 # TODO (DecoDocs)
 
-_Last updated: February 17, 2026_
+_Last updated: February 19, 2026_
 
 This file mirrors `decodocs-repo/docs/ROADMAP.md` and lists actionable engineering + documentation tasks.
 
@@ -13,165 +13,123 @@ Admin-specific decisions, status, and deploy checklist are tracked in:
 - `admin/TODO.md`
 
 Remaining cross-project dependency:
-- [ ] Add schema validation in Functions for safer writes to `admin/*`.
+- [x] Add schema validation in Functions for safer writes to `admin/*`.
+- [x] Add unified admin reports pipeline (`admin_reports`) for backend exceptions + user bug/feedback intake.
 
 ### UI Quality & Consistency (High priority refactor)
-- [x] **Unify layouts**: define one canonical `Layout` (header/footer/nav) and use it across all routes (Home, Pricing, Sign-in, Profile, Viewer, Editor, About/Terms/Privacy/Contact)
-  - Done via canonical `web/src/components/Layout.jsx` (landing-aligned visual language) used by all React app routes.
-- [x] Add **DecoDocs logo + consistent nav** to the canonical layout (match landing brand)
-  - Canonical `SiteHeader` now uses consistent logo treatment + shared core nav across marketing and app routes.
-- [x] Remove/retire legacy/duplicate pages and styles (e.g. older `web/src/pages/*` vs `web/src/components/*`) to reduce confusion
-- [x] Reduce inline-style sprawl: migrate repeated inline styles into shared components (Card/Button/Section) or Tailwind classes
-  - Added shared `web/src/components/ui/Card.jsx`, `web/src/components/ui/PageSection.jsx`, `web/src/components/ui/Notice.jsx` and migrated Pricing/Sign-in/Sign-up/Profile pages to Tailwind/class-based styling.
-- [x] Standardize typography + spacing tokens (one design system, even if lightweight)
-  - Added global design tokens + component classes in `web/src/index.css` (`:root` typography/spacing/radius tokens + `dd-*` classes) and wired shared UI + key pages to use them.
-- [x] Custom 404 and 500 pages
-  - Added `web/src/components/NotFoundPage.jsx` and `web/src/components/ServerErrorPage.jsx`, routed catch-all to custom 404 and `/500` to custom 500, and wired `ErrorBoundary` to render the same 500 UI.
+- ✅ Most UI-quality tasks (layout, header/nav, shared UI components, design tokens, responsive hero, 404/500) are implemented and verified in the codebase.
+- Remaining maintainability focus is now narrowed to `DocumentViewer.jsx` and `functions/index.js` after splitting `DocumentEditor.jsx` into smaller modules.
 
 #### Home page UI issues (as seen on mobile screenshots)
-- [x] Fix landing layout being “squashed”/broken on mobile due to **global CSS leaking onto `<main>`**
-  - Implemented by scoping `App.css` from `main { ... }` → `.App main { ... }` so landing pages keep their own layout.
-- [x] Audit `web/src/App.css` and other global styles for additional unscoped selectors (e.g. `body`, `a`, `p`, `.container`, `header`, `footer`) that can override landing components.
-  - Scoped legacy `footer { ... }` rule to `.App:not(.homepage-app) footer` to avoid overriding the Tailwind landing/footer.
-- [x] Add a small “visual regression checklist” for mobile (Chrome Android + iOS Safari): Home, Pricing, View PDF, footer links.
-  - Added `docs/VISUAL_REGRESSION_CHECKLIST.md`
-- [x] Ensure hero/logo sizing is responsive on small screens (cap hero image height, prevent overflow, keep CTA visible above the fold).
-  - Updated `web/src/components/landing/Hero.jsx` with mobile-first typography/spacing, capped hero visual height on small screens, and compact CTA spacing; adjusted header logo sizing in `SiteHeader`/island header.
 
-- [x] Brand polish: ensure "DecoDocs" and "Snap Sign Pty Ltd" are consistent across UI + docs (no legacy names)
 - [x] Replace placeholder Sign page with a clear "Signing MVP checklist" (show number of remaining tasks + CTA to analyze PDF + join waitlist)
   - Checklist (v1): signature placement UI, signer identity/consent, audit trail, doc hashing/integrity, signature appearance, signed PDF export, verification view, send-for-signing flow, storage/retention, legal/terms UX
-- [x] Add a visible "Free vs Pro" gating UX: explain *why* buttons are disabled + what upgrades unlock
 - [x] Harden analysis flow: loading/error/empty states for analysis results; avoid partial UI renders
-- [~] **Authentication: add comprehensive sign-in options (Email, Google + One Tap, Microsoft, Apple)**: support real accounts (and upgrading from anonymous) so users can unlock Pro, storage, and cross-device continuity.
-  - Implemented in web app: provider buttons + email flows + anonymous linking + Google One Tap + friendly auth errors + Google auth telemetry events.
-  - Remaining: production provider configuration/verification in Firebase/Azure/Apple consoles.
-  - [x] Define the exact auth UX + states (no ambiguity)
-    - Required entry points:
-      - A visible “Sign in” button in the header/footer (always accessible)
-      - A “Sign in to use analysis” CTA when gated actions are clicked
-    - Required states:
-      - Anonymous session (default)
-      - Signed-in session (persistent)
-      - “Link your anonymous session” flow (upgrade anonymous → real account)
-      - Signed-out session (optional)
-    - Acceptance criteria:
-      - User can start anonymous, then link to Email/Google/Microsoft/Apple without losing the current document context.
-  - [x] Implement Email/Password auth (Firebase Auth)
-    - Tasks:
-      - Enable Email/Password provider in Firebase Console for project `snapsign-au`
-      - Add UI: “Continue with email” → (create account / sign in / reset password)
-      - Add validation rules (explicit):
-        - Email must be RFC-like and non-empty
-        - Password minimum length (set to 10) with strength hints
-      - Add “reset password” email flow and success messaging
-    - Acceptance criteria:
-      - A user can create an account, sign in, sign out, and reset password from the UI.
-  - [x] Implement Google sign-in (Firebase Auth) + Google Identity Services “One Tap”
-    - Tasks:
-      - Enable Google provider in Firebase Console
-      - Add “Continue with Google” button using Firebase `GoogleAuthProvider`
-      - Add “Google One Tap” for eligible users using Google Identity Services (GIS):
-        - Load GIS script only on public pages (e.g. Home) and only when not authenticated
-        - Show One Tap prompt at most once per session unless user interacts
-        - Provide a visible opt-out (dismiss) and respect dismissal for 7 days (localStorage)
-      - Track analytics events (explicit names):
-        - `auth_google_click`, `auth_google_success`, `auth_google_error`, `auth_one_tap_shown`, `auth_one_tap_success`, `auth_one_tap_dismissed`
-    - Acceptance criteria:
-      - Returning users see One Tap on Home (when not signed-in) and can complete sign-in without page navigation.
-  - [~] Implement Microsoft sign-in (Firebase Auth via OAuthProvider `microsoft.com`)
-    - Tasks:
-      - Create an Azure AD app registration with redirect URIs for:
-        - `https://decodocs.com/__/auth/handler`
-        - `https://snapsign.com.au/__/auth/handler` (if sharing the project’s auth domain)
-        - Local dev emulator redirect URI (document the exact URL used)
-      - Enable Microsoft provider in Firebase Console and configure client ID/secret
-      - Add “Continue with Microsoft” button using Firebase `OAuthProvider('microsoft.com')`
-      - Define requested scopes explicitly:
-        - Minimum: `openid`, `email`, `profile`
-        - Do not request Graph scopes unless Drive/OneDrive integration work begins
-    - Acceptance criteria:
-      - A new user can sign in with Microsoft and gets a stable Firebase `uid` with email attached (when available).
-    - Status: web-side provider flow + scopes are implemented; Azure/Firebase Console provider setup still required.
-  - [~] Implement Apple sign-in (Firebase Auth via OAuthProvider `apple.com`) with production-ready prerequisites
-    - Tasks:
-      - Create Apple Service ID + Key; configure:
-        - Redirect URI(s) to Firebase auth handler for the production domain(s)
-        - Domain verification (Apple requires verified domains)
-      - Enable Apple provider in Firebase Console and configure:
-        - Service ID, Team ID, Key ID, private key
-      - Add “Continue with Apple” button using Firebase `OAuthProvider('apple.com')`
-      - Handle Apple privacy behavior explicitly:
-        - Email may be hidden/relay; treat `email` as optional and allow account management without email display
-    - Acceptance criteria:
-      - Apple sign-in works on Safari and Chrome, and doesn’t break when email is withheld.
-    - Status: web-side provider flow + scopes are implemented; Apple Service ID/domain verification/Firebase provider setup still required.
-  - [x] Implement account linking + conflict handling (anonymous → provider)
-    - Tasks (explicit behavior):
-      - If user is anonymous and chooses a provider, link credentials to the existing user (`linkWithPopup` / `linkWithRedirect`)
-      - If credentials already exist on another account:
-        - show “This email is already in use. Sign in to that account to continue.” and offer provider sign-in
-        - provide a safe merge strategy document (don’t auto-merge data silently)
-    - Acceptance criteria:
-      - Linking preserves user `uid` when possible; errors are handled with actionable UI (no raw Firebase error strings).
-    - Implemented in `web/src/components/SignInPage.jsx` + `web/src/components/SignUpPage.jsx` with conflict handling and friendly messaging.
-  - [x] Update web auth state model and docs (source of truth)
-    - Code references:
-      - Auth state + actions: `web/src/stores/authStore.ts`
-      - Auth context wrapper: `web/src/context/AuthContext.jsx`
-    - Tasks:
-      - Expand `AuthContext` to expose: `signInWithEmail`, `signUpWithEmail`, `signInWithGoogle`, `signInWithMicrosoft`, `signInWithApple`, `signOut`, `linkCurrentUser`
-      - Ensure emulator support still works (`VITE_USE_FIREBASE_EMULATOR`)
-    - Implemented in `web/src/stores/authStore.ts` (env overrides + `connectAuthEmulator`) and `web/src/context/AuthContext.jsx` (actions exposed to UI).
-  - [~] Add tests for auth flows (unit + e2e)
-    - Unit:
-      - Update/extend: `decodocs-repo/web/src/__tests__/AuthContext.test.jsx` to cover new methods and error cases
-      - Added coverage for provider telemetry/friendly errors in `web/src/components/__tests__/SignInPage.test.jsx`
-      - Added coverage for emulator wiring in `web/src/stores/authStore.test.ts`
-    - E2E (Playwright):
-      - Add a mock auth mode test that simulates:
-        - anonymous → link → authenticated, and analysis gating disappears
-    - Acceptance criteria:
-      - Tests run in CI without real provider credentials (mocked or emulator-based).
-- [x] Make environment setup unambiguous: one canonical place to define required `.env` variables and how to run locally
- - [x] Implement Google Identity Services (GIS) in the web app for Google sign-in and token management
- - [x] Configure Firebase Hosting 301 redirects so `https://decodocs-site.web.app` and `https://decodocs-site.firebaseapp.com` permanently redirect to `https://decodocs.com` (via `firebase.json` hosting settings)
-- [ ] Testing:
-  - [x] Expand Playwright: cover "auth failure still renders PDF", and "analysis buttons gated until authenticated"
-  - [x] Add CI-friendly `npm run test:unit` + `npm run test:e2e` runbook for the web app
-  - [ ] Add a Playwright flow for anonymous → provider link → authenticated gating removal.
-  - [ ] Add a CI workflow that runs Playwright against the built preview (E2E_USE_PREVIEW=1) so route/static-file tests pass in CI.
-  - [ ] Mark route-dependent Playwright specs as preview-only or add `test.skip(!process.env.E2E_USE_PREVIEW, ...)` guards so dev runs don't fail on server-route assertions.
-  - [ ] Add documentation in `docs/TESTING.md` and `web/README.md` showing how to run E2E in preview mode locally.
+- [~] **Authentication (partial)** — Implemented: Email/Password, Google (+ One Tap), account linking, auth state model, GIS and emulator support. Remaining items:
+  - Microsoft and Apple production provider configuration (Azure AD / Apple Service ID, domain verification, Firebase console setup).
+  - Add the Playwright E2E for anonymous → provider linking and expand auth-related E2E coverage.
+  
+  (See `web/src/stores/authStore.ts`, `web/src/context/AuthContext.jsx`, `web/src/components/SignInPage.jsx` for implemented pieces.)
+- [x] Make environment setup unambiguous with a strict **no `.env*` files** policy and documented runtime config approach.
 
-## Phase 2 - Cloud Storage Integrations 
-- [x] Define the "Open vs Upload" contract (Free vs Pro) as a spec:
-  - [x] Default is ephemeral open (no storage)
-  - [x] Upload/save is explicit and paid (history/export)
-  - [x] Token revocation guarantees + audit logging expectations
-- [ ] Google Drive (read-only):
-  - [ ] OAuth consent + connect/disconnect UX
-  - [ ] File picker -> open -> analyze pipeline
-  - [ ] Token storage strategy (encrypted at rest; rotation/revocation)
-- [ ] OneDrive (read-only):
-  - [ ] Microsoft Graph integration + consistent UI with Drive
-  - [ ] Cross-browser testing matrix
-- [ ] iCloud Drive:
-  - [ ] User-initiated file selection flow (Safari/iOS constraints)
-  - [ ] Document open parity with local uploads
+
+
+
+## Testing:
+  - [x] Add Playwright flow for anonymous → provider link → authenticated gating removal.
+  - [x] Add Playwright flow for anonymous first-visit happy path (landing → app/view entry → auth prompt visibility).
+  - [x] Add Playwright flow for anonymous usage limit reached (gated actions disabled + upgrade/sign-in explanation shown).
+  - [ ] Add Playwright flow for anonymous sign-in with Google and session continuity (same working document remains usable).
+  - [x] Add Playwright flow for anonymous sign-up with email/password and session continuity.
+  - [ ] Add Playwright flow for anonymous attempting sign-up with existing email (clear "log in instead" path, no dead-end).
+  - [x] Add Playwright flow for login with existing email account after anonymous session (continuity + no duplicate state).
+  - [ ] Add Playwright flow for link additional provider after initial auth (e.g. Google + Email on same account).
+  - [ ] Add Playwright flow for unlink/disconnect attempt safeguards (cannot lock user out of all providers).
+  - [ ] Add Playwright flow for sign-out and re-authentication (state reset as expected; protected actions gated again when unauthenticated).
+  - [ ] Add Playwright flow for auth popup blocked/cancelled/error handling (user sees recoverable UI, no crash).
+  - [ ] Add Playwright flow for auth-state restore on refresh/deep-link (`/view`, `/pricing`, `/profile`) with no redirect loops.
+  - [x] Add Playwright flow for local PDF "open-only" (analyze without persistent upload) behavior.
+  - [x] Add Playwright flow for explicit upload-required path (clear transition from open-only to stored/upload flow where applicable).
+  - [x] Add Playwright flow for unsupported file type / corrupted PDF handling (friendly error + retry path).
+    - Consolidated in `web/playwright-tests/open-upload-and-file-errors.spec.js` (anonymous open-only baseline, non-Pro upload gate transition, paid upload option, unsupported/corrupt retry flow).
+  - [x] Add Playwright flow for large/scanned PDF requiring Pro or alternate handling (clear CTA and preserved document context).
+  - [x] Add Playwright flow for analysis lifecycle states (loading → success with results rendered).
+
+  - [ ] Add Playwright flow for analysis API transient failure and retry success.
+  - [ ] Add Playwright flow for analysis API hard failure (error message + no broken/partial UI).
+  - [ ] Add Playwright flow for document type auto-detection + manual override persistence across refresh.
+  - [ ] Add Playwright flow for selection-based "explain this" action and results panel updates.
+  - [ ] Add Playwright flow for free-tier feature gates on signing/editor actions (disabled reason + upgrade CTA).
+  - [ ] Add Playwright flow for Pro user happy path (gated controls enabled after entitlement is active).
+  - [ ] Add Playwright flow for entitlement downgrade/expiry behavior mid-session (UI updates without stale Pro state).
+  - [ ] Add Playwright flow for Stripe checkout entry + return URL handling (success/cancel states).
+  - [ ] Add Playwright flow for mobile viewport core journey (home → upload/open → analyze) with no blocking layout regressions.
+  - [ ] Add Playwright flow for static route/test-doc direct access in preview mode (`/view/test-docs/*`) and expected rendering.
+  - [ ] Add CI workflow to run Playwright against the built preview and guard route-dependent specs (E2E_USE_PREVIEW).
+  - [ ] Document preview-mode E2E steps in `docs/TESTING.md` and `web/README.md`.
+  - [x] Fix targeted Vitest invocation reliability (deterministic single-file + single-test-name pattern documented and verified).
+    - Implemented `npm run test:unit:single` in `web/package.json` (`vitest run --coverage.enabled=false`).
+    - Documented deterministic command pattern in `docs/TESTING.md` and `web/README.md`:
+      - `npm run test:unit:single -- src/stores/authStore.test.ts`
+      - `npm run test:unit:single -- src/stores/authStore.test.ts --testNamePattern "routes all auth actions to firebase auth module"`
+    - Verified on February 19, 2026: file-target run executed 11/11 tests; test-name run executed 1/1 selected test (10 skipped) with real pass/fail output.
+  - [ ] Add CI guard or mocked S3 fallback so `functions/test/minio.test.js` can run reliably in CI (or only run when `MINIO_TEST_CONFIG` is present).
+
+## Storage integrations & multi-document (drive providers behave like disks; open/save not premium)
+- Policy: Cloud drive connectors (Google Drive, OneDrive, iCloud, etc.) must behave like disk providers: users can open, edit, and save documents directly to their drive without requiring Pro. Upload-to-server (persistent storage) and heavy server-side processing (large OCR, bulk cross‑doc AI) remain explicit and may be metered.
+- Done: "Open vs Upload" contract specified (ephemeral open by default; upload is explicit/paid; token revocation + audit expectations documented).
+- [ ] Drive parity tasks (open + save) — available to all users:
+  - Google Drive:
+    - [ ] OAuth consent + connect/disconnect UX
+    - [ ] File picker -> open -> analyze pipeline
+    - [ ] Save back to Drive (preserve filename/folder metadata; conflict resolution UI)
+    - [ ] Token storage strategy (encrypted at rest; rotation/revocation)
+  - OneDrive:
+    - [ ] Microsoft Graph integration + consistent UI with Drive
+    - [ ] File picker -> open -> save back to OneDrive
+    - [ ] Cross-browser testing matrix
+    - [ ] Token handling + least-privilege scopes
+  - iCloud Drive:
+    - [ ] User-initiated file selection flow (Safari/iOS constraints)
+    - [ ] Open/save parity with local uploads
 - [ ] Security checklist:
-  - [ ] Least-privilege scopes (read-only)
-  - [ ] No background sync or indexing
-  - [ ] Clear user messaging about what is (not) stored
-
-## Phase 3 - Paid Depth + Multi-Document 
-- [ ] Define "Premium" value clearly (what's expensive and why):
-  - [ ] DOCX conversion pipeline scope and limits
-  - [ ] Multi-document session UX (bundle upload, ordering, references)
-- [ ] Build multi-document analysis scaffolding:
+  - [ ] Least-privilege scopes (read/write only when necessary)
+  - [ ] No background indexing or automatic uploads
+  - [ ] Clear user messaging about what is (not) stored and how to revoke access
+- [ ] Multi-document (bundles & cross-document analysis) — not gated by "Paid Depth" label:
   - [ ] Data model for bundles / references
-  - [ ] UI for selecting which docs are in scope
-  - [ ] Output schema for cross-document contradictions
+  - [ ] UI for selecting which docs are in scope (bundle ordering, pinning)
+  - [ ] Save/load bundle metadata (persist per user/docHash)
+  - [ ] Output schema for cross-document contradictions and references
+  - [ ] E2E + Playwright coverage for bundle upload/open/save flows
+
+### Tests — required coverage (Playwright E2E, unit, integration, CI guards)
+- UI / Playwright E2E (use mocks in CI)
+  - [ ] `playwright-tests/drive-connectors/drive-open-save-parity.spec.js` — Connect provider → open file → analyze (open-only) → edit → save back → assert file content + metadata preserved
+  - [ ] `playwright-tests/drive-connectors/connect-disconnect-and-revoke.spec.js` — OAuth consent, disconnect, provider-revoked token handling, app shows reconnect CTA
+  - [ ] `playwright-tests/drive-connectors/conflict-resolution.spec.js` — Simulate remote conflict on save; verify rename/merge UX and final file state
+  - [ ] `playwright-tests/multi-document/bundles-create-edit.spec.js` — Create bundle from drive files, reorder/pin, save/load bundle metadata, re-open bundle
+  - [ ] `playwright-tests/multi-document/cross-doc-analysis.spec.js` — Run cross-document analysis on a bundle; verify UI shows contradictions/refs and metering notice for heavy compute
+  - [ ] `playwright-tests/edge/large-and-scanned-files.spec.js` — Open large/scanned PDF from Drive; verify OCR/Pro gating CTA and preserved viewer context
+  - [ ] `playwright-tests/security/no-background-indexing.spec.js` — Assert no automatic background sync/indexing for connected drives
+- Unit / integration tests
+  - [ ] `vitest` — `web/src/stores/driveStore.test.ts` (token storage/refresh/revoke + permission checks)
+  - [ ] `vitest` — `web/src/components/DrivePicker.test.tsx` (open/save UI, conflict dialog)
+  - [ ] `functions/test/drive-proxy.test.js` (pre-signed URL generation, save callbacks, error paths; mock provider APIs)
+  - [ ] `functions/test/bundles.test.js` (Firestore bundle model CRUD, permissions, metadata persistence)
+  - [ ] Integration tests with mocked Google/OneDrive APIs verifying request payloads for open/save/metadata
+- Security & telemetry
+  - [ ] Assert server logs never contain raw document content (only `docHash` + metadata) in functions/unit tests
+  - [ ] Test token revocation and expired-token flows surface a clear, recoverable UI path
+- CI / test infra
+  - [ ] Add `E2E_USE_MOCK_DRIVES` env flag and mock servers/fixtures so Playwright runs deterministically in CI
+  - [ ] Gate real-provider tests behind `RUN_REAL_DRIVE_TESTS` (manual/optional in CI)
+  - [ ] Add Playwright fixture data: `web/test-docs/drive/sample.pdf`, `sample-scanned.pdf`, `sample-large.pdf`
+  - [ ] Store Drive API fixtures: `tests/fixtures/google-drive/*.json`, `tests/fixtures/one-drive/*.json`
+- Test acceptance criteria
+  - All Playwright specs run reliably in CI using mocks and assert end-to-end open + save parity with local disk.
+  - Unit/integration tests validate token lifecycle, conflict-resolution logic, pre-signed save callbacks, and Firestore bundle persistence.
+  - Any tests requiring real OAuth/providers are documented and gated.
 
 ## Phase 4 - Mobile Apps 
 - [ ] Decide v1 architecture: WebView wrapper vs native shell + deep links
@@ -179,7 +137,7 @@ Remaining cross-project dependency:
 - [ ] Establish auth + analytics parity with web (anonymous by default, upgrade path)
 - [ ] Define v1 non-goals explicitly (offline, on-device inference, native signing)
 
-## Phase 5 - Signing & Verification (Target: 2027+)
+## Phase 5 - Signing & Verification
 - [ ] Write a signing MVP spec:
   - [ ] What "sign" means (signature placement, audit trail, exports)
   - [ ] Envelope format + integrity checks
@@ -187,7 +145,6 @@ Remaining cross-project dependency:
 - [ ] Decide storage policy for signed artifacts (retention, export, deletion)
 
 ## Documentation Hygiene (Always On)
-- [x] Keep dates current across docs (avoid timelines stuck in 2025 when it's 2026+)
 - [ ] Ensure roadmap claims match the code (mark items "specified" vs "implemented")
 - [x] Update test plans when selectors/UX change (`docs/test-plans/`)
 
@@ -199,78 +156,52 @@ Remaining cross-project dependency:
 - [x] Add user override persistence (server-side per puid+docHash) + surface the detected vs overridden type in UI.
 
 ### Static classification/validation JSON artifacts (public)
-- [x] Create static folder: `web/public/classifications/`
-  - [x] `document-types.index.json` (flat list for typeahead: id, label, category, synonyms, parentId)
-  - [x] `validation/*.json` (type-specific criteria + schema — currently named by doc slug)
-  - [x] `validation.index.json` (index of validation artifacts)
-- [x] Write a small build script to generate JSON from docs:
-  - Input: `docs/validation/*.md` and `web/src/lib/documentTypes.js`
-  - Output: `web/public/classifications/document-types.index.json` + `web/public/classifications/validation/*.json`
-  - Script: `web/scripts/generate-classifications.mjs` (npm: `classifications:build`)
-- [~] Make web UI load these files dynamically (cacheable), instead of bundling large registries:
-  - [x] load index for typeahead (document-types.index.json)
-  - [x] lazy-load validation details on selection (validationSlug → /classifications/validation/*.json)
-  - [x] keep override persistence server-side in Functions
+- ✅ Static classification artifacts + generator script are in place (`web/public/classifications/`, `web/scripts/generate-classifications.mjs`) and the UI lazy-loads the index/validation files. Remaining: none (maintenance/follow-ups only).
+
+### Fileserver / MinIO — operational verification (high priority)
+- [ ] Verify production fileserver (`storage.smrtai.top`) is live and serving the MinIO health endpoint via the proxy.
+  - Acceptance: `curl -sSf https://storage.smrtai.top/minio/health/live` (or `https://storage.smrtai.top:7433/minio/health/live`) returns HTTP 200.
+  - Confirm TLS (Certbot) is valid and Cloudflare origin rule rewrites to port `7433`.
+- [ ] Confirm Firestore `admin/minio` contains the production config required by `functions/index.js`:
+  - `mode: "prod"`, `endpoint`, `bucket`, and `prod.accessKey` + `prod.secretKey` (or local test config `test.*` when applicable).
+  - Recommended check: run `node functions/test/fetch-minio-config.js` to save `functions/test/.minio-test-config.json`.
+- [ ] Run the MinIO integration tests: `cd functions && npm run test:minio` (requires `admin/minio` or `functions/test/.minio-test-config.json`).
+- [ ] Verify ops/backup/monitoring:
+  - Ensure `minio-backup.sh` produces archives in `minio_backup_dir` and retention is enforced.
+  - Ensure `minio-healthcheck.sh` cron runs and (if configured) webhook alerts are firing on failure.
+- [ ] Credential rotation & secrets:
+  - Rotate app credentials using `Decodocs/fileserver/rotate-minio-app-key.sh`, store new secret in the secure secret manager, then re-run `node functions/test/fetch-minio-config.js` + `npm run test:minio`.
+- [ ] CI / tests:
+  - Add a CI guard so `functions/test/minio.test.js` runs only when `MINIO_TEST_CONFIG` (or equivalent) is available in CI, or provide a mocked S3 fallback.
 
 ### AI integration tasks (classification + type-specific validation)
-- [x] Add callable `detectDocumentType` (cheap):
-  - returns intakeCategory + typeId + confidence + reasons
-  - persists to `doc_classifications/{docHash}`
-- [x] Add callable `getDocumentTypeState`:
-  - returns detected + override + effective type
-- [x] Add callable `analyzeByType`:
-  - [x] resolves effective type server-side
-  - [x] loads validation spec JSON server-side (via static `document-types.index.json` + `validation/*.json`)
-  - [x] runs LLM extraction/validation server-side using the spec + returns structured JSON per-type
-  - notes: Implemented in `functions/index.js` (Gemini). Follow-up: expand unit/integration/E2E coverage and remove remaining "placeholder" references in docs.
-- [x] Docs: `docs/CLASSIFICATIONS_INTEGRATION.md` is the integration plan.
+- ✅ Server-callables (`detectDocumentType`, `getDocumentTypeState`, `analyzeByType`) and docs are implemented (`functions/index.js`, `docs/CLASSIFICATIONS_INTEGRATION.md`). Follow-up: expand unit/integration/E2E coverage where noted.
 
 ### Validation schema authoring (docs)
-- [ ] Define prompt-pack output schemas (JSON) for:
-  - [x] Company policies / governance docs (mandatory rules, vague language, conflicts, ownership/enforcement) — docs/validation/company-policy.md
-  - [x] SOPs / guides (steps, prerequisites, ambiguous instructions, responsibility gaps, contradictions) — docs/validation/sop-procedure.md
-  - [ ] Informational docs (claims vs evidence, logic gaps)
-  - [ ] Decision/evaluation docs (assumptions, missing data)
-  - [ ] Representation docs (CV/bio: inconsistencies, omissions)
-  - [x] Invoices (totals/tax/entity checks; cross-check vs PO/contract if provided) — docs/validation/invoice.md
-  - [x] Job offer / offer letter — docs/validation/job-offer.md
-  - [x] Associations constitution/charter — docs/validation/association-constitution.md
-- [ ] Wire UI action sets based on intake+type (show different next actions depending on classification).
-- [ ] Docs: keep `docs/DOCUMENT_TYPE_SYSTEM.md` as the source of truth.
+- ✅ Existing prompt-pack schemas: company-policy, sop-procedure, invoice, job-offer, association-constitution (see `docs/validation/`).
+- Remaining: author JSON prompt-pack schemas for Informational docs, Decision/evaluation docs, and Representation docs; wire UI action sets per intake+type; keep `docs/DOCUMENT_TYPE_SYSTEM.md` up to date.
 
 - [ ] **Big Document Vector Management**: For big documents, RLM (Recursive Language Model) or other vector-based data management needs to be developed to efficiently handle large PDFs and document collections.
 - [ ] **Refactor: split large UI components (maintainability)**: Reduce “god components” by extracting hooks + subcomponents so PDF viewing, analysis actions, and presentation concerns are separated.
   - [~] Refactor `decodocs-repo/web/src/components/DocumentViewer.jsx` into smaller units
-    - [x] Extract Firebase callable wrappers into `web/src/services/*` (`analyzeText`, `preflightCheck`, `documentType*`, `analyzeByType`)
-    - Why: this file mixes (1) PDF.js initialization/loading, (2) PDF render lifecycle, (3) Firebase callable orchestration, and (4) UI layout/wiring. It’s currently the largest UI module (~561 LOC).
-    - Suggested extraction:
-      - `usePdfJs()` / `usePdfLoader()` hook: PDF.js init + `loadPdfFromBlob` + `loadTestPdf`
-      - `useDocumentAnalysis()` hook (or `services/analysisService.js`): `runPreflightCheck`, `handleAnalyzeDocument`, selection explain/highlight/translate actions
-      - Keep `DocumentViewer` mostly as a container composing `PDFControls`, `PDFDisplay`, `AnalysisToolbox`, `AnalysisResults`
+    - ✅ Firebase callable wrappers have been moved into `web/src/services/*` (`analyzeText`, `preflightCheck`, `documentType*`, `analyzeByType`).
+    - ✅ Extracted viewer state/presentation modules:
+      - `web/src/hooks/useViewerDocumentState.js` (open/load/upload/download/finish flows)
+      - `web/src/hooks/useViewerSignMode.js` (tool/signature/annotation interaction state)
+      - `web/src/components/viewer/ViewerPageOverlay.jsx` (signature + annotation overlay rendering)
+    - Why: this file mixes (1) PDF.js init/loading, (2) PDF render lifecycle, (3) Firebase callable orchestration, and (4) UI layout/wiring. Remaining suggested extractions: `usePdfJs()`, `useDocumentAnalysis()` and smaller UI subcomponents.
     - References:
       - Component + state: `decodocs-repo/web/src/components/DocumentViewer.jsx:17`
       - PDF.js init (worker + test PDF load): `decodocs-repo/web/src/components/DocumentViewer.jsx:63`
-      - PDF loading: `decodocs-repo/web/src/components/DocumentViewer.jsx:95`
-      - Preflight + analysis orchestration: `decodocs-repo/web/src/components/DocumentViewer.jsx:231`, `decodocs-repo/web/src/components/DocumentViewer.jsx:263`
-      - UI composition boundary: `decodocs-repo/web/src/components/DocumentViewer.jsx:509`
-  - [ ] Refactor `decodocs-repo/web/src/components/HomePage.jsx` by extracting page sections + moving content arrays out of the component
-    - Why: large “marketing page” component tends to grow indefinitely; extracting `Hero`, `Features`, `Pricing`, `Roadmap`, etc. makes changes safer and improves readability.
-    - Suggested extraction:
-      - `components/home/*` section components (or similar)
-      - Move `features`, `pricingTiers`, `roadmapItems` into a `homeContent.js` (or JSON) module
-    - References:
-      - Component start + event handlers: `decodocs-repo/web/src/components/HomePage.jsx:5`, `decodocs-repo/web/src/components/HomePage.jsx:17`
-      - Static content arrays: `decodocs-repo/web/src/components/HomePage.jsx:79`, `decodocs-repo/web/src/components/HomePage.jsx:88`, `decodocs-repo/web/src/components/HomePage.jsx:129`
-  - [ ] Refactor `decodocs-repo/web/src/components/DocumentEditor.jsx` into “editor shell” + “overlay/canvas” subcomponents
-    - Why: the editor currently combines navigation, file selection, mode toggling, signature/annotation modeling, and rendering layout in one file (~379 LOC).
-    - Suggested extraction:
-      - `EditorToolbar` (file open, view, mode toggle)
-      - `SignatureOverlay` / `AnnotationOverlay` components (render + event handling)
-      - `useSignMode()` hook (signatures/annotations state + actions)
-    - References:
-      - Component start: `decodocs-repo/web/src/components/DocumentEditor.jsx:4`
-      - File upload + navigation: `decodocs-repo/web/src/components/DocumentEditor.jsx:38`
-      - Sign/annotation actions: `decodocs-repo/web/src/components/DocumentEditor.jsx:70`, `decodocs-repo/web/src/components/DocumentEditor.jsx:74`, `decodocs-repo/web/src/components/DocumentEditor.jsx:94`
+  - [x] Refactor `decodocs-repo/web/src/components/HomePage.jsx` by extracting page sections + moving content arrays out of the component
+    - ✅ `HomePage.jsx` is now a thin orchestrator that composes landing section components (`Hero`, `SocialProof`, `HowItWorks`, `FeatureGrid`, `UseCases`, `Integrations`, `SecureByDesign`), and no longer acts as a large marketing “god component”.
+    - Reference: `decodocs-repo/web/src/components/HomePage.jsx:1`
+  - [x] Refactor `decodocs-repo/web/src/components/DocumentEditor.jsx` into “editor shell” + “overlay/canvas” subcomponents
+    - ✅ Extracted:
+      - `EditorToolbar`: `web/src/components/editor/EditorToolbar.jsx`
+      - `EditorOverlay`: `web/src/components/editor/EditorOverlay.jsx`
+      - `useSignMode()` hook: `web/src/hooks/useSignMode.js`
+    - ✅ `DocumentEditor.jsx` now focuses on PDF loading, export orchestration, and composition of extracted modules.
   - [ ] Refactor `functions/index.js` by extracting Cloud Functions + shared helpers into modules
     - Why: `functions/index.js` is a single entry containing config/constants, auth/validation helpers, multiple callable functions, and a scheduled job (~461 LOC). Splitting improves testability and reduces merge conflicts.
     - Suggested extraction:
@@ -281,121 +212,13 @@ Remaining cross-project dependency:
     - References:
       - Admin init + helpers: `functions/index.js:8`, `functions/index.js:49`, `functions/index.js:67`, `functions/index.js:85`
       - Exports: `functions/index.js:108`, `functions/index.js:192`, `functions/index.js:393`, `functions/index.js:428`
-- [ ] **Copy/SEO/UX: audit + rewrite all user-facing text (no ambiguity)**: Make DecoDocs’ messaging consistent, conversion-focused, and SEO-ready; remove placeholder/contradictory copy; ensure every label/link maps to a real user destination.
-  - [ ] Define the single “north-star” one-liner + use it everywhere (exact replacements)
-    - Why: the product tagline is currently inconsistent across entry points, which weakens brand recall and SEO relevance.
-    - Decide one primary tagline (choose exactly one):
-      - Option A (clarity-first): `Decode documents. Act with confidence.`
-      - Option B (signing-adjacent): `Decode documents. Sign with clarity.`
-    - Then update *all* occurrences to match the chosen tagline:
-      - `decodocs-repo/web/src/components/Layout.jsx:21` (header tagline)
-      - `decodocs-repo/web/src/components/AboutPage.jsx:11` (header tagline)
-      - `decodocs-repo/web/src/components/HomePage.jsx:180` (hero headline currently differs)
-      - `decodocs-repo/web/index.html:7` (HTML `<title>` currently differs)
-      - `decodocs-repo/web/public/index.html:10` + `decodocs-repo/web/public/index.html:18` (legacy template meta/title currently differs)
-    - Acceptance criteria:
-      - A user sees the same tagline on Home, About, Viewer header, and browser tab title.
-      - No “Act with confidence” vs “Sign with clarity” mismatch remains.
-  - [x] Rewrite the HomePage hero + “trust line” into precise, benefit-led copy (exact line edits)
-    - Why: current hero is directionally good but mixes “Open” and “Sign” positioning; trust/privacy line is vague and can be interpreted as local-only processing.
-    - Replace hero headline + subtitle with one of these *approved* sets (pick exactly one set and apply verbatim):
-      - Set A (decision-first):
-        - H1: `Understand what you’re about to sign.`
-        - Subtitle: `Upload a PDF and get a plain‑language summary, key risks, and what to check—before you commit.`
-      - Set B (risk-first):
-        - H1: `Spot risks in contracts before you sign.`
-        - Subtitle: `Plain‑English explanations, caveats, and inconsistencies—so you can decide confidently.`
-    - Rewrite trust line to a factual, non-ambiguous statement (apply verbatim):
-      - `Free: we don’t store your files. Pro: optional secure storage and deeper analysis.`
-    - References:
-      - Hero H1 + subtitle + CTAs + trust line: `web/src/components/landing/Hero.jsx:12`, `web/src/components/landing/Hero.jsx:18`, `web/src/components/landing/Hero.jsx:21`, `web/src/components/landing/Hero.jsx:39`
-  - [x] Fix HomePage navigation + footer links so every link works (no dead anchors)
-    - Why: multiple links point to anchors that don’t exist, which is a trust and UX killer (and looks broken to crawlers).
-    - Tasks (perform all):
-      - Add `id="product"` to the section you want “Product” to scroll to (recommended: “How it works” section).
-      - Replace `href="#privacy"` and `href="#terms"` with real routes (`/privacy`, `/terms`) and create those pages (see “Legal pages” task below).
-      - Replace `href="#contact"` with a real route (`/contact`) or a `mailto:` link (choose one and use consistently across the app).
-    - References:
-      - HomePage nav uses `#product`: `decodocs-repo/web/src/components/HomePage.jsx:164`
-      - HomePage footer anchors: `decodocs-repo/web/src/components/HomePage.jsx:356`
-      - Layout footer anchors: `decodocs-repo/web/src/components/Layout.jsx:59`
-      - AboutPage footer anchors: `decodocs-repo/web/src/components/AboutPage.jsx:110`
-  - [x] Make Pricing copy internally consistent and non-placeholder (align with real entitlement limits)
-    - Why: pricing table contains ambiguous placeholders that reduce conversion and can create support issues.
-    - Tasks (perform all):
-      - Do not describe limits as “AI calls per document”. Limits are token-based and the number of full-document analyses varies by document size.
-      - If showing limits publicly, match the real backend limits:
-        - Anonymous trial: `ANON_TOKENS_PER_UID` (currently 20k total)
-        - Free account: `FREE_TOKENS_PER_DAY` (currently 40k/day)
-        - Pro: no token cap enforced today (subject to fair use / abuse controls)
-      - Add one plain-language sentence clarifying the above in Pricing “Notes”.
-    - References:
-      - Pricing copy: `web/src/components/PricingPage.jsx:1`
-      - Backend limits source of truth: `functions/index.js:54`
-  - [x] Remove publicly-hostile wording from Roadmap and feature list (replace “kill feature” copy)
-    - Why: “kill feature” reads as internal jargon and undermines trust; feature names should describe user value.
-    - Tasks:
-      - Replace `HubSpot capture (kill feature)` with a user-facing label (choose one):
-        - `Optional lead capture (Pro)` OR `Team lead capture (optional)`
-      - Replace `Email-to-sign + HubSpot capture` feature bullet with a user-value phrasing:
-        - Recommended: `Email a PDF to start analysis (coming soon)`
-    - References:
-      - Feature bullet: `decodocs-repo/web/src/components/HomePage.jsx:85`
-      - Roadmap item: `decodocs-repo/web/src/components/HomePage.jsx:135`
-  - [ ] Improve microcopy for AI feature gating (remove technical language, add “why” + next step)
-    - Why: current UI surfaces “Firebase” and uses blocking `alert()`; users need plain language and clear action.
-    - Tasks:
-      - Replace header auth banner strings with user-friendly wording that avoids internal terms:
-        - Replace `✅ Firebase authenticated - AI features available` with `Connected — analysis tools are ready.`
-        - Replace `⚠️ Authenticating with Firebase...` with `Connecting…`
-        - Replace `⚠️ AI calls disabled: "...". Document viewing features remain available.` with `Analysis is temporarily unavailable. You can still view PDFs.`
-      - Replace `alert()` flows with non-blocking UI copy (toast/inline message) and include:
-        - A short reason (e.g. “Sign in required”, “Pro required for scanned PDFs”, “Limit reached”)
-        - A next action (e.g. “Upgrade”, “Try another document”, “Retry”)
-    - References:
-      - Banner strings: `decodocs-repo/web/src/components/Layout.jsx:35`
-      - Current alerts: `decodocs-repo/web/src/components/DocumentViewer.jsx:281`, `decodocs-repo/web/src/components/DocumentViewer.jsx:349`, `decodocs-repo/web/src/components/HomePage.jsx:43`
-      - Auth error card: `decodocs-repo/web/src/components/AuthErrorNotification.jsx:37`
-  - [x] Add “Not legal advice” disclaimer consistently where decisions happen (Home + Viewer + About)
-    - Why: this reduces legal ambiguity and sets correct expectations at the moment users rely on results.
-    - Tasks:
-      - Add a short disclaimer block (apply verbatim):
-        - `DecoDocs provides informational analysis and is not legal advice. For legal decisions, consult a qualified professional.`
-      - Place it in:
-        - Landing Home hero (below CTAs)
-        - DocumentViewer near Analysis results panel (above “Analysis Results” header)
-        - About page (in the “What DecoDocs Is — and Is Not” section)
-      - References:
-        - Home disclaimer: `web/src/pages/index.astro:41`
-        - Viewer disclaimer: `web/src/components/AnalysisResults.jsx:23`
-        - About disclaimer: `web/src/components/AboutPage.jsx:56`
-  - [x] SEO basics: define one canonical title/description + OpenGraph/Twitter meta (exact fields)
-    - Why: current HTML head is minimal and inconsistent between `web/index.html` and `web/public/index.html`; crawlers and link previews need stable metadata.
-    - Tasks:
-      - Choose one canonical title (≤ 60 chars) and one meta description (≤ 155 chars) and implement them in `web/index.html`.
-        - Recommended title: `DecoDocs — Understand documents before you sign`
-        - Recommended description: `Upload a PDF to get plain‑English explanations, risks, and what to check—before you sign. Free tier available.`
-      - Add OpenGraph + Twitter meta tags in `web/index.html`:
-        - `og:title`, `og:description`, `og:type=website`, `og:url`, `og:image`
-        - `twitter:card=summary_large_image`, `twitter:title`, `twitter:description`, `twitter:image`
-      - Remove or align the legacy template file `web/public/index.html` (pick one):
-        - Option A: delete it to avoid confusion, OR
-        - Option B: keep it but ensure it matches `web/index.html` exactly (title + description + icons)
-    - References:
-      - Current Vite title: `decodocs-repo/web/index.html:7`
-      - Current legacy description/title: `decodocs-repo/web/public/index.html:9`, `decodocs-repo/web/public/index.html:18`
-  - [x] Create real Legal/Contact pages with scoped, copy-complete content (no placeholders)
-    - Why: links exist across multiple pages but don’t resolve; legal/trust pages improve conversion and reduce support.
-    - Tasks (perform all):
-      - Add `/privacy` page with:
-        - What is processed (PDF + extracted text), what is stored (Free vs Pro), retention, user controls (delete/export), and contact email.
-      - Add `/terms` page with:
-        - Service scope, “not legal advice”, acceptable use, limitation of liability, and change notice.
-      - Add `/contact` page with:
-        - 1-sentence prompt, email address, and (optional) waitlist mailto CTA for signing.
-      - Update all footers/navs to point to these routes (replace `#privacy/#terms/#contact`).
-    - References:
-      - Broken footer links: `decodocs-repo/web/src/components/HomePage.jsx:356`, `decodocs-repo/web/src/components/Layout.jsx:59`, `decodocs-repo/web/src/components/AboutPage.jsx:110`
+- [ ] **Copy/SEO/UX: audit + rewrite all user-facing text (no ambiguity)** — Status summary:
+  - ✅ Implemented: Home hero & trust line rewrite, footer/nav links fixed, Pricing copy aligned, "Not legal advice" disclaimer added to Home/Viewer/About, SEO/meta tags and legal/contact pages created.
+  - Remaining:
+    - [ ] Decide and apply the single canonical tagline across the site (choose Option A or B).
+    - [ ] Improve microcopy for AI feature gating (remove internal terms, add clear reason + next action and replace blocking alerts with non-blocking UI).
+
+
 - [ ] **Make DecoDocs available via MCP (Model Context Protocol) as a “document decode service”**: expose safe, well-scoped tools that let MCP clients upload a document, request analysis, and retrieve results with clear limits and privacy guarantees.
   - Goal (non-ambiguous): an MCP client (Cursor/Claude Desktop/etc.) can connect to a local/hosted MCP server and call `decodocs.decode_document(...)` to get structured analysis JSON, with optional “explain selection” and “risk highlights” tools.
   - [ ] Decide MCP deployment model and document it (pick exactly one)

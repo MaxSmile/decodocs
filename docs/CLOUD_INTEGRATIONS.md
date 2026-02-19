@@ -90,7 +90,7 @@ class CloudStorageManager {
 ## Security & Privacy
 
 ### Data Handling
-- Files never stored on SnapSign servers in Free tier
+- Files never stored on DecoDocs servers in Free tier
 - Temporary access tokens with minimal lifespan
 - No file indexing or caching
 - End-to-end processing only
@@ -116,7 +116,7 @@ class CloudStorageManager {
 
 ### Free Tier Restrictions
 - Ephemeral processing only
-- No file storage on SnapSign servers
+- No file storage on DecoDocs servers
 - Standard AI call limits applied
 
 ### Pro Tier Benefits

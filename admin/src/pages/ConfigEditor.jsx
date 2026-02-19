@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
+import { httpsCallable } from 'firebase/functions';
 
-import { db } from '../firebase.js';
+import { db, fn } from '../firebase.js';
+import { parseAndValidateConfig } from '../lib/configValidation.js';
 
 const CONFIG_MAP = {
   stripe: 'stripe',
@@ -23,6 +25,8 @@ export default function ConfigEditor() {
   const [savedAt, setSavedAt] = useState(null);
 
   const ref = useMemo(() => (docId ? doc(db, 'admin', docId) : null), [docId]);
+  const saveConfig = useMemo(() => httpsCallable(fn, 'setAdminConfig'), []);
+  const validation = useMemo(() => parseAndValidateConfig(docId, raw), [docId, raw]);
 
   useEffect(() => {
     if (!ref) return;
@@ -52,11 +56,29 @@ export default function ConfigEditor() {
     setError(null);
     setBusy(true);
     try {
-      const parsed = raw.trim() ? JSON.parse(raw) : {};
-      await setDoc(ref, { ...parsed, updatedAt: serverTimestamp() }, { merge: true });
+      if (validation.jsonError) {
+        setError(`Invalid JSON: ${validation.jsonError}`);
+        return;
+      }
+      if (validation.errors.length > 0) {
+        setError(`Fix validation errors before saving:\n- ${validation.errors.join('\n- ')}`);
+        return;
+      }
+
+      const parsed = validation.parsed || {};
+      await saveConfig({
+        docId,
+        config: parsed,
+        merge: true,
+      });
       setSavedAt(new Date());
     } catch (e) {
-      setError(e?.message || 'Save failed');
+      const details = e?.details?.errors;
+      if (Array.isArray(details) && details.length > 0) {
+        setError(`Save blocked by server validation:\n- ${details.join('\n- ')}`);
+      } else {
+        setError(e?.message || 'Save failed');
+      }
     } finally {
       setBusy(false);
     }
@@ -103,7 +125,7 @@ export default function ConfigEditor() {
       </div>
 
       {error ? (
-        <div style={{ marginTop: 12, color: '#991b1b', fontSize: 13, background: '#fef2f2', padding: 10, borderRadius: 10, border: '1px solid #fecaca' }}>
+        <div style={{ marginTop: 12, color: '#991b1b', fontSize: 13, background: '#fef2f2', padding: 10, borderRadius: 10, border: '1px solid #fecaca', whiteSpace: 'pre-wrap' }}>
           {error}
         </div>
       ) : null}
@@ -130,6 +152,22 @@ export default function ConfigEditor() {
       </div>
 
       {loading ? <div style={{ marginTop: 8, color: '#64748b', fontSize: 12 }}>Loading…</div> : null}
+
+      {!loading && validation.jsonError ? (
+        <div style={{ marginTop: 10, color: '#991b1b', fontSize: 12 }}>
+          JSON parse error: {validation.jsonError}
+        </div>
+      ) : null}
+      {!loading && !validation.jsonError && validation.errors.length > 0 ? (
+        <div style={{ marginTop: 10, color: '#991b1b', fontSize: 12 }}>
+          Validation errors: {validation.errors.join(' | ')}
+        </div>
+      ) : null}
+      {!loading && validation.warnings.length > 0 ? (
+        <div style={{ marginTop: 10, color: '#92400e', fontSize: 12 }}>
+          Hints: {validation.warnings.join(' | ')}
+        </div>
+      ) : null}
     </div>
   );
 }

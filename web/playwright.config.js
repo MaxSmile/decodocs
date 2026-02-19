@@ -1,12 +1,8 @@
 // @ts-check
 import { defineConfig, devices } from '@playwright/test';
 
-/**
- * Read environment variables from file.
- * https://github.com/motdotla/dotenv
- */
-// import dotenv from 'dotenv';
-// dotenv.config();
+// Runtime flags are read from process environment only.
+// Do not load .env files in this project.
 
 /**
  * @see https://playwright.dev/docs/test-configuration
@@ -23,7 +19,12 @@ export default defineConfig({
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'html',
+  /*
+   * Default to 'list' to avoid generating HTML reports locally.
+   * To enable the HTML reporter set the environment variable
+   * PLAYWRIGHT_REPORTER=html when running tests.
+   */
+  reporter: process.env.PLAYWRIGHT_REPORTER || 'list',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */

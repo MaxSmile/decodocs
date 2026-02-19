@@ -46,4 +46,4 @@ E15. ISO 27001 readiness.
 ## Naming
 - Company: Snap Sign Pty Ltd
 - Product: DecoDocs
-- Brand family: SnapSign
+- Brand family: Snap Sign

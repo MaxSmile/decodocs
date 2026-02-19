@@ -60,9 +60,9 @@ const AboutPage = () => {
 
           {/* Product Clarification */}
           <section className="decodocs-clarification">
-            <h2>How It Relates To SnapSign</h2>
+            <h2>How It Relates To Snap Sign</h2>
             <p>
-              Snap Sign Pty Ltd builds DecoDocs. SnapSign is the company brand and broader product family; DecoDocs is the
+              Snap Sign Pty Ltd builds DecoDocs. Snap Sign is the company brand and broader product family; DecoDocs is the
               document understanding and analysis product in that family.
             </p>
           </section>
@@ -71,7 +71,7 @@ const AboutPage = () => {
           <section className="team-company">
             <h2>Company</h2>
             <p>
-              SnapSign is built by a small, focused team with backgrounds in software engineering, automation,
+              Snap Sign is built by a small, focused team with backgrounds in software engineering, automation,
               and privacy-first systems. We prioritize correctness, transparency, and long-term maintainability.
             </p>
             <div className="legal-block">

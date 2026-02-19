@@ -45,3 +45,4 @@ Current scope:
   - `src/pages/ConfigEditor.jsx`
   - Relevant Firestore rules and docs.
 - Avoid introducing hidden defaults in UI; prefer explicit JSON in Firestore.
+- Do not introduce `.env*` file workflows (`.env`, `.env.local`, etc.) or dotenv loaders.

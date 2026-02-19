@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
     HiSparkles,
     HiLightningBolt,
@@ -36,6 +37,15 @@ const AnalysisSidebar = ({
     }, [analysisResults, selectedDocument]);
 
     const isDisabled = !hasDocument || !isAuthenticated || isLoading;
+    let disabledReason = null;
+
+    if (isLoading) {
+        disabledReason = 'Working…';
+    } else if (!hasDocument) {
+        disabledReason = 'Open a PDF to enable analysis tools.';
+    } else if (!isAuthenticated) {
+        disabledReason = 'Sign in to enable AI analysis (Free) and unlock Pro upgrades (OCR / deeper processing).';
+    }
 
     if (!isOpen) {
         return (
@@ -89,15 +99,26 @@ const AnalysisSidebar = ({
             <div className="flex-1 overflow-y-auto p-5">
                 {activeTab === 'tools' ? (
                     <div className="flex flex-col gap-3">
-                        {!hasDocument && (
-                            <div className="p-4 bg-slate-50 rounded-lg border border-slate-100 text-center text-sm text-slate-500">
-                                Open a document to use AI tools
-                            </div>
-                        )}
-
-                        {hasDocument && !isAuthenticated && (
-                            <div className="p-4 bg-amber-50 rounded-lg border border-amber-100 text-sm text-amber-800">
-                                Sign in to use AI features.
+                        {disabledReason && (
+                            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+                                <div className="font-semibold text-slate-900">Why are buttons disabled?</div>
+                                <div className="mt-1">{disabledReason}</div>
+                                {!isAuthenticated && hasDocument && !isLoading && (
+                                    <div className="mt-3 flex gap-2.5 flex-wrap">
+                                        <Link
+                                            to="/sign-in"
+                                            className="rounded-full bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white no-underline"
+                                        >
+                                            Sign in
+                                        </Link>
+                                        <Link
+                                            to="/pricing"
+                                            className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 no-underline"
+                                        >
+                                            See Free vs Pro
+                                        </Link>
+                                    </div>
+                                )}
                             </div>
                         )}
 

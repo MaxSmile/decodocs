@@ -1,0 +1,16 @@
+[
+  {
+    "id": "g1",
+    "name": "dummy.pdf",
+    "mimeType": "application/pdf",
+    "size": "12345",
+    "webContentLink": "/public/test-docs/dummy.pdf"
+  },
+  {
+    "id": "g2",
+    "name": "sample-scanned.pdf",
+    "mimeType": "application/pdf",
+    "size": "54321",
+    "webContentLink": "/playwright-tests/fixtures/corrupt.pdf"
+  }
+]

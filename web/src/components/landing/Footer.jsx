@@ -8,8 +8,9 @@ import { APP_VERSION } from '../../lib/version.js';
 const FooterLink = ({ href, children }) => {
   const isExternal = typeof href === 'string' && /^https?:\/\//.test(href);
   const isHash = typeof href === 'string' && href.startsWith('#');
+  const isAstroPage = href === '/privacy' || href === '/terms';
 
-  if (isExternal) {
+  if (isExternal || isAstroPage) {
     return (
       <a className="text-slate-600 no-underline hover:text-slate-900 hover:underline" href={href}>
         {children}
@@ -40,7 +41,7 @@ const Footer = () => {
 
   return (
     <footer className="border-t border-slate-200 bg-white px-6 py-12">
-      <div className="mx-auto grid w-full max-w-6xl gap-10 md:grid-cols-[1.2fr_0.8fr_0.8fr_0.8fr]">
+      <div className="mx-auto grid w-full max-w-6xl gap-10 md:grid-cols-2 lg:grid-cols-[1.2fr_0.8fr_0.8fr_0.8fr_1fr]">
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-3">
             <img src={logoSrc} alt="DecoDocs" className="h-10 w-10" />
@@ -81,6 +82,17 @@ const Footer = () => {
           <p className="text-sm font-semibold text-slate-900">Company</p>
           <ul className="mt-4 space-y-3 text-sm text-slate-600 list-none p-0 m-0">
             {footerLinks.company.map((link) => (
+              <li key={link.label} className="m-0">
+                <FooterLink href={link.href}>{link.label}</FooterLink>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div>
+          <p className="text-sm font-semibold text-slate-900">Docs</p>
+          <ul className="mt-4 space-y-3 text-sm text-slate-600 list-none p-0 m-0">
+            {footerLinks.docs.map((link) => (
               <li key={link.label} className="m-0">
                 <FooterLink href={link.href}>{link.label}</FooterLink>
               </li>

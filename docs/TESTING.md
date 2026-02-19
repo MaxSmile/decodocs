@@ -7,7 +7,7 @@ This document is the canonical reference for running the DecoDocs web app tests 
 All commands below assume:
 
 ```bash
-cd decodocs/web
+cd Decodocs/web
 ```
 
 ## Unit tests (Vitest)
@@ -27,6 +27,24 @@ npm run test
 Notes:
 - Unit tests run in `jsdom`.
 - Some PDF/canvas related tests may log warnings about `HTMLCanvasElement.getContext()` in jsdom; they should still pass.
+
+### Targeted single-test runs (deterministic)
+
+Use the dedicated script to avoid noisy full-suite coverage output and ensure a deterministic file filter:
+
+```bash
+npm run test:unit:single -- src/stores/authStore.test.ts
+```
+
+Run one specific test name inside a known file:
+
+```bash
+npm run test:unit:single -- src/stores/authStore.test.ts --testNamePattern "routes all auth actions to firebase auth module"
+```
+
+Notes:
+- Always pass an explicit test file path under `src/**/*.{test,spec}.*` first, then add `--testNamePattern` as needed.
+- This pattern is verified and returns real pass/fail output (not "No test files found").
 
 ## E2E tests (Playwright)
 

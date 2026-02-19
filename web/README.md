@@ -1,133 +1,57 @@
-# DecoDocs - Document Analysis Platform
+# DecoDocs Web App
 
-DecoDocs is an AI-powered document analysis and signing platform that helps users understand, analyze, and safely act on documents before signing.
+Frontend application for `decodocs.com`.
 
-## Overview
+## Stack
 
-This application provides:
-- **Document Analysis**: AI-powered analysis of contracts and agreements
-- **Risk Identification**: Automatic detection of potential risks
-- **Plain Language Explanations**: Complex clauses simplified in plain English
-- **Document Signing**: Secure electronic signing capabilities
-- **Multi-step Workflow**: Guided process from document upload to signing
+- Astro (primary build/runtime)
+- React islands/components where needed
+- Firebase SDK for auth + callable functions
+- Playwright + Vitest for testing
 
-## Available Scripts
+## Commands
 
-In the project directory, you can run:
-
-### `npm start`
-
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
-
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run test:unit`
-
-Runs only the unit tests in the src/__tests__ directory.
-
-### `npm run test:e2e`
-
-Runs the end-to-end tests using Playwright.
-
-- For tests that depend on server-served routes or static test files run the preview build first or set the preview env var:
+Run from `Decodocs/web/`:
 
 ```bash
-# recommended (build + preview + run Playwright automatically)
+npm run dev          # Astro dev server
+npm run build        # writes version metadata + Astro build
+npm run preview      # preview built output
+npm run test         # vitest run
+npm run test:unit    # vitest run (unit-focused)
+npm run test:unit:single -- src/stores/authStore.test.ts
+npm run test:e2e     # Playwright tests
+```
+
+Target one test name within a known file:
+```bash
+npm run test:unit:single -- src/stores/authStore.test.ts --testNamePattern "routes all auth actions to firebase auth module"
+```
+
+For deterministic E2E against built output:
+```bash
 E2E_USE_PREVIEW=1 npm run test:e2e
 ```
 
-CI uses preview mode for deterministic route/assertion tests.
+## Build Output
 
-### `npm run build`
+- Static output directory: `Decodocs/web/decodocs.com/`
+- Firebase hosting target (from root `firebase.json`): `decodocs-site`
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Development Notes
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- Keep app behavior aligned with canonical docs in `../docs/`.
+- Do not use `.env*` files (`.env`, `.env.local`, etc.) for this app.
+- If runtime flags are needed, pass them via process environment when starting commands (CI/shell), not via env files.
+- For API contracts and callable payloads, use `../docs/API.md`.
+- For deployment and hosting behavior, use `../docs/DEPLOYMENT.md`.
+- For classification and doc-type behavior, use:
+  - `../docs/DOCUMENT_TYPE_SYSTEM.md`
+  - `../docs/CLASSIFICATIONS_INTEGRATION.md`
 
-### `npm run eject`
+## Related Docs
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-## Architecture
-
-This application follows a modern React architecture with:
-
-- **React 18**: Component-based UI library
-- **React Router**: Client-side routing for multi-view application
-- **Firebase Functions**: Serverless backend for AI processing
-- **Google Generative AI**: AI-powered document analysis
-- **Google Identity Services (GIS)**: Google sign-in and OAuth token handling for the web app
-
-## Pages / Routes
-
-- `/` landing
-- `/view` viewer
-- `/about` about
-- `/privacy` privacy policy
-- `/terms` terms of service
-- `/contact` contact + signing waitlist
-
-## Features
-
-### Document Analysis
-- PDF upload and viewing
-- AI-powered document understanding
-- Risk identification and classification
-- Plain language explanations
-- Key points extraction
-
-### User Interface
-- Responsive design for desktop and mobile
-- Multi-step workflow for document processing
-- Clean, intuitive user experience
-- Real-time document analysis
-
-## API Integration
-
-The application connects to Firebase Functions for AI processing:
-- Document analysis
-- Risk identification
-- Plain language conversion
-- Text explanation
-
-## Development
-
-For detailed development information, see the documentation in the `/docs` directory:
-- [Development Guide](../docs/DEVELOPMENT.md)
-- [Architecture](../docs/ARCHITECTURE.md)
-- [API Documentation](../docs/API.md)
-- [Deployment Guide](../docs/DEPLOYMENT.md)
-
-## Deployment
-
-The application is deployed to Firebase Hosting at: https://decodocs-site.web.app
-
-## Technologies Used
-
-- React 18
-- React Router 6
-- Firebase Functions
-- Google Generative AI SDK
-- CSS3
-- JavaScript ES6+
-- Jest & React Testing Library
-- Playwright (for E2E tests)
-
-## Contributing
-
-Please read the [Development Guide](../docs/DEVELOPMENT.md) for details on our code of conduct and the process for submitting pull requests.
-
-## License
-
-This project is proprietary to Snap Sign Pty Ltd.
+- Documentation hub: `../docs/README.md`
+- Product context: `../docs/PRODUCT.md`
+- Testing strategy: `../docs/TESTING.md`
+- Web test plan: `TEST_PLAN.md`

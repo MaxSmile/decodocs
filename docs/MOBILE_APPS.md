@@ -1,13 +1,13 @@
 # Mobile Apps - Technical Specification
 
 ## Overview
-This document outlines the technical specifications for the DecoDocs mobile applications, following the Phase 4 roadmap requirements. The goal is to make SnapSign usable at the moment of signing by enabling document access from various sources.
+This document outlines the technical specifications for the DecoDocs mobile applications, following the Phase 4 roadmap requirements. The goal is to make DecoDocs usable at the moment of signing by enabling document access from various sources.
 
 ## Core Objectives
-- Make SnapSign usable at the moment of signing
+- Make DecoDocs usable at the moment of signing
 - Enable document access from multiple sources
 - Run same analysis pipeline as web/email
-- Implement Share-to-SnapSign entry point
+- Implement Share-to-DecoDocs entry point
 - Enable viewing explanations before signing elsewhere
 
 ## Platform Support
@@ -42,7 +42,7 @@ This document outlines the technical specifications for the DecoDocs mobile appl
 - Consistent user experience across platforms
 - Shared business logic with web platform
 
-### Share-to-SnapSign Integration
+### Share-to-DecoDocs Integration
 
 #### iOS Implementation
 - Share Extension (Today Widget)

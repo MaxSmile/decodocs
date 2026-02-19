@@ -3,6 +3,7 @@ import React from 'react';
 import Footer from './landing/Footer.jsx';
 import GoogleOneTap from './auth/GoogleOneTap.jsx';
 import SiteHeader from './SiteHeader.jsx';
+import ReportWidget from './ReportWidget.jsx';
 
 /**
  * Shared app layout.
@@ -43,6 +44,7 @@ const Layout = ({
         {/* Footer */}
         {showFooter ? <Footer /> : null}
       </div>
+      {!isAppLayout ? <ReportWidget /> : null}
     </div>
   );
 };

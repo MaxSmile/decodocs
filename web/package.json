@@ -27,6 +27,7 @@
     "preview": "astro preview",
     "test": "vitest run",
     "test:unit": "vitest run",
+    "test:unit:single": "vitest run --coverage.enabled=false",
     "test:e2e": "playwright test playwright-tests/",
     "test:debug": "vitest --reporter=verbose",
     "test:coverage": "vitest run --coverage",

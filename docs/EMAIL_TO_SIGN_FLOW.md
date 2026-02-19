@@ -1,4 +1,4 @@
-# SnapSign Envelope Flow (Frontend-Only)
+# DecoDocs Envelope Flow (Frontend-Only)
 
 ## Scope
 This document defines the canonical `.snapsign` envelope workflow implemented in this project.

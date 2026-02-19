@@ -6,6 +6,8 @@ import RegisterPage from './pages/RegisterPage.jsx';
 import AccessDenied from './pages/AccessDenied.jsx';
 import AdminHome from './pages/AdminHome.jsx';
 import ConfigEditor from './pages/ConfigEditor.jsx';
+import AiEventsPage from './pages/AiEventsPage.jsx';
+import ReportsPage from './pages/ReportsPage.jsx';
 
 function RequireSignedIn({ children }) {
   const { state } = useAuth();
@@ -50,6 +52,28 @@ export default function App() {
           <RequireSignedIn>
             <RequireAdmin>
               <ConfigEditor />
+            </RequireAdmin>
+          </RequireSignedIn>
+        }
+      />
+
+      <Route
+        path="/ai-events"
+        element={
+          <RequireSignedIn>
+            <RequireAdmin>
+              <AiEventsPage />
+            </RequireAdmin>
+          </RequireSignedIn>
+        }
+      />
+
+      <Route
+        path="/reports"
+        element={
+          <RequireSignedIn>
+            <RequireAdmin>
+              <ReportsPage />
             </RequireAdmin>
           </RequireSignedIn>
         }

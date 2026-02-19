@@ -1,20 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { getFunctions } from 'firebase/functions';
-import {
-  HiLink,
-  HiCloudUpload,
-  HiCursorClick,
-  HiPencil,
-  HiAnnotation,
-  HiPhotograph,
-  HiCalendar,
-  HiCheck,
-  HiDownload,
-  HiArrowRight,
-} from 'react-icons/hi';
 import { useAuth } from '../context/AuthContext';
-import Layout from './Layout';
 import PDFControls from './PDFControls';
 import PDFDisplay from './PDFDisplay';
 import PDFDropzone from './PDFDropzone';
@@ -24,25 +11,21 @@ import SignatureModal from './SignatureModal';
 import DocumentTypeSelector from './DocumentTypeSelector';
 import GateDialog from './GateDialog';
 import ViewerToolbar from './ViewerToolbar';
+import ViewerPageOverlay from './viewer/ViewerPageOverlay.jsx';
 import { useDocumentTypes } from '../hooks/useDocumentTypes';
 import { useValidationSpec } from '../hooks/useValidationSpec';
 import { usePdfJs } from '../hooks/usePdfJs';
 import { useDocumentAnalysis } from '../hooks/useDocumentAnalysis';
 import { useDocumentTypeDetection } from '../hooks/useDocumentTypeDetection';
 import { useTextSelection } from '../hooks/useTextSelection';
-import {
-  createUploadUrl,
-  createDownloadUrl,
-  uploadViaPresignedUrl,
-  downloadBlobViaPresignedUrl,
-} from '../services/storageService';
-import { openPdfOrEnvelopeFile } from '../services/envelopeService';
+import { useViewerSignMode } from '../hooks/useViewerSignMode';
+import { useViewerDocumentState } from '../hooks/useViewerDocumentState';
 
 const DocumentViewer = () => {
   const { authState, app } = useAuth();
   const isMockMode = typeof window !== 'undefined' && window.MOCK_AUTH;
 
-  const { documentId, fileName } = useParams();
+  const { fileName } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
@@ -58,13 +41,13 @@ const DocumentViewer = () => {
     pageNumber,
     pageScale,
     pdfTextContent,
-    docStats,
     docHash,
     isLoading: isPdfLoading,
     loadingMessage,
     loadPdfFromBlob,
     loadTestPdf,
     navigation,
+    loadError,
   } = usePdfJs();
 
   const {
@@ -85,7 +68,6 @@ const DocumentViewer = () => {
 
   const {
     detectedDocTypeId,
-    detectedMeta,
     overrideDocTypeId,
     pendingOverride,
     setOverrideDocTypeId,
@@ -96,21 +78,47 @@ const DocumentViewer = () => {
     loadLocalOverride,
   } = useDocumentTypeDetection({ functions, isMockMode });
 
-  // Local UI State
-  const [selectedDocument, setSelectedDocument] = useState(null);
-  const [highlights, setHighlights] = useState([]);
-  const [clauseMarkers, setClauseMarkers] = useState([]);
+  const {
+    activeTool,
+    setActiveTool,
+    signatures,
+    annotations,
+    signatureModalOpen,
+    setSignatureModalOpen,
+    handleCanvasClick,
+    handleSignClick,
+    handleSignatureAdopt,
+  } = useViewerSignMode();
+
+  const [highlights] = useState([]);
+  const [clauseMarkers] = useState([]);
   const [riskBadges, setRiskBadges] = useState([]);
   const [typeSelectorOpen, setTypeSelectorOpen] = useState(false);
-  const [criteriaOpen, setCriteriaOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [activeTool, setActiveTool] = useState('select');
-  const [signatures, setSignatures] = useState([]);
-  const [annotations, setAnnotations] = useState([]);
-  const [signatureModalOpen, setSignatureModalOpen] = useState(false);
-  const [pendingSignature, setPendingSignature] = useState(null); // holds adopted sig data until placed
-  const [cloudObjectKey, setCloudObjectKey] = useState(null);
-  const [isCloudBusy, setIsCloudBusy] = useState(false);
+
+  const {
+    selectedDocument,
+    isCloudBusy,
+    handleFileUpload,
+    handleSaveToCloud,
+    handleDownload,
+    handleEditDocument,
+    handleFinishDocument,
+  } = useViewerDocumentState({
+    fileName,
+    pdfLibLoaded,
+    location,
+    navigate,
+    loadTestPdf,
+    loadPdfFromBlob,
+    loadError,
+    setGate,
+    loadLocalOverride,
+    loadServerTypeState,
+    runServerDetection,
+    functions,
+    pdfDoc,
+  });
 
   // Derived State
   const isLoading = isPdfLoading || isAnalysisLoading;
@@ -120,7 +128,7 @@ const DocumentViewer = () => {
   const effectiveDocType = resolveType(effectiveDocTypeId);
   const detectedDocType = resolveType(detectedDocTypeId);
   const validationSlug = effectiveDocType?.validationSlug || null;
-  const validation = useValidationSpec(validationSlug);
+  useValidationSpec(validationSlug);
 
 
   // PDF Rendering Logic is now handled within PDFDisplay -> PDFPage
@@ -133,189 +141,6 @@ const DocumentViewer = () => {
     const element = document.getElementById(`pdf-page-${pageNum}`);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
-
-  // Effect: Load Test PDF (from URL param)
-  useEffect(() => {
-    if (fileName && pdfLibLoaded) {
-      const load = async () => {
-        try {
-          const result = await loadTestPdf(fileName);
-          if (result) {
-            setSelectedDocument({
-              id: fileName,
-              name: fileName,
-              type: 'application/pdf',
-              size: result.fileInfo?.size,
-              file: null
-            });
-            loadLocalOverride(result.docHash);
-            await loadServerTypeState(result.docHash);
-            runServerDetection({ docHashValue: result.docHash, stats: result.stats, text: result.text });
-          }
-        } catch (err) {
-          setGate({
-            title: 'Could not load PDF',
-            message: err?.message || 'Failed to load test PDF.',
-            primaryLabel: 'OK',
-            primaryTo: null,
-            secondaryLabel: null,
-            secondaryTo: null,
-          });
-        }
-      };
-      load();
-    }
-  }, [fileName, pdfLibLoaded]);
-
-  // Effect: Load PDF from Navigation State
-  useEffect(() => {
-    if (location.state?.document && !fileName && pdfLibLoaded) {
-      const doc = location.state.document;
-      setSelectedDocument(doc);
-      setCloudObjectKey(doc?.cloudKey || null);
-
-      const load = async () => {
-        try {
-          const result = await loadPdfFromBlob(doc.file);
-          if (result) {
-            loadLocalOverride(result.docHash);
-            await loadServerTypeState(result.docHash);
-            runServerDetection({ docHashValue: result.docHash, stats: result.stats, text: result.text });
-          }
-        } catch (e) {
-          // ignore, handled in hook
-        }
-      };
-      load();
-    }
-  }, [location, fileName, pdfLibLoaded]);
-
-  // Handlers
-  const handleFileUpload = async (event) => {
-    const files = Array.from(event.target.files);
-    if (files.length === 0) return;
-
-    try {
-      const file = files[0];
-      const opened = await openPdfOrEnvelopeFile(file);
-      const newDocument = {
-        id: Date.now() + Math.random(),
-        name: opened.pdfFile.name,
-        size: opened.pdfFile.size,
-        type: opened.pdfFile.type,
-        file: opened.pdfFile,
-        sourceType: opened.source,
-        envelope: opened.envelope || null,
-      };
-
-      setSelectedDocument(newDocument);
-      setCloudObjectKey(null);
-      navigate('/view', { state: { document: newDocument } });
-    } catch (err) {
-      setGate({
-        title: 'Unsupported or invalid file',
-        message: err?.message || 'Please upload a valid .pdf or .snapsign file.',
-        primaryLabel: 'OK',
-      });
-    }
-  };
-
-  const sanitizeFileName = (name) =>
-    String(name || 'document.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');
-
-  const handleSaveToCloud = async () => {
-    if (!functions) return;
-    if (!selectedDocument?.file) {
-      setGate({
-        title: 'No local file to upload',
-        message: 'Open a local PDF first, then save it to DecoDocs cloud storage.',
-        primaryLabel: 'OK',
-      });
-      return;
-    }
-
-    setIsCloudBusy(true);
-    try {
-      const keySeed = `documents/${Date.now()}-${sanitizeFileName(selectedDocument.name)}`;
-      const uploadInfo = await createUploadUrl(functions, {
-        key: keySeed,
-        contentType: selectedDocument.type || 'application/pdf',
-        expiresIn: 600,
-      });
-
-      await uploadViaPresignedUrl({
-        url: uploadInfo.url,
-        file: selectedDocument.file,
-        contentType: selectedDocument.type || 'application/pdf',
-      });
-
-      setCloudObjectKey(uploadInfo.key);
-      setSelectedDocument((prev) => ({ ...(prev || {}), cloudKey: uploadInfo.key }));
-      setGate({
-        title: 'Saved to DecoDocs',
-        message: `Document uploaded successfully.\nObject key: ${uploadInfo.key}`,
-        primaryLabel: 'OK',
-      });
-    } catch (err) {
-      const code = err?.code || '';
-      const isProGate = String(code).includes('permission-denied');
-      setGate({
-        title: isProGate ? 'Pro required' : 'Cloud upload failed',
-        message: isProGate
-          ? 'Cloud storage is available for Pro plans. Upgrade to continue.'
-          : (err?.message || 'Unable to upload file to cloud storage.'),
-        primaryLabel: isProGate ? 'View plans' : 'OK',
-        primaryTo: isProGate ? '/pricing' : null,
-      });
-    } finally {
-      setIsCloudBusy(false);
-    }
-  };
-
-  const handleDownload = async () => {
-    if (!pdfDoc) return;
-
-    // Prefer original in-memory file when available.
-    if (selectedDocument?.file) {
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(selectedDocument.file);
-      link.download = selectedDocument?.name || 'document.pdf';
-      link.click();
-      return;
-    }
-
-    // Fallback: cloud object download via callable + pre-signed URL.
-    if (functions && cloudObjectKey) {
-      setIsCloudBusy(true);
-      try {
-        const downloadInfo = await createDownloadUrl(functions, {
-          key: cloudObjectKey,
-          expiresIn: 600,
-        });
-        const blob = await downloadBlobViaPresignedUrl(downloadInfo.url);
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = selectedDocument?.name || 'document.pdf';
-        link.click();
-        return;
-      } catch (err) {
-        setGate({
-          title: 'Download failed',
-          message: err?.message || 'Unable to download cloud document.',
-          primaryLabel: 'OK',
-        });
-      } finally {
-        setIsCloudBusy(false);
-      }
-    }
-  };
-
-  const handleEditDocument = () => {
-    if (selectedDocument) {
-      navigate(`/edit/${selectedDocument.id}`, { state: { document: selectedDocument } });
     }
   };
 
@@ -337,90 +162,8 @@ const DocumentViewer = () => {
     setRiskBadges(newRiskBadges);
   };
 
-  // Signing tool: place annotation on canvas click
-  const handleCanvasClick = (e) => {
-    if (activeTool === 'select') return;
-
-    const pageWrapper = e.target.closest('[data-page-num]');
-    if (!pageWrapper) return;
-
-    const pageNum = parseInt(pageWrapper.getAttribute('data-page-num'), 10);
-    const rect = pageWrapper.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    if (activeTool === 'signature' && pendingSignature) {
-      setSignatures((prev) => [
-        ...prev,
-        {
-          id: Date.now(),
-          pageNum,
-          x,
-          y,
-          width: pendingSignature.width || 200,
-          height: pendingSignature.height || 60,
-          ...pendingSignature,
-        },
-      ]);
-      setActiveTool('select');
-      // Don't clear pendingSignature so user can place the same sig again with another Sign click
-    } else if (activeTool === 'text') {
-      setAnnotations((prev) => [...prev, { id: Date.now(), pageNum, x, y, text: 'Text', type: 'text' }]);
-      setActiveTool('select');
-    } else if (activeTool === 'date') {
-      setAnnotations((prev) => [...prev, { id: Date.now(), pageNum, x, y, text: new Date().toLocaleDateString(), type: 'date' }]);
-      setActiveTool('select');
-    } else if (activeTool === 'image') {
-      setAnnotations((prev) => [...prev, { id: Date.now(), pageNum, x, y, text: '🖼 Image', type: 'image' }]);
-      setActiveTool('select');
-    } else if (activeTool === 'checkmark') {
-      setAnnotations((prev) => [...prev, { id: Date.now(), pageNum, x, y, text: '✓', type: 'checkmark' }]);
-      setActiveTool('select');
-    }
-  };
-
-  // Render signing overlays on each page
   const renderPageOverlay = (pageNum) => (
-    <>
-      {signatures.filter((s) => s.pageNum === pageNum).map((sig) => (
-        <div
-          key={sig.id}
-          className="absolute border-2 border-blue-500/40 bg-blue-50/20 flex items-center justify-center cursor-move rounded"
-          style={{ left: sig.x, top: sig.y, width: sig.width, height: sig.height, zIndex: 50 }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          {sig.mode === 'type' ? (
-            <span
-              className="text-slate-900 select-none"
-              style={{ fontFamily: sig.fontFamily, fontSize: '1.5rem', lineHeight: 1 }}
-            >
-              {sig.text}
-            </span>
-          ) : sig.dataUrl ? (
-            <img src={sig.dataUrl} alt="Signature" className="max-w-full max-h-full object-contain" draggable={false} />
-          ) : (
-            <span className="text-blue-700 font-semibold italic text-lg">Signature</span>
-          )}
-        </div>
-      ))}
-      {annotations.filter((a) => a.pageNum === pageNum).map((ann) => (
-        <div
-          key={ann.id}
-          className={`absolute px-2 py-1 text-sm shadow-sm cursor-move rounded ${ann.type === 'checkmark'
-            ? 'text-green-700 text-2xl font-bold'
-            : ann.type === 'date'
-              ? 'bg-amber-50 border border-amber-300 text-amber-800'
-              : ann.type === 'image'
-                ? 'bg-purple-50 border border-purple-300 text-purple-700'
-                : 'bg-yellow-100 border border-yellow-300 text-slate-800'
-            }`}
-          style={{ left: ann.x, top: ann.y, zIndex: 50 }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          {ann.text}
-        </div>
-      ))}
-    </>
+    <ViewerPageOverlay pageNum={pageNum} signatures={signatures} annotations={annotations} />
   );
 
   return (
@@ -429,10 +172,7 @@ const DocumentViewer = () => {
       <SignatureModal
         open={signatureModalOpen}
         onClose={() => setSignatureModalOpen(false)}
-        onAdopt={(sigData) => {
-          setPendingSignature(sigData);
-          setActiveTool('signature');
-        }}
+        onAdopt={handleSignatureAdopt}
       />
 
       {/* Gate Dialog */}
@@ -486,22 +226,13 @@ const DocumentViewer = () => {
             }}
             onSaveCloud={handleSaveToCloud}
             onDownload={handleDownload}
-            onFinish={() => {
-              setSelectedDocument(null);
-              navigate('/view');
-            }}
+            onFinish={handleFinishDocument}
             isCloudBusy={isCloudBusy}
             effectiveDocType={effectiveDocType}
             onOpenDocTypeSelector={() => setTypeSelectorOpen(true)}
             activeTool={activeTool}
             setActiveTool={setActiveTool}
-            onSignClick={() => {
-              if (pendingSignature) {
-                setActiveTool('signature');
-              } else {
-                setSignatureModalOpen(true);
-              }
-            }}
+            onSignClick={handleSignClick}
           />
         )}
 

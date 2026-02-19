@@ -101,7 +101,7 @@ Following the principle: "If a feature increases inference cost, storage cost, o
 
 ### Mobile Apps (Phase 4)
 - iOS and Android technical specifications ready
-- Share-to-SnapSign integration planned
+- Share-to-DecoDocs integration planned
 - Consistent analysis pipeline architecture confirmed
 
 ## Resource Requirements
@@ -138,4 +138,4 @@ Following the principle: "If a feature increases inference cost, storage cost, o
 - **Phase 2 Complete**: End of Month
 
 ## Investment Priority
-Following roadmap priority: Focus on **input convenience** and **distribution** rather than new analysis logic. Core SnapSign logic remains unchanged - the focus is on reducing friction for document access and processing.
+Following roadmap priority: Focus on **input convenience** and **distribution** rather than new analysis logic. Core DecoDocs logic remains unchanged - the focus is on reducing friction for document access and processing.

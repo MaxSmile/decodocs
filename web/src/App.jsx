@@ -15,7 +15,10 @@ import SignPage from './components/SignPage.jsx';
 import UseCasePage from './components/landing/UseCasePage.jsx';
 import NotFoundPage from './components/NotFoundPage.jsx';
 import ServerErrorPage from './components/ServerErrorPage.jsx';
-import Layout from './components/Layout.jsx';
+import PublicLayout from './components/layouts/PublicLayout.jsx';
+import AuthLayout from './components/layouts/AuthLayout.jsx';
+import WebAppLayout from './components/layouts/WebAppLayout.jsx';
+import WorkspaceLayout from './components/layouts/WorkspaceLayout.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 import AuthErrorNotification from './components/AuthErrorNotification.jsx';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
@@ -37,37 +40,37 @@ const AppRoutes = () => {
 
       {/* Pricing Page */}
       <Route path="/pricing" element={
-        <Layout showHeader>
+        <PublicLayout>
           <PricingPage />
-        </Layout>
+        </PublicLayout>
       } />
 
       {/* About Page */}
       <Route path="/about" element={
-        <Layout showHeader>
+        <PublicLayout>
           <AboutPage />
-        </Layout>
+        </PublicLayout>
       } />
 
       {/* Privacy Page */}
       <Route path="/privacy" element={
-        <Layout showHeader>
+        <PublicLayout>
           <PrivacyPage />
-        </Layout>
+        </PublicLayout>
       } />
 
       {/* Terms Page */}
       <Route path="/terms" element={
-        <Layout showHeader>
+        <PublicLayout>
           <TermsPage />
-        </Layout>
+        </PublicLayout>
       } />
 
       {/* Contact Page */}
       <Route path="/contact" element={
-        <Layout showHeader>
+        <PublicLayout>
           <ContactPage />
-        </Layout>
+        </PublicLayout>
       } />
 
       {/* Use cases (landing detail pages) */}
@@ -75,75 +78,75 @@ const AppRoutes = () => {
 
       {/* Auth Pages */}
       <Route path="/sign-in" element={
-        <Layout showHeader>
+        <AuthLayout>
           <SignInPage />
-        </Layout>
+        </AuthLayout>
       } />
 
       <Route path="/sign-up" element={
-        <Layout showHeader>
+        <AuthLayout>
           <SignUpPage />
-        </Layout>
+        </AuthLayout>
       } />
 
       {/* App / Document Viewer */}
       <Route path="/view" element={
-        <Layout variant="app" showHeader>
+        <WorkspaceLayout>
           <DocumentViewer />
-        </Layout>
+        </WorkspaceLayout>
       } />
 
       <Route path="/view/:documentId" element={
-        <Layout variant="app" showHeader>
+        <WorkspaceLayout>
           <DocumentViewer />
-        </Layout>
+        </WorkspaceLayout>
       } />
 
       {/* Specific route for test documents */}
       <Route path="/view/test-docs/:fileName" element={
-        <Layout variant="app" showHeader>
+        <WorkspaceLayout>
           <DocumentViewer />
-        </Layout>
+        </WorkspaceLayout>
       } />
 
       {/* Profile */}
       <Route path="/profile" element={
         <PrivateRoute>
-          <Layout variant="app" showHeader>
+          <WebAppLayout>
             <ProfilePage />
-          </Layout>
+          </WebAppLayout>
         </PrivateRoute>
       } />
 
       {/* Editor */}
       <Route path="/edit/:documentId" element={
         <PrivateRoute>
-          <Layout variant="app" showHeader>
+          <WorkspaceLayout>
             <DocumentEditor />
-          </Layout>
+          </WorkspaceLayout>
         </PrivateRoute>
       } />
 
       <Route path="/edit/test-docs/:fileName" element={
         <PrivateRoute>
-          <Layout variant="app" showHeader>
+          <WorkspaceLayout>
             <DocumentEditor />
-          </Layout>
+          </WorkspaceLayout>
         </PrivateRoute>
       } />
 
       {/* Sign Page */}
       <Route path="/sign" element={
-        <Layout showHeader>
+        <PublicLayout>
           <SignPage />
-        </Layout>
+        </PublicLayout>
       } />
 
       {/* Error Pages */}
       <Route path="/500" element={
-        <Layout showHeader>
+        <PublicLayout>
           <ServerErrorPage />
-        </Layout>
+        </PublicLayout>
       } />
 
       {/* Legacy App Route */}
@@ -151,9 +154,9 @@ const AppRoutes = () => {
 
       {/* Catch-all */}
       <Route path="*" element={
-        <Layout showHeader>
+        <PublicLayout>
           <NotFoundPage />
-        </Layout>
+        </PublicLayout>
       } />
     </Routes>
   );

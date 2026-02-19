@@ -33,6 +33,8 @@ export default function AdminHome() {
         <Card title="Plans" desc="Edit admin/plans" to="/config/plans" />
         <Card title="Feature flags" desc="Edit admin/flags" to="/config/flags" />
         <Card title="Policies" desc="Edit admin/policies" to="/config/policies" />
+        <Card title="Crash & Reports" desc="Manage backend exceptions + user reports" to="/reports" />
+        <Card title="AI Error Events" desc="View function-side Gemini failures" to="/ai-events" />
       </div>
 
       <div style={{ marginTop: 18, color: '#64748b', fontSize: 12 }}>

@@ -24,3 +24,10 @@ DecoDocs is deployed via the SnapSign-AU Firebase project:
 ---
 
 If any hosting or function scripts require Blaze/Cloud Build, re-check your firebase.json and eliminate non-static or SSR-related features. All deployments should keep Cloud Build and Artifact Registry disabled unless absolutely necessary for your product.
+
+## Environment Policy (Required)
+- Do not create or use `.env*` files (`.env`, `.env.local`, `.env.production`, etc.).
+- Do not add dotenv loaders to web/admin/functions scripts.
+- Configuration must come from:
+  - Firestore admin config documents, and/or
+  - platform-provided process environment (CI/runtime/shell), without env files committed or loaded from disk.

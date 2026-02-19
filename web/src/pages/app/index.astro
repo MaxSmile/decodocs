@@ -9,8 +9,9 @@ import ReactAppIsland from '../../components/islands/ReactAppIsland.jsx';
   canonical="https://decodocs.com/app/"
   image="https://decodocs.com/og.svg"
   noindex={true}
+  showHeader={false}
 >
-  <main class="min-h-[calc(100vh-56px)]">
+  <main class="min-h-screen">
     <ReactAppIsland client:only="react" basename="/" />
   </main>
 </MainLayout>

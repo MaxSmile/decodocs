@@ -23,10 +23,11 @@ This repo is designed to run locally with **either**:
 - Firebase emulators (recommended for local dev / CI)
 
 ### Config strategy (current state)
-- We **do not commit** `.env` files.
-- The web app has a safe default Firebase config (project `snapsign-au`), and supports overriding via **Vite env vars** (`VITE_*`) when needed.
+- We do not use `.env*` files (`.env`, `.env.local`, `.env.production`, etc.).
+- The web app has a safe default Firebase config (project `snapsign-au`).
+- If a temporary override is needed, pass env values inline in the command or via CI/runtime environment (not via env files).
 - For local dev without real credentials, use:
-  - Firebase Auth emulator (`VITE_USE_FIREBASE_EMULATOR=true`), or
+  - Firebase Auth emulator (inline flag), or
   - `window.MOCK_AUTH=true` (test/dev helper)
 
 ### 1) Clone the repository
@@ -50,23 +51,18 @@ cd ../functions
 npm install
 ```
 
-### 3) Optional environment variables (web)
+### 3) Runtime overrides (no env files)
 
-Create a local `.env.local` **only if you need overrides** (do not commit it):
+Default behavior uses built-in config in `web/src/stores/authStore.ts`.
 
-- `VITE_USE_FIREBASE_EMULATOR=true` — use the Auth emulator at `http://localhost:9099`
-- `VITE_FIREBASE_API_KEY=...`
-- `VITE_FIREBASE_AUTH_DOMAIN=...`
-- `VITE_FIREBASE_PROJECT_ID=...`
-- `VITE_FIREBASE_STORAGE_BUCKET=...`
-- `VITE_FIREBASE_MESSAGING_SENDER_ID=...`
-- `VITE_FIREBASE_APP_ID=...`
-- `VITE_FIREBASE_MEASUREMENT_ID=...`
-- `VITE_FIREBASE_AUTH_EMULATOR_URL=http://localhost:9099` (optional override when `VITE_USE_FIREBASE_EMULATOR=true`)
+If needed, pass overrides inline (examples):
 
-If you do not set these, the app uses baked-in defaults in `web/src/stores/authStore.ts`.
+```bash
+VITE_USE_FIREBASE_EMULATOR=true npm run dev
+VITE_FIREBASE_AUTH_EMULATOR_URL=http://localhost:9099 VITE_USE_FIREBASE_EMULATOR=true npm run dev
+```
 
-> Note: Only `VITE_*` variables are exposed to the web build. Keep secrets server-side.
+Do not create `.env*` files for these values.
 
 ## Development Workflow
 
@@ -128,7 +124,12 @@ firebase emulators:start --only functions,auth
 - Functions emulator: `http://localhost:5001`
 - Auth emulator: `http://localhost:9099`
 
-Then, in another terminal, start the web app with `VITE_USE_FIREBASE_EMULATOR=true`.
+Then, in another terminal, start the web app:
+
+```bash
+cd web
+VITE_USE_FIREBASE_EMULATOR=true npm run dev
+```
 
 #### Available Commands
 

@@ -98,6 +98,6 @@ Suggested fields:
 
 ## Notes
 
-- v1 uses a **JSON editor** in the admin portal; schema validation is minimal.
+- v1 uses a **JSON editor** in the admin portal with lightweight client hints and server-side validation in Functions (`setAdminConfig`, `setDocByPath`).
 - Prefer keeping these docs **small and stable**.
 - If/when configs grow, add explicit schema validation in Cloud Functions and/or move to a typed UI.

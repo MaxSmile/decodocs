@@ -1,4 +1,4 @@
-# SnapSign - AI Signature Studio Flow (Free vs Paid) - Technical Spec (MVP)
+# DecoDocs - AI Signature Studio Flow (Free vs Paid) - Technical Spec (MVP)
 
 ## 0) Goals
 - Enable users to create a calligraphic or artistic signature style with AI assistance.

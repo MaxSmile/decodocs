@@ -1,0 +1,8 @@
+[
+  {
+    "id": "o1",
+    "name": "dummy.pdf",
+    "file": { "mimeType": "application/pdf", "size": 12345 },
+    "downloadUrl": "/public/test-docs/dummy.pdf"
+  }
+]

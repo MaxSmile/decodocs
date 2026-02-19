@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import Layout from './Layout.jsx';
+import PublicLayout from './layouts/PublicLayout.jsx';
 import Hero from './landing/Hero.jsx';
 import SocialProof from './landing/SocialProof.jsx';
 import HowItWorks from './landing/HowItWorks.jsx';
@@ -55,7 +55,7 @@ const HomePage = () => {
   };
 
   return (
-    <Layout showHeader showFooter showOneTap showDecor onOpenPdf={openFilePicker}>
+    <PublicLayout showOneTap showDecor onOpenPdf={openFilePicker}>
       <input
         ref={fileInputRef}
         type="file"
@@ -75,7 +75,7 @@ const HomePage = () => {
       </section>
       <UseCases />
       <SecureByDesign />
-    </Layout>
+    </PublicLayout>
   );
 };
 

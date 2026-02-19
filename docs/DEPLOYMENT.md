@@ -152,39 +152,31 @@ The DecoDocs web app is hosted on Firebase Hosting under the `decodocs-site` hos
 - `https://decodocs-site.web.app`
 - `https://decodocs-site.firebaseapp.com`
 
-In production, these Firebase domains are **not the primary brand URL**. Instead, they should issue a **permanent redirect (301)** to the canonical domain:
+In production, these Firebase domains are **not the primary brand URL**. The canonical domain is:
 
 - `https://decodocs.com`
 
-This redirect behavior is configured in the root `firebase.json` under the `hosting` entry where `site` is `decodocs-site`, for example:
+Current implementation uses a **client-side JavaScript canonical redirect** in `web/src/layouts/MainLayout.astro`:
 
-```json
-{
-  "hosting": [
-    {
-      "site": "decodocs-site",
-      "public": "decodocs/web/decodocs.com",
-      "redirects": [
-        {
-          "source": "**",
-          "destination": "https://decodocs.com/:splat",
-          "type": 301
-        }
-      ]
+```html
+<script is:inline>
+  (function () {
+    var canonicalHost = 'decodocs.com';
+    var host = location.host;
+    var isFirebase = host.endsWith('.web.app') || host.endsWith('.firebaseapp.com');
+    if (isFirebase && host !== canonicalHost) {
+      location.replace(
+        'https://' + canonicalHost + location.pathname + location.search + location.hash
+      );
     }
-  ]
-}
+  })();
+</script>
 ```
 
-Once deployed with:
-
-```bash
-firebase deploy --only hosting:decodocs-site
-```
-
-any request to `decodocs-site.web.app` or `decodocs-site.firebaseapp.com` will be permanently redirected to `https://decodocs.com/...`.
-
-Note: only enable this redirect once `decodocs.com` is serving the app (e.g., via a custom domain on a different hosting site or a non-redirecting config), otherwise you may redirect the canonical domain back to itself.
+Why this approach:
+- We intentionally keep deployment on simple/static Firebase Hosting.
+- In the current free-tier/simple single-site setup, host-conditional server-side redirect strategy is not used because it requires extra hosting-site/domain routing complexity.
+- JS canonicalization preserves path/query/hash and keeps operational complexity low.
 
 ### Environment Variables
 

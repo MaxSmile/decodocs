@@ -30,6 +30,12 @@
 - no long-lived signed URLs
 - Firestore is used for metadata/ledgers (e.g. docHash), but not required as the canonical file store
 
+## Hosting Canonical URL Policy
+- Canonical public URL for the product is `https://decodocs.com`.
+- Firebase default hostnames (`decodocs-site.web.app`, `decodocs-site.firebaseapp.com`) are treated as non-canonical entry points.
+- In the current single-site Firebase Hosting setup, host-conditional 301 rules are not used for this because they are not practical on free-tier/simple hosting without introducing separate hosting-site/domain routing complexity.
+- Decision: enforce canonicalization with a lightweight client-side redirect script in `web/src/layouts/MainLayout.astro` that forwards Firebase-host requests to `https://decodocs.com` while preserving path/query/hash.
+
 ## Entitlements / Tiers (Product + Technical)
 - Core runtime tiers:
   - Anonymous = Firebase Anonymous Auth

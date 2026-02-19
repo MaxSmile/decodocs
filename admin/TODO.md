@@ -1,6 +1,6 @@
 # TODO - DecoDocs Admin Portal
 
-_Last updated: February 17, 2026_
+_Last updated: February 19, 2026_
 
 ## Decisions (confirmed)
 - **Admins:** any signed-in user with `@snapsign.com.au` email = super admin (single role for now).
@@ -25,15 +25,15 @@ _Last updated: February 17, 2026_
 
 ## First deploy readiness (staging)
 - [ ] Firebase Auth: enable Email/Password provider in project `snapsign-au`.
-- [ ] Firestore Rules: confirm `admin/*` read/write is restricted to `@snapsign.com.au`.
-- [ ] Hosting target mapping: confirm `.firebaserc` maps `decodocs-admin -> decodocs-admin`.
+- [x] Firestore Rules: confirm `admin/*` read/write is restricted to `@snapsign.com.au`.
+- [x] Hosting target mapping: confirm `.firebaserc` maps `decodocs-admin -> decodocs-admin`.
 - [ ] Bootstrap at least one `@snapsign.com.au` admin account.
 - [ ] Seed minimum config docs:
   - [ ] `admin/stripe`
   - [ ] `admin/plans`
   - [ ] `admin/flags`
   - [ ] `admin/policies`
-- [ ] Build app (`npm run build`) and verify `Decodocs/admin/dist`.
+- [x] Build app (`npm run build`) and verify `Decodocs/admin/dist`.
 - [ ] Deploy staging (`firebase deploy --only hosting:decodocs-admin`).
 - [ ] Smoke test:
   - [ ] Allowed admin login works.
@@ -43,6 +43,12 @@ _Last updated: February 17, 2026_
 - [ ] Verify downstream behavior in web + functions after config edits.
 
 ## Next engineering tasks
-- [ ] Add server-side schema validation for `admin/*` writes (Functions).
-- [ ] Add lightweight UI validation hints for common config mistakes.
-- [ ] Add admin portal test coverage (auth gating + config read/write flow).
+- [x] Add server-side schema validation for `admin/*` writes (Functions).
+- [x] Add lightweight UI validation hints for common config mistakes.
+- [x] Add admin portal test coverage (auth gating + config read/write flow).
+
+## Crash + report operations (new)
+- [x] Add unified Firestore collection for operational reports (`admin_reports`).
+- [x] Add admin page to view and manage report status (`/reports`).
+- [x] Add web intake for `feedback` and `bug` reports from decodocs.com.
+- [x] Log backend exceptions to Firestore operational reports for admin triage.

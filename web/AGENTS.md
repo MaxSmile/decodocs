@@ -186,6 +186,7 @@ But always preserve:
 - Long-lived signed URLs
 - Deep lock-in to Firestore rules as the only authorization layer
 - Building “an e-sign tool” mindset; signing is downstream
+- Introducing `.env*` file workflows or dotenv loaders in the web app
 
 ## Terminology
 
@@ -195,3 +196,8 @@ But always preserve:
 
 ---
 If you change architecture decisions, update this file first.
+
+## Environment Policy (Web)
+- `.env`, `.env.local`, `.env.production`, etc. are prohibited for this app.
+- Runtime toggles may come from platform-provided environment at process start (CI/shell), but never from local env files.
+- Product/runtime secrets and mutable config must stay server-side (Firestore admin docs or backend runtime), not in web env files.

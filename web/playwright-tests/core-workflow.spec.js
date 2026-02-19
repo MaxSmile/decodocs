@@ -73,6 +73,49 @@ test.describe.serial('Core Document Workflow', () => {
       await expect(page.getByRole('button', { name: 'Deep Analysis' })).toBeEnabled();
       await expect(page.getByRole('button', { name: 'Highlight Risks' })).toBeEnabled();
     });
+
+    test('BTN-03: Anonymous → provider link → gating removed (mock)', async ({ page }) => {
+      // Start with an anonymous mock user and use a test-docs route so reloads preserve the document
+      await page.addInitScript({ content: 'window.MOCK_AUTH = true; window.MOCK_AUTH_USER = { uid: "anon-e2e", isAnonymous: true };' });
+
+      // Open viewer and load a stable test-doc so state survives a reload
+      await openViewer(page);
+      await page.evaluate(() => { history.pushState({}, '', '/view/test-docs/dummy.pdf'); window.dispatchEvent(new PopStateEvent('popstate')); });
+      await page.waitForURL('**/view/test-docs/dummy.pdf');
+      await expect(page.locator('canvas').first()).toBeVisible({ timeout: 15000 });
+
+      // Anonymous session baseline.
+      await expect(page.getByRole('button', { name: 'Deep Analysis' })).toBeEnabled();
+      await expect(page.getByRole('button', { name: 'Highlight Risks' })).toBeEnabled();
+      await page.evaluate(() => {
+        history.pushState({}, '', '/profile');
+        window.dispatchEvent(new PopStateEvent('popstate'));
+      });
+      await page.waitForURL('**/profile');
+      await expect(page.getByText(/Anonymous:\s*true/i)).toBeVisible();
+
+      // Simulate provider-link completing by switching the mock user to an authenticated identity
+      await page.evaluate(() => {
+        window.MOCK_AUTH_USER = { uid: 'user-e2e', email: 'e2e+user@example.com', isAnonymous: false };
+      });
+      await page.addInitScript({ content: 'window.MOCK_AUTH = true; window.MOCK_AUTH_USER = { uid: "user-e2e", email: "e2e+user@example.com", isAnonymous: false };' });
+
+      // Restart app at root so auth watcher picks up linked non-anonymous user.
+      await page.goto('/', { waitUntil: 'domcontentloaded' });
+
+      // Ensure the viewer/document is still reachable after reload and
+      // identity state is no longer anonymous (email is surfaced in app header).
+      await page.goto('/app', { waitUntil: 'domcontentloaded' });
+      await page.waitForURL('**/view');
+      await expect(page.getByRole('link', { name: 'e2e+user@example.com' }).first()).toBeVisible();
+      await page.evaluate(() => { history.pushState({}, '', '/view/test-docs/dummy.pdf'); window.dispatchEvent(new PopStateEvent('popstate')); });
+      await page.waitForURL('**/view/test-docs/dummy.pdf');
+      await expect(page.locator('canvas').first()).toBeVisible({ timeout: 15000 });
+
+      // Gated actions should now be enabled for the authenticated user
+      await expect(page.getByRole('button', { name: 'Deep Analysis' })).toBeEnabled();
+      await expect(page.getByRole('button', { name: 'Highlight Risks' })).toBeEnabled();
+    });
   });
 
   test.describe('3.3 & 3.4 Analysis Results & Annotations (Mocked)', () => {

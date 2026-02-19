@@ -149,6 +149,7 @@ update.yml
 
 Secrets must **never** be committed.
 They are injected at deploy time via environment variables or secure stores.
+Do not add `.env*` files to this repo for infra/runtime configuration.
 
 ---
 
@@ -212,4 +213,3 @@ If you change:
 **Update this file first.**
 
 This document is the contract for how DecoDocs infrastructure works.
-

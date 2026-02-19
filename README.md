@@ -1,207 +1,49 @@
-# DecoDocs
+# DecoDocs (Nested Repository)
 
-**Decode documents. Act with confidence.**
+DecoDocs is an AI-powered document understanding workspace.
 
-DecoDocs is an AI-powered document workspace that helps people **understand, clarify, and safely act on documents** before they sign, send, or rely on them.
+This folder is a nested independent git repository that remains physically inside the Firebase umbrella repo for deployment convenience.
 
-This repository is the canonical home for the DecoDocs web application, supporting services, and project documentation.
+## Start Here
 
-Key docs:
-- `docs/README.md`
+- Documentation hub: `docs/README.md`
+- Product definition: `docs/PRODUCT.md`
+- Current status: `docs/STATUS_SUMMARY.md`
+- Roadmap: `docs/ROADMAP.md`
+- Engineering tasks: `TODO.md`
 
----
+## Subprojects
 
-## Why DecoDocs Exists
+- `web/` - DecoDocs website/app build deployed as static hosting output
+- `admin/` - internal admin portal for runtime config docs
+- `docs/` - canonical product/architecture/api/deployment docs
+- `fileserver/` - MinIO/fileserver provisioning and ops runbooks
+- `infra/` - infrastructure assets and notes
+- `mobile/` - mobile app docs and planning
 
-Most people do not struggle with *signing* documents.  
-They struggle with **understanding them**.
+## Documentation Policy
 
-Contracts, invoices, policies, PDFs, and agreements are:
-- unclear
-- verbose
-- risky
-- easy to misunderstand
-- written for lawyers, not humans
+- Canonical specs live in `docs/`.
+- Task tracking lives in `TODO.md` and `admin/TODO.md`.
+- App-specific setup/run instructions live in each app README.
+- Snapshot/planning docs should not replace canonical docs; merge durable decisions into `docs/`.
 
-DecoDocs solves the problem **before the signature**.
+## Config Policy (No `.env*` Files)
 
----
+- This repo does not use `.env`, `.env.local`, `.env.production`, or similar env files.
+- Do not add dotenv-based loading to app/runtime code.
+- Configuration must come from platform environment (CI/runtime/shell) or Firestore admin config documents.
 
-## Core Idea
+## Core Product Positioning
 
-DecoDocs helps users **decode documents** by:
+DecoDocs focuses on understanding before signing:
+- explain complex documents in plain language
+- identify risks and unclear obligations
+- support edits, collaboration, and optional signing workflows
 
-- explaining content in plain language  
-- highlighting risks, inconsistencies, and unclear clauses  
-- suggesting improvements or alternative wording  
-- preparing documents for confident action  
-- optionally supporting signing and sharing as a final step  
+## Related Umbrella Repo Docs
 
-**Signing is a feature.  
-Understanding is the product.**
-
----
-
-## What “Decode” Means in Practice
-
-When a user uploads a document, DecoDocs helps them:
-
-1. **Understand**  
-   - Plain-language explanations  
-   - Section-by-section summaries  
-
-2. **Clarify**  
-   - Highlight unclear or risky parts  
-   - Explain why something may be problematic  
-
-3. **Fix**  
-   - AI-assisted rewrites  
-   - Cleaner, safer alternative text  
-
-4. **Prepare for Action**  
-   - Know what to sign, send, or question  
-   - Track important dates and obligations  
-
-5. **Act (Optional)**  
-   - Send for signature  
-   - Sign digitally  
-   - Store and reference later  
-
----
-
-## What DecoDocs Is NOT
-
-- Not just an e-signature tool  
-- Not a legal advice replacement  
-- Not a blockchain-first product  
-- Not an enterprise-only platform  
-
-DecoDocs is **human-first, clarity-first**.
-
----
-
-## Target Users (Initial)
-
-- Founders and startup teams  
-- Freelancers and consultants  
-- Small businesses  
-- Non-legal professionals dealing with documents  
-
-Future expansion may include teams, integrations, and regulated workflows.
-
----
-
-## High-Level Features
-
-### Document Intelligence
-- AI explanation and summaries
-- Risk and issue highlighting
-- Plain-language decoding
-- Semantic search across documents
-
-### Editing & Preparation
-- AI-assisted rewriting
-- PDF editing (lightweight)
-- Templates for common documents
-
-### Workflow
-- Send documents for review or signature
-- Email-based signing flow
-- Reminders for deadlines and payments
-
-### Storage
-- Secure document storage
-- AI-powered semantic search
-- Version-aware history
-
-### File Upload & Processing Policy
-- Files under 10MB processed with client-side preview
-- Files larger than 10MB require authentication and server-side processing
-- Only registered users with active subscriptions can process large files on server
-- Free-tier users limited to smaller files with client-side processing
-- Explicit user consent required before any file upload
-
-### Optional / Later
-- Integrations (Drive, OneDrive, HubSpot, etc.)
-- Mobile apps
-- Advanced compliance modes
-- Cryptographic or blockchain-based proof layers
-
----
-
-## Product Philosophy
-
-- **Clarity over complexity**
-- **Docs before signatures**
-- **Confidence over compliance theater**
-- **Progressive disclosure** (advanced features only when needed)
-
----
-
-## Repository Structure (Planned)
-
-```
-
-/web            # ReactJS web application hosted on Firebase
-/ai             # AI prompts, pipelines, and logic
-/docs           # Product and technical documentation
-/infra          # Infrastructure and deployment configs
-/scripts        # Dev and ops scripts
-/mobile
-```
-
-Exact structure may evolve as the project grows.
-
----
-
-## Technology (Specific Architecture)
-
-The project uses a specific technology stack:
-
-Stack areas:
-- ReactJS web frontend hosted on Firebase
-- Mozilla PDF.js for PDF rendering and parsing
-- PDF-LIB (Hopding/pdf-lib) for client-side PDF editing
-- Firebase Authentication for user identity
-- Firebase Functions as secure proxy for AI services
-- Firebase Hosting for static content delivery
-- Server-side APIs on VPS
-- Gemini SDK for AI model integration (accessed via Firebase Functions)
-- Secure document handling
-- Scalable storage and search
-
-Decisions will favor **clarity, maintainability, and control**.
-
----
-
-## Status
-
-🟡 Early-stage development  
-🧠 Core concept and naming finalized  
-🛠 MVP scope being defined  
-
-This repository will evolve alongside the product.
-
----
-
-## Vision
-
-In the long run, DecoDocs aims to become:
-
-> The place where documents stop being scary, unclear, or risky —  
-> and start being understandable and actionable.
-
----
-
-## License
-
-TBD
-
----
-
-## Contact
-
-Project owner:  
-**Snap Sign Pty Ltd**  
-📧 team@snapsign.com.au  
-🌐 https://decodocs.com
+From repository root:
+- `README.md` - Firebase umbrella overview
+- `docs/README.md` - documentation governance model
+- `DOCS_INDEX.md` - curated index of Markdown docs

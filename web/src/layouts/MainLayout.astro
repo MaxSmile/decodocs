@@ -11,6 +11,7 @@ const {
   canonical,
   image,
   noindex = false,
+  showHeader = true,
 } = Astro.props;
 ---
 
@@ -44,7 +45,7 @@ const {
   </head>
   <body>
     <AuthWatcher client:load transition:persist />
-    <Header client:load transition:persist />
+    {showHeader ? <Header client:load transition:persist /> : null}
     <slot />
   </body>
 </html>

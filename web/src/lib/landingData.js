@@ -446,6 +446,13 @@ export const footerLinks = {
     { label: 'About', href: '/about' },
     { label: 'Contact', href: '/contact' }
   ],
+  docs: [
+    { label: 'Docs home', href: 'https://docs.decodocs.com/' },
+    { label: 'Getting started', href: 'https://docs.decodocs.com/#getting-started' },
+    { label: 'Architecture', href: 'https://docs.decodocs.com/#architecture' },
+    { label: 'API & integrations', href: 'https://docs.decodocs.com/#api-integrations' },
+    { label: 'Deployment', href: 'https://docs.decodocs.com/#deployment' }
+  ],
   legal: [
     { label: 'Privacy', href: '/privacy' },
     { label: 'Terms', href: '/terms' }

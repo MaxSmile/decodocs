@@ -10,8 +10,11 @@ Internal admin UI for managing runtime configuration docs in Firestore.
   - `admin/plans`
   - `admin/flags`
   - `admin/policies`
+- Provides operations dashboard pages for:
+  - `admin_ai_events` (AI function failures)
+  - `admin_reports` (backend exceptions + user bug/feedback reports)
 
-Config is written directly to Firestore so behavior can be changed without redeploying.
+Config is loaded from Firestore and saved via the callable Function `setAdminConfig` so server-side schema checks can reject invalid writes.
 
 ## How it works
 - App entry: `src/main.jsx`
@@ -30,6 +33,10 @@ cd Decodocs/admin
 npm ci
 npm run dev
 ```
+
+Config policy:
+- Do not use `.env*` files (`.env`, `.env.local`, `.env.production`, etc.).
+- Keep mutable runtime config in Firestore `admin/*` docs.
 
 Build:
 ```bash

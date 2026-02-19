@@ -1,6 +1,7 @@
 import { initializeApp, getApp, getApps } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import { getFunctions } from 'firebase/functions';
 
 // Admin portal uses the same Firebase project as the main app.
 // Defaults are the snapsign-au web config; can be overridden via Vite env.
@@ -17,6 +18,7 @@ export const firebaseConfig = {
 export const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+export const fn = getFunctions(app);
 
 export const isSnapsignAdminEmail = (email) =>
   typeof email === 'string' && email.toLowerCase().endsWith('@snapsign.com.au');

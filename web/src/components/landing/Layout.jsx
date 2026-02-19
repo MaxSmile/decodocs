@@ -1,12 +1,12 @@
 import React from 'react';
 
-import Layout from '../Layout.jsx';
+import PublicLayout from '../layouts/PublicLayout.jsx';
 
 const LandingLayout = ({ onOpenPdf = () => {}, children }) => {
   return (
-    <Layout showHeader showFooter showOneTap showDecor onOpenPdf={onOpenPdf}>
+    <PublicLayout showOneTap showDecor onOpenPdf={onOpenPdf}>
       {children}
-    </Layout>
+    </PublicLayout>
   );
 };
 
