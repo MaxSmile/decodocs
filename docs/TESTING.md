@@ -38,6 +38,17 @@ npm run test:e2e
 
 This runs Playwright tests in `web/playwright-tests/`.
 
+**Preview vs dev server (important)**
+- Some specs assert server-served static routes (e.g. `/view/test-docs/*`, direct PDF URLs, pricing direct GET). Those tests require the production-like preview server.
+- To run Playwright against a built preview locally (or in CI):
+
+```bash
+# Run Playwright against the static preview (build + preview)
+E2E_USE_PREVIEW=1 npm run test:e2e
+```
+
+When `E2E_USE_PREVIEW=1` Playwright's configured webServer will execute `npm run build && npm run preview` before tests.
+
 ### Requirements for CI
 
 - Browsers must be installed for Playwright.
@@ -48,16 +59,16 @@ If you need to install them:
 npx playwright install --with-deps
 ```
 
-### Running against a server
+### Running against a server (manual)
 
-If you want Playwright to run against a locally served build, you can:
+If you prefer to serve the built site yourself then run:
 
 ```bash
 npm run build
 npm run preview
 ```
 
-Then run Playwright in a separate terminal.
+Then run Playwright in a separate terminal (no E2E_USE_PREVIEW env var required in this mode).
 
 ## Skyvern (optional visual smoke tests)
 

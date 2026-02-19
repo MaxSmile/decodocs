@@ -28,32 +28,35 @@ const AboutPage = () => {
             </ul>
           </section>
 
-          {/* Scope Definition */}
-          <section className="scope-definition">
-            <h2>What DecoDocs Is — and Is Not</h2>
-            <div className="scope-columns">
-              <div className="scope-column">
-                <h3>Is</h3>
-                <ul>
-                  <li>Pre-signature document analysis</li>
-                  <li>Plain-language explanation</li>
-                  <li>Caveat and unfair-condition detection</li>
-                  <li>Logical inconsistency checks</li>
-                  <li>Ephemeral processing by default</li>
-                </ul>
-              </div>
-              <div className="scope-column">
-                <h3>Is Not</h3>
-                <ul>
-                  <li>A document editor</li>
-                  <li>A document management system</li>
-                  <li>A "sign now, think later" tool</li>
-                  <li>A storage-first SaaS</li>
-                  <li>A replacement for legal advice</li>
-                </ul>
-              </div>
-            </div>
-          </section>
+	          {/* Scope Definition */}
+	          <section className="scope-definition">
+	            <h2>What DecoDocs Is — and Is Not</h2>
+	            <div className="scope-columns">
+	              <div className="scope-column">
+	                <h3>Is</h3>
+	                <ul>
+	                  <li>Pre-signature document analysis</li>
+	                  <li>Plain-language explanation</li>
+	                  <li>Caveat and unfair-condition detection</li>
+	                  <li>Logical inconsistency checks</li>
+	                  <li>Ephemeral processing by default</li>
+	                </ul>
+	              </div>
+	              <div className="scope-column">
+	                <h3>Is Not</h3>
+	                <ul>
+	                  <li>A document editor</li>
+	                  <li>A document management system</li>
+	                  <li>A "sign now, think later" tool</li>
+	                  <li>A storage-first SaaS</li>
+	                  <li>A replacement for legal advice</li>
+	                </ul>
+	              </div>
+	            </div>
+	            <p className="legal-disclaimer">
+	              DecoDocs provides informational analysis and is not legal advice. For legal decisions, consult a qualified professional.
+	            </p>
+	          </section>
 
           {/* Product Clarification */}
           <section className="decodocs-clarification">

@@ -12,6 +12,7 @@ import SignInPage from './components/SignInPage.jsx';
 import SignUpPage from './components/SignUpPage.jsx';
 import ProfilePage from './components/ProfilePage.jsx';
 import SignPage from './components/SignPage.jsx';
+import UseCasePage from './components/landing/UseCasePage.jsx';
 import NotFoundPage from './components/NotFoundPage.jsx';
 import ServerErrorPage from './components/ServerErrorPage.jsx';
 import Layout from './components/Layout.jsx';
@@ -68,6 +69,9 @@ const AppRoutes = () => {
           <ContactPage />
         </Layout>
       } />
+
+      {/* Use cases (landing detail pages) */}
+      <Route path="/use-cases/:slug" element={<UseCasePage />} />
 
       {/* Auth Pages */}
       <Route path="/sign-in" element={

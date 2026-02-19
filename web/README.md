@@ -36,6 +36,15 @@ Runs only the unit tests in the src/__tests__ directory.
 
 Runs the end-to-end tests using Playwright.
 
+- For tests that depend on server-served routes or static test files run the preview build first or set the preview env var:
+
+```bash
+# recommended (build + preview + run Playwright automatically)
+E2E_USE_PREVIEW=1 npm run test:e2e
+```
+
+CI uses preview mode for deterministic route/assertion tests.
+
 ### `npm run build`
 
 Builds the app for production to the `build` folder.\

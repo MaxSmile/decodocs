@@ -68,6 +68,11 @@ const HomePage = () => {
       <HowItWorks />
       <Integrations />
       <FeatureGrid />
+      <section className="px-6 pb-4">
+        <div className="mx-auto w-full max-w-6xl rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-900">
+          DecoDocs provides informational analysis and is not legal advice. For legal decisions, consult a qualified professional.
+        </div>
+      </section>
       <UseCases />
       <SecureByDesign />
     </Layout>

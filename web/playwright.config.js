@@ -33,11 +33,12 @@ export default defineConfig({
     trace: 'on-first-retry',
   },
 
-  /* Run your local dev server before starting the tests */
+  /* Run preview by default for deterministic e2e behavior.
+   * Opt into dev server with E2E_USE_DEV=1 when needed. */
   webServer: {
-    command: (process.env.CI || process.env.E2E_USE_PREVIEW) ? 'npm run build && npm run preview' : 'npm run dev',
+    command: process.env.E2E_USE_DEV ? 'npm run dev' : 'npm run build && npm run preview',
     url: 'http://localhost:3000',
-    reuseExistingServer: !(process.env.CI || process.env.E2E_USE_PREVIEW),
+    reuseExistingServer: !!process.env.E2E_USE_DEV && !process.env.CI,
   },
 
   /* Configure projects for major browsers */

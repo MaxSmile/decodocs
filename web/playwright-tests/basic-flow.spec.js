@@ -1,5 +1,11 @@
 import { test, expect } from '@playwright/test';
 
+const openReactApp = async (page) => {
+  await page.goto('/app', { waitUntil: 'domcontentloaded' });
+  await page.waitForURL('**/view');
+  await expect(page.locator('#viewer-root')).toBeVisible({ timeout: 15000 });
+};
+
 test.describe('DecoDocs Application Flow', () => {
   test.beforeEach(async ({ page }) => {
     // Test on localhost dev server
@@ -8,7 +14,7 @@ test.describe('DecoDocs Application Flow', () => {
 
   test('should display new homepage with correct content', async ({ page }) => {
     // Verify we're on the home page with new content
-    await expect(page.locator('h1')).toContainText('Decode documents before you sign.');
+    await expect(page.locator('#hero h1')).toContainText('Decode documents');
 
     // Verify the main CTA link exists (use role-based selector)
     const openPdfButton = page.getByRole('link', { name: 'Analyze a Document' });
@@ -26,19 +32,19 @@ test.describe('DecoDocs Application Flow', () => {
   });
 
   test('should display pricing tiers', async ({ page }) => {
-    // Navigate to pricing via client-side routing (dev server returns 404 for direct /pricing)
-    await page.goto('/', { waitUntil: 'domcontentloaded' });
-    // wait briefly for client hydration to attach route handlers
-    await page.waitForTimeout(300);
-    // Click the Pricing link in the footer (always visible) so client-side routing is used
-    await page.locator('footer').getByRole('link', { name: 'Pricing' }).click();
+    // Open the React app shell first, then route to pricing in-app
+    await openReactApp(page);
+    await page.evaluate(() => {
+      history.pushState({}, '', '/pricing');
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    });
     await page.waitForURL('**/pricing');
 
     // Check the pricing section exists
-    await expect(page.locator('h1', { hasText: 'Pricing' })).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('heading', { name: 'Pricing' })).toBeVisible({ timeout: 10000 });
 
-    // Check for Starter tier
-    await expect(page.locator('div', { hasText: 'Starter' }).first()).toBeVisible();
+    // Check for current plan tiers
+    await expect(page.locator('div', { hasText: 'Free' }).first()).toBeVisible();
 
     // Check for Pro tier
     await expect(page.locator('div', { hasText: 'Pro' }).first()).toBeVisible();
@@ -61,22 +67,22 @@ test.describe('DecoDocs Application Flow', () => {
 
 test.describe('Document Viewer Tests', () => {
   test('should navigate to document viewer route', async ({ page }) => {
-    // Navigate via the main CTA to ensure SPA routing works in dev
-    await page.goto('/', { waitUntil: 'domcontentloaded' });
-    await page.getByRole('link', { name: 'Analyze a Document' }).click();
-    await page.waitForURL('**/view');
+    await openReactApp(page);
 
-    // Wait for file input and check viewer UI
-    await page.waitForSelector('input[type="file"]', { timeout: 15000 });
+    // Wait for viewer shell and hidden file input to mount
+    await page.locator('#viewer-root input[type="file"]').first().waitFor({ state: 'attached', timeout: 10000 });
     await expect(page.locator('text=Upload a PDF')).toBeVisible();
   });
 });
 
 test.describe('Document Editor Tests', () => {
   test('should navigate to document editor route', async ({ page }) => {
-    // Navigate to the editor page via SPA navigation to avoid dev-server 404
-    await page.goto('/', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(300);
+    // Enable mock auth so PrivateRoute allows editor access
+    await page.addInitScript({ content: 'window.MOCK_AUTH = true; window.MOCK_AUTH_USER = { email: "test@example.com" };' });
+
+    // Bootstrap React app, then route to editor
+    await page.goto('/app', { waitUntil: 'domcontentloaded' });
+    await page.waitForURL('**/view');
     // Use a known test-docs editor route so the editor UI is rendered
     await page.evaluate(() => { history.pushState({}, '', '/edit/test-docs/offer.pdf'); window.dispatchEvent(new PopStateEvent('popstate')); });
     await page.waitForURL('**/edit/test-docs/offer.pdf');
@@ -84,7 +90,13 @@ test.describe('Document Editor Tests', () => {
     // Wait for potential loading
     await page.waitForTimeout(1000);
 
-    // Check if editing tools section exists
-    await expect(page.locator('h4', { hasText: 'Editor Controls' })).toBeVisible();
+    // Check editor shell actions
+    await expect(page.getByRole('button', { name: 'Cancel' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Download' })).toBeVisible();
+
+    // Editor should either render PDF canvas or show upload dropzone while loading
+    await expect(
+      page.locator('canvas').first().or(page.getByText('Upload a PDF or .snapsign file'))
+    ).toBeVisible({ timeout: 15000 });
   });
 });

@@ -395,7 +395,7 @@ export const pricingPlans = [
     cta: 'Upgrade to Pro',
     isPopular: true,
     highlights: [
-      'Unlimited AI analysis',
+      'No token cap enforced today (fair use)',
       'OCR for scanned PDFs',
       '5GB private cloud storage',
       'Priority vision models'

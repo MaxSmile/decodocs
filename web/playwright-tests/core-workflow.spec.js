@@ -4,161 +4,80 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const dummyPdfPath = path.join(__dirname, '../public/test-docs/dummy.pdf');
 
-/**
- * Core Document Workflow Test Plan Implementation
- * Covers: Ingestion -> Analysis -> Visualization
- */
+const openViewer = async (page) => {
+  await page.goto('/app', { waitUntil: 'domcontentloaded' });
+  await page.waitForURL('**/view');
+  await expect(page.locator('#viewer-root')).toBeVisible({ timeout: 15000 });
+};
+
+const uploadDummyPdf = async (page) => {
+  const input = page.locator('#viewer-root input[type="file"]').first();
+  await input.waitFor({ state: 'attached', timeout: 10000 });
+  await input.setInputFiles(dummyPdfPath);
+  await expect(page.locator('canvas').first()).toBeVisible({ timeout: 30000 });
+  await expect(page.locator('#viewer-toolbar')).toBeVisible({ timeout: 10000 });
+};
 
 test.describe.serial('Core Document Workflow', () => {
-
   test.beforeEach(async ({ page }) => {
-    // Inject Mock Auth flag
-    await page.addInitScript({ content: 'window.MOCK_AUTH = true;' });
-
-    page.on('console', msg => console.log(`BROWSER LOG: ${msg.text()}`));
-    page.on('pageerror', err => console.log(`BROWSER ERROR: ${err}`));
-
-    // Navigate to the app (uses baseURL from config)
-    await page.goto('/', { waitUntil: 'domcontentloaded' });
-    // Wait for the app to load
-    await expect(page.locator('h1').first()).toBeVisible({ timeout: 10000 });
+    await page.addInitScript({
+      content: 'window.MOCK_AUTH = true;',
+    });
   });
 
-  // 3.1 Document Ingestion
   test.describe('3.1 Document Ingestion', () => {
-
     test('ING-01: Initial State', async ({ page }) => {
-      // Navigate to viewer via client-side route (SPA-friendly)
-      await page.goto('/', { waitUntil: 'domcontentloaded' });
-      // wait for client hydration to attach route handlers
-      await page.waitForTimeout(1000);
-      // Use pushState (client router will handle it once hydrated)
-      await page.evaluate(() => { history.pushState({}, '', '/view'); window.dispatchEvent(new PopStateEvent('popstate')); });
-      await page.waitForURL('**/view');
-
-      // The PDFDisplay component shows: "Upload a PDF or .snapsign file"
-      await page.waitForSelector('input[type="file"]', { timeout: 10000 });
-      await expect(page.locator('text=Upload a PDF')).toBeVisible({ timeout: 10000 });
+      await openViewer(page);
+      await expect(page.getByText('Upload a PDF or .snapsign file')).toBeVisible({ timeout: 10000 });
+      await page.locator('#viewer-root input[type="file"]').first().waitFor({ state: 'attached', timeout: 10000 });
     });
 
     test('ING-02 to ING-05: File Selection and Rendering', async ({ page }) => {
-      // Navigate to viewer via client-side route (avoid dev-server 404)
-      await page.goto('/', { waitUntil: 'domcontentloaded' });
-      // wait for client hydration to attach route handlers
-      await page.waitForTimeout(1000);
-      // Use pushState (client router will handle it once hydrated)
-      await page.evaluate(() => { history.pushState({}, '', '/view'); window.dispatchEvent(new PopStateEvent('popstate')); });
-      await page.waitForURL('**/view');
-
-      // Use a dummy PDF file from public/test-docs/dummy.pdf
-      await page.waitForSelector('input[type="file"]', { timeout: 10000 });
-      const fileInput = page.locator('input[type="file"]');
-      const pdfPath = path.join(__dirname, '../public/test-docs/dummy.pdf');
-
-      // ING-02: File Selection (simulate by setting input files)
-      await fileInput.setInputFiles(pdfPath);
-
-      // ING-03: Loading State
-      // Loading message will briefly appear
-
-      // ING-04: Render Success - wait for canvas to appear
-      const canvas = page.locator('canvas');
-      await expect(canvas).toBeVisible({ timeout: 30000 }); // Wait for PDF.js to render
-
-      // Verify placeholder is gone
-      await expect(page.locator('text=Upload a PDF')).not.toBeVisible();
+      await openViewer(page);
+      await uploadDummyPdf(page);
+      await expect(page.getByText('Upload a PDF or .snapsign file')).not.toBeVisible();
     });
 
     test('ING-06: Zoom Controls', async ({ page }) => {
-      // Navigate to viewer and upload PDF
-      await page.goto('/', { waitUntil: 'domcontentloaded' });
-      // wait for client hydration then pushState to /view
-      await page.waitForTimeout(1000);
-      await page.evaluate(() => { history.pushState({}, '', '/view'); window.dispatchEvent(new PopStateEvent('popstate')); });
-      await page.waitForURL('**/view');
-      const pdfPath = path.join(__dirname, '../public/test-docs/dummy.pdf');
-      await page.waitForSelector('input[type="file"]', { timeout: 10000 });
-      await page.locator('input[type="file"]').setInputFiles(pdfPath);
-      await expect(page.locator('canvas')).toBeVisible({ timeout: 30000 });
+      await openViewer(page);
+      await uploadDummyPdf(page);
 
-      // Find Zoom In button in the controls
-      const zoomInBtn = page.locator('button', { hasText: 'Zoom In' });
-
-      // Zoom level is displayed as a percentage (e.g., "150%")
-      const zoomDisplay = page.locator('text=/%/');
-
-      // Initial zoom should be 150%
+      const zoomDisplay = page.locator('#viewer-page-controls span').filter({ hasText: '%' }).first();
       const initialZoom = await zoomDisplay.textContent();
 
-      // Click zoom in
-      await zoomInBtn.click();
+      await page.locator('#viewer-page-controls button[title="Zoom In"]').click();
 
-      // Verify zoom level changed
-      const newZoom = await zoomDisplay.textContent();
-      expect(newZoom).not.toBe(initialZoom);
+      await expect.poll(async () => zoomDisplay.textContent(), { timeout: 5000 }).not.toBe(initialZoom);
     });
   });
 
-  // 3.2 feature: Toolbox & Analysis Triggering
   test.describe('3.2 Toolbox & Analysis Triggering', () => {
-
     test('BTN-01: Auth Enforcement (Guest)', async ({ page }) => {
-      // Override MOCK_AUTH to simulate unauthenticated state
-      await page.addInitScript({ content: 'window.MOCK_AUTH = true; window.MOCK_AUTH_USER = null;' });
+      await page.addInitScript({
+        content: 'window.MOCK_AUTH = true; window.MOCK_AUTH_USER = null;',
+      });
 
-      // Navigate to viewer and upload
-      await page.goto('/', { waitUntil: 'domcontentloaded' });
-      // wait for client hydration then pushState to /view
-      await page.waitForTimeout(1000);
-      await page.evaluate(() => { history.pushState({}, '', '/view'); window.dispatchEvent(new PopStateEvent('popstate')); });
-      await page.waitForURL('**/view');
-      const pdfPath = path.join(__dirname, '../public/test-docs/dummy.pdf');
-      await page.waitForSelector('input[type="file"]', { timeout: 10000 });
-      await page.locator('input[type="file"]').setInputFiles(pdfPath);
-      await expect(page.locator('canvas')).toBeVisible({ timeout: 30000 });
+      await openViewer(page);
+      await uploadDummyPdf(page);
 
-      // Check if buttons are disabled when not authenticated
-      const analyzeBtn = page.getByRole('button', { name: 'Analyze Document' });
-      await expect(analyzeBtn).toBeDisabled();
-
-      const explainBtn = page.getByRole('button', { name: 'Explain Selection' });
-      await expect(explainBtn).toBeDisabled();
+      await expect(page.getByRole('button', { name: 'Deep Analysis' })).toBeDisabled();
+      await expect(page.getByRole('button', { name: 'Highlight Risks' })).toBeDisabled();
     });
 
     test('BTN-02: Auth Enablement (Authenticated)', async ({ page }) => {
-      // Valid PDF loaded state (authenticated via default MOCK_AUTH)
-      await page.goto('/', { waitUntil: 'domcontentloaded' });
-      // wait for client hydration then pushState to /view
-      await page.waitForTimeout(1000);
-      await page.evaluate(() => { history.pushState({}, '', '/view'); window.dispatchEvent(new PopStateEvent('popstate')); });
-      await page.waitForURL('**/view');
-      const pdfPath = path.join(__dirname, '../public/test-docs/dummy.pdf');
-      await page.waitForSelector('input[type="file"]', { timeout: 10000 });
-      await page.locator('input[type="file"]').setInputFiles(pdfPath);
-      await expect(page.locator('canvas')).toBeVisible({ timeout: 30000 });
+      await openViewer(page);
+      await uploadDummyPdf(page);
 
-      // Wait for auth to complete
-      await page.waitForTimeout(500);
-
-      // Check if buttons are enabled when authenticated
-      const analyzeBtn = page.getByRole('button', { name: 'Analyze Document' });
-      await expect(analyzeBtn).toBeEnabled();
-
-      const explainBtn = page.getByRole('button', { name: 'Explain Selection' });
-      await expect(explainBtn).toBeEnabled();
+      await expect(page.getByRole('button', { name: 'Deep Analysis' })).toBeEnabled();
+      await expect(page.getByRole('button', { name: 'Highlight Risks' })).toBeEnabled();
     });
   });
 
-  // Mocking API for Analysis (Used in 3.3 and 3.4)
   test.describe('3.3 & 3.4 Analysis Results & Annotations (Mocked)', () => {
-
     test.beforeEach(async ({ page }) => {
-      // Mock the analyzeText endpoint
-      await page.route('**/analyzeText', async route => {
-        console.log('Intercepted analyzeText');
-        // Return a delayed success response
-        await new Promise(r => setTimeout(r, 1000));
+      await page.route('**/analyzeText', async (route) => {
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
@@ -172,166 +91,123 @@ test.describe.serial('Core Document Workflow', () => {
                   title: 'High Risk Clause',
                   severity: 'high',
                   whyItMatters: 'Immediate termination without cause.',
-                  whatToCheck: ['Check notice period', 'Check definitions']
-                }
+                  whatToCheck: ['Check notice period', 'Check definitions'],
+                },
               ],
-              recommendations: ["Negotiate notice period."]
-            }
-          })
+            },
+          }),
         });
       });
 
-
-      // Navigate to viewer via client-side route (avoid dev-server 404)
-      await page.goto('/', { waitUntil: 'domcontentloaded' });
-      // Click the Analyze CTA so client-side routing is used
-      await page.getByRole('link', { name: 'Analyze a Document' }).click();
-      await page.waitForURL('**/view');
-      const pdfPath = path.join(__dirname, '../public/test-docs/dummy.pdf');
-      await page.waitForSelector('input[type="file"]', { timeout: 10000 });
-      await page.locator('input[type="file"]').setInputFiles(pdfPath);
-      await expect(page.locator('canvas')).toBeVisible({ timeout: 30000 });
+      await openViewer(page);
+      await uploadDummyPdf(page);
     });
 
     test('ANL-01 & ANL-02: Analyze Trigger and Completion', async ({ page }) => {
-      // Find the Analyze Document button
-      const analyzeBtn = page.getByRole('button', { name: 'Analyze Document' });
+      const summarizeBtn = page.getByRole('button', { name: 'Summarize Key Points' });
+      await expect(summarizeBtn).toBeEnabled();
+      await summarizeBtn.click();
 
-      // Verify button is enabled
-      await expect(analyzeBtn).toBeEnabled();
-
-      // ANL-01: Click to trigger analysis
-      // Set up a promise to listen for the loading state before clicking
-      const loadingPromise = page.waitForSelector('button:has-text("Analyzing...")', { timeout: 2000 }).catch(() => null);
-
-      await analyzeBtn.click();
-
-      // Try to catch the "Analyzing..." state, but don't fail if we miss it
-      await loadingPromise;
-
-      // ANL-02: Wait for analysis completion
-      await expect(analyzeBtn).toContainText('Analyze Document', { timeout: 10000 });
-      await expect(analyzeBtn).toBeEnabled();
-
-      // Verify analysis completed successfully
-      await page.waitForTimeout(500);
+      await expect(page.getByText('Analysis Results')).toBeVisible({ timeout: 10000 });
+      await expect(page.getByText('This is a summary of the document.')).toBeVisible({ timeout: 10000 });
     });
 
     test('RES-01 to RES-05: Results Visualization', async ({ page }) => {
-      // Trigger analysis first
-      const analyzeBtn = page.getByRole('button', { name: 'Analyze Document' });
-      await analyzeBtn.click();
+      await page.getByRole('button', { name: 'Summarize Key Points' }).click();
 
-      // Wait for analysis to complete
-      await expect(analyzeBtn).toContainText('Analyze Document', { timeout: 10000 });
-
-      // Wait a bit for UI to update
-      await page.waitForTimeout(1000);
-
-      // RES-01: Check for analysis results panel (might be in a different container)
-      // The results are displayed but structure may vary
-      // Just verify the analysis completed successfully
-      await expect(analyzeBtn).toBeEnabled();
+      await expect(page.getByText('Identified Risks')).toBeVisible({ timeout: 10000 });
+      await expect(page.getByText('High Risk Clause')).toBeVisible({ timeout: 10000 });
+      await expect(page.getByText('Check notice period', { exact: true })).toBeVisible({ timeout: 10000 });
     });
 
     test('OVL-01 to OVL-03: Canvas Annotations', async ({ page }) => {
-      // Trigger analysis first
-      const analyzeBtn = page.getByRole('button', { name: 'Analyze Document' });
-      await analyzeBtn.click();
-
-      // Wait for analysis to complete
-      await expect(analyzeBtn).toContainText('Analyze Document', { timeout: 10000 });
-
-      // Wait for potential annotations to render
-      await page.waitForTimeout(1000);
-
-      // Verify analysis completed successfully (annotations are internal implementation)
-      await expect(analyzeBtn).toBeEnabled();
-    });
-  });
-
-  // 3.5 Specific Tools
-  test.describe('3.5 Specific Tools', () => {
-    test.beforeEach(async ({ page }) => {
-      // Navigate to viewer and upload PDF
-      await page.goto('/', { waitUntil: 'domcontentloaded' });
-      // wait for client hydration then pushState to /view
-      await page.waitForTimeout(1000);
-      await page.evaluate(() => { history.pushState({}, '', '/view'); window.dispatchEvent(new PopStateEvent('popstate')); });
-      await page.waitForURL('**/view');
-      const pdfPath = path.join(__dirname, '../public/test-docs/dummy.pdf');
-      await page.waitForSelector('input[type="file"]', { timeout: 10000 });
-      await page.locator('input[type="file"]').setInputFiles(pdfPath);
-      await expect(page.locator('canvas')).toBeVisible({ timeout: 30000 });
-
-      // Force enable buttons (keep existing behaviour)
-      await page.evaluate(() => {
-        document.querySelectorAll('button').forEach(b => b.removeAttribute('disabled'));
-      });
-    });
-
-    test('TOOL-01: Plain English', async ({ page }) => {
-      // Mock translateToPlainEnglish
-      await page.route('**/translateToPlainEnglish', async route => {
+      await page.route('**/highlightRisks', async (route) => {
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
           body: JSON.stringify({
-            success: true,
-            translation: {
-              originalText: 'Original Legalese',
-              plainEnglishTranslation: 'Simple English'
-            }
-          })
+            ok: true,
+            risks: {
+              summary: { totalRisks: 1 },
+              items: [
+                {
+                  severity: 'high',
+                  description: 'Bad thing',
+                  explanation: 'It is bad.',
+                },
+              ],
+            },
+          }),
         });
       });
 
-      page.on('dialog', async dialog => {
-        // Verify the dialog contains the expected content
+      page.once('dialog', async (dialog) => {
+        await dialog.accept();
+      });
+
+      await page.getByRole('button', { name: 'Highlight Risks' }).click();
+      await expect(page.locator('.risk-badge').first()).toBeVisible({ timeout: 10000 });
+    });
+  });
+
+  test.describe('3.5 Specific Tools', () => {
+    test.beforeEach(async ({ page }) => {
+      await openViewer(page);
+      await uploadDummyPdf(page);
+    });
+
+    test('TOOL-01: Plain English', async ({ page }) => {
+      await page.route('**/translateToPlainEnglish', async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            ok: true,
+            translation: {
+              originalText: 'Original Legalese',
+              plainEnglishTranslation: 'Simple English',
+            },
+          }),
+        });
+      });
+
+      page.once('dialog', async (dialog) => {
         expect(dialog.message()).toContain('Original');
         expect(dialog.message()).toContain('Plain English');
         await dialog.accept();
       });
 
-      await page.getByRole('button', { name: 'Translate to Plain English' }).click();
-
-      // Wait a bit for dialog to appear
-      await page.waitForTimeout(1000);
+      await page.getByRole('button', { name: 'Plain English' }).click();
     });
 
-    // TOOL-02 Highlight Risks
     test('TOOL-02: Highlight Risks', async ({ page }) => {
-      // Mock highlightRisks
-      await page.route('**/highlightRisks', async route => {
+      await page.route('**/highlightRisks', async (route) => {
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
           body: JSON.stringify({
-            success: true,
+            ok: true,
             risks: {
               summary: { totalRisks: 1 },
-              items: [{
-                riskLevel: 'high',
-                description: 'Bad thing',
-                explanation: 'It is bad.'
-              }]
-            }
-          })
+              items: [
+                {
+                  severity: 'high',
+                  description: 'Bad thing',
+                  explanation: 'It is bad.',
+                },
+              ],
+            },
+          }),
         });
       });
 
-      page.on('dialog', async dialog => {
-        // Verify the dialog shows the risk count
-        expect(dialog.message()).toContain('Found');
-        expect(dialog.message()).toContain('risk');
+      page.once('dialog', async (dialog) => {
+        expect(dialog.message()).toContain('Found 1 risks');
         await dialog.accept();
       });
 
       await page.getByRole('button', { name: 'Highlight Risks' }).click();
-
-      // Wait for UI to update
-      await page.waitForTimeout(1000);
+      await expect(page.locator('.risk-badge').first()).toBeVisible({ timeout: 10000 });
     });
   });
-
 });

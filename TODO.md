@@ -139,8 +139,12 @@ Remaining cross-project dependency:
 - [ ] Testing:
   - [x] Expand Playwright: cover "auth failure still renders PDF", and "analysis buttons gated until authenticated"
   - [x] Add CI-friendly `npm run test:unit` + `npm run test:e2e` runbook for the web app
+  - [ ] Add a Playwright flow for anonymous → provider link → authenticated gating removal.
+  - [ ] Add a CI workflow that runs Playwright against the built preview (E2E_USE_PREVIEW=1) so route/static-file tests pass in CI.
+  - [ ] Mark route-dependent Playwright specs as preview-only or add `test.skip(!process.env.E2E_USE_PREVIEW, ...)` guards so dev runs don't fail on server-route assertions.
+  - [ ] Add documentation in `docs/TESTING.md` and `web/README.md` showing how to run E2E in preview mode locally.
 
-## Phase 2 - Cloud Storage Integrations (Target: Q2 2026)
+## Phase 2 - Cloud Storage Integrations 
 - [x] Define the "Open vs Upload" contract (Free vs Pro) as a spec:
   - [x] Default is ephemeral open (no storage)
   - [x] Upload/save is explicit and paid (history/export)
@@ -160,7 +164,7 @@ Remaining cross-project dependency:
   - [ ] No background sync or indexing
   - [ ] Clear user messaging about what is (not) stored
 
-## Phase 3 - Paid Depth + Multi-Document (Target: Q3 2026)
+## Phase 3 - Paid Depth + Multi-Document 
 - [ ] Define "Premium" value clearly (what's expensive and why):
   - [ ] DOCX conversion pipeline scope and limits
   - [ ] Multi-document session UX (bundle upload, ordering, references)
@@ -169,7 +173,7 @@ Remaining cross-project dependency:
   - [ ] UI for selecting which docs are in scope
   - [ ] Output schema for cross-document contradictions
 
-## Phase 4 - Mobile Apps (Target: Q4 2026)
+## Phase 4 - Mobile Apps 
 - [ ] Decide v1 architecture: WebView wrapper vs native shell + deep links
 - [ ] Implement "Open in DecoDocs" from share sheet (iOS + Android)
 - [ ] Establish auth + analytics parity with web (anonymous by default, upgrade path)
@@ -214,19 +218,20 @@ Remaining cross-project dependency:
   - persists to `doc_classifications/{docHash}`
 - [x] Add callable `getDocumentTypeState`:
   - returns detected + override + effective type
-- [~] Add callable `analyzeByType`:
+- [x] Add callable `analyzeByType`:
   - [x] resolves effective type server-side
   - [x] loads validation spec JSON server-side (via static `document-types.index.json` + `validation/*.json`)
-  - [ ] runs LLM extraction/validation server-side using the spec + returns structured JSON per-type
+  - [x] runs LLM extraction/validation server-side using the spec + returns structured JSON per-type
+  - notes: Implemented in `functions/index.js` (Gemini). Follow-up: expand unit/integration/E2E coverage and remove remaining "placeholder" references in docs.
 - [x] Docs: `docs/CLASSIFICATIONS_INTEGRATION.md` is the integration plan.
 
 ### Validation schema authoring (docs)
-- [x] Define prompt-pack output schemas (JSON) for:
+- [ ] Define prompt-pack output schemas (JSON) for:
   - [x] Company policies / governance docs (mandatory rules, vague language, conflicts, ownership/enforcement) — docs/validation/company-policy.md
   - [x] SOPs / guides (steps, prerequisites, ambiguous instructions, responsibility gaps, contradictions) — docs/validation/sop-procedure.md
-  - [x] Informational docs (claims vs evidence, logic gaps) — docs/validation/informational-document.md
-  - [x] Decision/evaluation docs (assumptions, missing data) — docs/validation/decision-evaluation.md
-  - [x] Representation docs (CV/bio: inconsistencies, omissions) — docs/validation/representation-cv-bio.md
+  - [ ] Informational docs (claims vs evidence, logic gaps)
+  - [ ] Decision/evaluation docs (assumptions, missing data)
+  - [ ] Representation docs (CV/bio: inconsistencies, omissions)
   - [x] Invoices (totals/tax/entity checks; cross-check vs PO/contract if provided) — docs/validation/invoice.md
   - [x] Job offer / offer letter — docs/validation/job-offer.md
   - [x] Associations constitution/charter — docs/validation/association-constitution.md
@@ -291,7 +296,7 @@ Remaining cross-project dependency:
     - Acceptance criteria:
       - A user sees the same tagline on Home, About, Viewer header, and browser tab title.
       - No “Act with confidence” vs “Sign with clarity” mismatch remains.
-  - [ ] Rewrite the HomePage hero + “trust line” into precise, benefit-led copy (exact line edits)
+  - [x] Rewrite the HomePage hero + “trust line” into precise, benefit-led copy (exact line edits)
     - Why: current hero is directionally good but mixes “Open” and “Sign” positioning; trust/privacy line is vague and can be interpreted as local-only processing.
     - Replace hero headline + subtitle with one of these *approved* sets (pick exactly one set and apply verbatim):
       - Set A (decision-first):
@@ -303,8 +308,8 @@ Remaining cross-project dependency:
     - Rewrite trust line to a factual, non-ambiguous statement (apply verbatim):
       - `Free: we don’t store your files. Pro: optional secure storage and deeper analysis.`
     - References:
-      - Hero H1 + subtitle + CTAs + trust line: `decodocs-repo/web/src/components/HomePage.jsx:180`, `decodocs-repo/web/src/components/HomePage.jsx:181`, `decodocs-repo/web/src/components/HomePage.jsx:185`, `decodocs-repo/web/src/components/HomePage.jsx:192`
-  - [ ] Fix HomePage navigation + footer links so every link works (no dead anchors)
+      - Hero H1 + subtitle + CTAs + trust line: `web/src/components/landing/Hero.jsx:12`, `web/src/components/landing/Hero.jsx:18`, `web/src/components/landing/Hero.jsx:21`, `web/src/components/landing/Hero.jsx:39`
+  - [x] Fix HomePage navigation + footer links so every link works (no dead anchors)
     - Why: multiple links point to anchors that don’t exist, which is a trust and UX killer (and looks broken to crawlers).
     - Tasks (perform all):
       - Add `id="product"` to the section you want “Product” to scroll to (recommended: “How it works” section).
@@ -315,21 +320,19 @@ Remaining cross-project dependency:
       - HomePage footer anchors: `decodocs-repo/web/src/components/HomePage.jsx:356`
       - Layout footer anchors: `decodocs-repo/web/src/components/Layout.jsx:59`
       - AboutPage footer anchors: `decodocs-repo/web/src/components/AboutPage.jsx:110`
-  - [ ] Make Pricing copy internally consistent and non-placeholder (align with real entitlement limits)
+  - [x] Make Pricing copy internally consistent and non-placeholder (align with real entitlement limits)
     - Why: pricing table contains ambiguous placeholders that reduce conversion and can create support issues.
     - Tasks (perform all):
-      - Replace `N AI calls per document` with a real number or a precise bound; do not ship placeholders.
-        - Recommended (matches current backend constants): `Up to 3 AI calls per document` for Pro.
-      - Decide whether to expose Free/Pro limits publicly:
-        - If yes: ensure Free and Pro limits match backend (`FREE_AI_CALLS_PER_DOC`, `PRO_AI_CALLS_PER_DOC`) and are reflected in tier bullets.
-        - If no: remove numbers entirely and phrase as “limited” vs “more” (but still remove `N` placeholder).
-      - Replace the pricing description sentence with a clearer value comparison (apply verbatim):
-        - `Free covers the essentials. Pro adds deeper analysis, OCR for scanned PDFs, and optional storage.`
+      - Do not describe limits as “AI calls per document”. Limits are token-based and the number of full-document analyses varies by document size.
+      - If showing limits publicly, match the real backend limits:
+        - Anonymous trial: `ANON_TOKENS_PER_UID` (currently 20k total)
+        - Free account: `FREE_TOKENS_PER_DAY` (currently 40k/day)
+        - Pro: no token cap enforced today (subject to fair use / abuse controls)
+      - Add one plain-language sentence clarifying the above in Pricing “Notes”.
     - References:
-      - Placeholder line: `decodocs-repo/web/src/components/HomePage.jsx:105`
-      - Pricing description: `decodocs-repo/web/src/components/HomePage.jsx:287`
-      - Backend limits source of truth: `functions/index.js:39`
-  - [ ] Remove publicly-hostile wording from Roadmap and feature list (replace “kill feature” copy)
+      - Pricing copy: `web/src/components/PricingPage.jsx:1`
+      - Backend limits source of truth: `functions/index.js:54`
+  - [x] Remove publicly-hostile wording from Roadmap and feature list (replace “kill feature” copy)
     - Why: “kill feature” reads as internal jargon and undermines trust; feature names should describe user value.
     - Tasks:
       - Replace `HubSpot capture (kill feature)` with a user-facing label (choose one):
@@ -339,17 +342,6 @@ Remaining cross-project dependency:
     - References:
       - Feature bullet: `decodocs-repo/web/src/components/HomePage.jsx:85`
       - Roadmap item: `decodocs-repo/web/src/components/HomePage.jsx:135`
-  - [ ] Replace the placeholder Sign page with a conversion-safe “Coming soon” page (exact content + CTA)
-    - Why: “coming soon, check back later” is a dead end; use it to route users to the core value (analysis) or collect intent.
-    - Tasks (perform all):
-      - Replace copy with:
-        - Title: `Sign PDFs (Coming soon)`
-        - Body: `We’re building a signing workflow with audit trail and verification. In the meantime, you can analyze a PDF before you sign.`
-      - Replace “Go Back” CTA with two clear CTAs:
-        - Primary: `Analyze a PDF` → navigates to `/` and triggers the “Open PDF” flow
-        - Secondary: `Join the waitlist` → navigates to `/contact` (or opens `mailto:contact@snapsign.com` with subject `DecoDocs signing waitlist`)
-    - References:
-      - Current placeholder: `decodocs-repo/web/src/App.jsx:13`, `decodocs-repo/web/src/App.jsx:18`
   - [ ] Improve microcopy for AI feature gating (remove technical language, add “why” + next step)
     - Why: current UI surfaces “Firebase” and uses blocking `alert()`; users need plain language and clear action.
     - Tasks:
@@ -364,20 +356,20 @@ Remaining cross-project dependency:
       - Banner strings: `decodocs-repo/web/src/components/Layout.jsx:35`
       - Current alerts: `decodocs-repo/web/src/components/DocumentViewer.jsx:281`, `decodocs-repo/web/src/components/DocumentViewer.jsx:349`, `decodocs-repo/web/src/components/HomePage.jsx:43`
       - Auth error card: `decodocs-repo/web/src/components/AuthErrorNotification.jsx:37`
-  - [ ] Add “Not legal advice” disclaimer consistently where decisions happen (Home + Viewer + About)
+  - [x] Add “Not legal advice” disclaimer consistently where decisions happen (Home + Viewer + About)
     - Why: this reduces legal ambiguity and sets correct expectations at the moment users rely on results.
     - Tasks:
       - Add a short disclaimer block (apply verbatim):
         - `DecoDocs provides informational analysis and is not legal advice. For legal decisions, consult a qualified professional.`
       - Place it in:
-        - HomePage near Pricing (below pricing explanation)
+        - Landing Home hero (below CTAs)
         - DocumentViewer near Analysis results panel (above “Analysis Results” header)
         - About page (in the “What DecoDocs Is — and Is Not” section)
-    - References:
-      - Pricing section: `decodocs-repo/web/src/components/HomePage.jsx:283`
-      - Analysis results panel render: `decodocs-repo/web/src/components/DocumentViewer.jsx:550`
-      - About “Is Not”: `decodocs-repo/web/src/components/AboutPage.jsx:53`
-  - [ ] SEO basics: define one canonical title/description + OpenGraph/Twitter meta (exact fields)
+      - References:
+        - Home disclaimer: `web/src/pages/index.astro:41`
+        - Viewer disclaimer: `web/src/components/AnalysisResults.jsx:23`
+        - About disclaimer: `web/src/components/AboutPage.jsx:56`
+  - [x] SEO basics: define one canonical title/description + OpenGraph/Twitter meta (exact fields)
     - Why: current HTML head is minimal and inconsistent between `web/index.html` and `web/public/index.html`; crawlers and link previews need stable metadata.
     - Tasks:
       - Choose one canonical title (≤ 60 chars) and one meta description (≤ 155 chars) and implement them in `web/index.html`.
@@ -392,7 +384,7 @@ Remaining cross-project dependency:
     - References:
       - Current Vite title: `decodocs-repo/web/index.html:7`
       - Current legacy description/title: `decodocs-repo/web/public/index.html:9`, `decodocs-repo/web/public/index.html:18`
-  - [ ] Create real Legal/Contact pages with scoped, copy-complete content (no placeholders)
+  - [x] Create real Legal/Contact pages with scoped, copy-complete content (no placeholders)
     - Why: links exist across multiple pages but don’t resolve; legal/trust pages improve conversion and reduce support.
     - Tasks (perform all):
       - Add `/privacy` page with:

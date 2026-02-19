@@ -100,6 +100,17 @@
   font-size: 1.1rem;
 }
 
+.legal-disclaimer {
+  margin-top: 2rem;
+  padding: 1rem 1.25rem;
+  background: #f8fafc;
+  border: 1px solid #e1e5e9;
+  border-radius: 10px;
+  color: #4a5568;
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
 /* DecoDocs Clarification */
 .decodocs-clarification {
   margin-bottom: 3rem;

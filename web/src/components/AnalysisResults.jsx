@@ -17,11 +17,17 @@ import RiskItem from './RiskItem.jsx';
  */
 const AnalysisResults = ({ analysis }) => {
   const meta = analysis?._meta || { status: analysis ? 'success' : 'idle' };
+  const LegalDisclaimer = () => (
+    <p className="text-xs text-gray-500 m-0 mb-2">
+      DecoDocs provides informational analysis and is not legal advice. For legal decisions, consult a qualified professional.
+    </p>
+  );
 
   // Empty state
   if (!analysis || meta.status === 'idle') {
     return (
       <div className="bg-white rounded-lg p-4 shadow-md mt-2.5">
+        <LegalDisclaimer />
         <h4 className="mt-0 text-gray-800 border-b border-gray-300 pb-2">
           Analysis Results
         </h4>
@@ -34,6 +40,7 @@ const AnalysisResults = ({ analysis }) => {
   if (meta.status === 'loading') {
     return (
       <div className="bg-white rounded-lg p-4 shadow-md mt-2.5">
+        <LegalDisclaimer />
         <h4 className="mt-0 text-gray-800 border-b border-gray-300 pb-2">
           Analysis Results
         </h4>
@@ -49,6 +56,7 @@ const AnalysisResults = ({ analysis }) => {
   if (meta.status === 'error') {
     return (
       <div className="bg-white rounded-lg p-4 shadow-md mt-2.5">
+        <LegalDisclaimer />
         <h4 className="mt-0 text-gray-800 border-b border-gray-300 pb-2">
           Analysis Results
         </h4>
@@ -66,6 +74,7 @@ const AnalysisResults = ({ analysis }) => {
 
   return (
     <div className="bg-white rounded-lg p-4 shadow-md mt-2.5">
+      <LegalDisclaimer />
       <h4 className="mt-0 text-gray-800 border-b border-gray-300 pb-2">
         Analysis Results
       </h4>

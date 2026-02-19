@@ -11,7 +11,7 @@ test.describe('Local DecoDocs Application Flow', () => {
 
   test('should display new homepage with correct content', async ({ page }) => {
     // Verify we're on the home page with new content
-    await expect(page.locator('h1')).toContainText('Decode documents before you sign.');
+    await expect(page.locator('#hero h1')).toContainText('Decode documents');
 
     // Verify the main CTA link exists (use role-based selector)
     const openPdfButton = page.getByRole('link', { name: 'Analyze a Document' });
@@ -60,7 +60,7 @@ test.describe('Component Navigation Tests', () => {
   test('should render different components based on route', async ({ page }) => {
     // Test home page
     await page.goto('/', { waitUntil: 'domcontentloaded' });
-    await expect(page.locator('h1')).toContainText('Decode documents before you sign.');
+    await expect(page.locator('#hero h1')).toContainText('Decode documents');
 
     // The following tests would require actual routing simulation or mock data
     // which is difficult to test without a real document being uploaded

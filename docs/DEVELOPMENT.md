@@ -264,9 +264,20 @@ describe('MyComponent', () => {
 End-to-end tests use Playwright and are located in the `e2e-tests/` directory.
 
 #### Running E2E Tests
+
+Run Playwright locally:
+
 ```bash
 npm run test:e2e
 ```
+
+Run tests against the built preview (recommended for route / static-file assertions):
+
+```bash
+E2E_USE_PREVIEW=1 npm run test:e2e
+```
+
+Note: CI uses the same preview-mode approach so route-dependent specs run reliably in automated checks.
 
 ## Styling / Tailwind (important)
 

@@ -163,7 +163,7 @@ export default function PricingPage() {
           <div className="mt-3.5">
             <FeatureList
               items={[
-                'AI analysis: 40k tokens/day per uid',
+                'AI analysis budget: 40k tokens/day per uid',
                 'Text-only PDFs (no OCR)',
                 'No storage with us (browser-only)',
                 'Link providers (Google/Email/Apple/Microsoft)',
@@ -181,7 +181,7 @@ export default function PricingPage() {
             </div>
           </div>
           <p className="mt-2.5 leading-relaxed text-slate-600">
-            OCR for scanned PDFs, unlimited analysis (for now), better model, and 5GB storage.
+            OCR for scanned PDFs, no token cap enforced today (fair use), better model, and 5GB storage.
           </p>
 
           <button
@@ -196,7 +196,7 @@ export default function PricingPage() {
           <div className="mt-3.5">
             <FeatureList
               items={[
-                'Unlimited AI (until abuse policy exists)',
+                'No token cap enforced today (fair use)',
                 'OCR / vision model for scanned PDFs',
                 '5GB storage (Contabo VPS)',
                 'Receipts + subscription management in /profile',
@@ -260,8 +260,11 @@ export default function PricingPage() {
       <Card className="mt-5 bg-slate-50">
         <div className="mb-2 font-black">Notes</div>
         <div className="leading-7 text-slate-600">
-          We&apos;ll prompt you to upgrade when you hit limits or when a scanned/OCR-required document is detected. Paid
-          checkout requires a non-anonymous account, and account linking is handled via <code>/sign-in</code>.
+          Anonymous trial use is limited to 20k tokens per uid (total). Free accounts have a 40k tokens/day budget.
+          Limits are token-based (not per-click). Larger documents consume more of your budget, so the number of full
+          analyses you can run varies by size. We&apos;ll prompt you to upgrade when you hit limits or when a scanned/OCR
+          document is detected. Paid checkout requires a non-anonymous account, and account linking is handled via{' '}
+          <code>/sign-in</code>.
         </div>
       </Card>
     </PageSection>
