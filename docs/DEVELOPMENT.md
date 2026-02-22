@@ -4,6 +4,12 @@
 
 This guide provides instructions for setting up, developing, and maintaining the DecoDocs application. It covers both frontend and backend development workflows.
 
+## Policy: No Firebase Emulators
+
+In this deployment repo, **Firebase emulators are not used** (not for tests, not for dev). Any emulator instructions in this document should be treated as **legacy/deprecated**.
+
+Development and tests should target the real deployed Firebase project (production Functions), and client-side tests should exercise the APIs in a way that is as close as possible to the real production frontend.
+
 ## Prerequisites
 
 Before starting development, ensure you have the following installed:
@@ -18,17 +24,13 @@ Before starting development, ensure you have the following installed:
 
 ### Canonical local setup (source of truth)
 
-This repo is designed to run locally with **either**:
-- real Firebase project config (default), **or**
-- Firebase emulators (recommended for local dev / CI)
+This repo is designed to run locally against the real deployed Firebase project config (default).
 
 ### Config strategy (current state)
 - We do not use `.env*` files (`.env`, `.env.local`, `.env.production`, etc.).
 - The web app has a safe default Firebase config (project `snapsign-au`).
 - If a temporary override is needed, pass env values inline in the command or via CI/runtime environment (not via env files).
-- For local dev without real credentials, use:
-  - Firebase Auth emulator (inline flag), or
-  - `window.MOCK_AUTH=true` (test/dev helper)
+- For local dev without real credentials, use `window.MOCK_AUTH=true` (test/dev helper).
 
 ### 1) Clone the repository
 

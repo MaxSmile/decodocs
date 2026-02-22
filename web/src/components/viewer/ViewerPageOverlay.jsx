@@ -7,9 +7,13 @@ const ViewerPageOverlay = ({ pageNum, signatures, annotations, selectedItemId, o
         key={signature.id}
         data-testid={`overlay-signature-${signature.id}`}
         className={`absolute border-2 ${selectedItemId === signature.id ? 'border-blue-500 ring-2 ring-blue-300' : 'border-blue-500/40'} bg-blue-50/20 flex items-center justify-center cursor-move rounded select-none`}
-        style={{ left: signature.x, top: signature.y, width: signature.width, height: signature.height, zIndex: 50 }}
+        style={{ left: signature.x, top: signature.y, width: signature.width, height: signature.height, zIndex: 50, touchAction: 'none' }}
         onClick={(e) => { e.stopPropagation(); onSelect && onSelect(signature.id); }}
-        onMouseDown={(e) => onStartDrag && onStartDrag(e, signature, 'signature')}
+        onMouseDown={(e) => {
+          if (typeof window !== 'undefined' && 'PointerEvent' in window) return;
+          onStartDrag && onStartDrag(e, signature, 'signature');
+        }}
+        onPointerDown={(e) => onStartDrag && onStartDrag(e, signature, 'signature')}
       >
         {signature.mode === 'type' ? (
           <span
@@ -40,9 +44,13 @@ const ViewerPageOverlay = ({ pageNum, signatures, annotations, selectedItemId, o
                 ? 'bg-purple-50 border border-purple-300 text-purple-700'
                 : 'bg-yellow-100 border border-yellow-300 text-slate-800'
         }`}
-        style={{ left: annotation.x, top: annotation.y, zIndex: 50 }}
+        style={{ left: annotation.x, top: annotation.y, zIndex: 50, touchAction: 'none' }}
         onClick={(e) => { e.stopPropagation(); onSelect && onSelect(annotation.id); }}
-        onMouseDown={(e) => onStartDrag && onStartDrag(e, annotation, 'annotation')}
+        onMouseDown={(e) => {
+          if (typeof window !== 'undefined' && 'PointerEvent' in window) return;
+          onStartDrag && onStartDrag(e, annotation, 'annotation');
+        }}
+        onPointerDown={(e) => onStartDrag && onStartDrag(e, annotation, 'annotation')}
       >
         {annotation.text}
       </div>

@@ -305,7 +305,7 @@ const DocumentViewer = () => {
                 <div
                   id="viewer-scroll-area"
                   className={`flex-1 overflow-auto bg-slate-100/50 relative ${activeTool !== 'select' ? 'cursor-crosshair' : ''}`}
-                  onClick={handleCanvasClick}
+                  onClickCapture={handleCanvasClick}
                 >
                   <PDFDisplay
                     pdfDoc={pdfDoc}

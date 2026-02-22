@@ -15,9 +15,14 @@ const EditorOverlay = ({ pageNum, signatures, annotations, selectedItemId, onSta
             width: signature.width,
             height: signature.height,
             zIndex: 50,
+            touchAction: 'none',
           }}
           onClick={(event) => { event.stopPropagation(); onSelect && onSelect(signature.id); }}
-          onMouseDown={(e) => onStartDrag && onStartDrag(e, signature, 'signature')}
+          onMouseDown={(e) => {
+            if (typeof window !== 'undefined' && 'PointerEvent' in window) return;
+            onStartDrag && onStartDrag(e, signature, 'signature');
+          }}
+          onPointerDown={(e) => onStartDrag && onStartDrag(e, signature, 'signature')}
         >
           <span className="text-blue-700 font-script text-xl font-bold pointer-events-none">{signature.text}</span>
         </div>
@@ -29,9 +34,13 @@ const EditorOverlay = ({ pageNum, signatures, annotations, selectedItemId, onSta
           key={annotation.id}
           data-testid={`overlay-annotation-${annotation.id}`}
           className={`absolute px-2 py-1 text-sm shadow-sm cursor-move rounded select-none ${selectedItemId === annotation.id ? 'ring-2 ring-blue-400' : ''} ${annotation.type === 'checkmark' ? 'text-green-700 text-2xl font-bold' : annotation.type === 'date' ? 'bg-amber-50 border border-amber-300 text-amber-800' : annotation.type === 'image' ? 'bg-purple-50 border border-purple-300 text-purple-700' : 'bg-yellow-100 border border-yellow-300 text-slate-800'}`}
-          style={{ left: annotation.x, top: annotation.y, zIndex: 50 }}
+          style={{ left: annotation.x, top: annotation.y, zIndex: 50, touchAction: 'none' }}
           onClick={(event) => { event.stopPropagation(); onSelect && onSelect(annotation.id); }}
-          onMouseDown={(e) => onStartDrag && onStartDrag(e, annotation, 'annotation')}
+          onMouseDown={(e) => {
+            if (typeof window !== 'undefined' && 'PointerEvent' in window) return;
+            onStartDrag && onStartDrag(e, annotation, 'annotation');
+          }}
+          onPointerDown={(e) => onStartDrag && onStartDrag(e, annotation, 'annotation')}
         >
           {annotation.text}
         </div>

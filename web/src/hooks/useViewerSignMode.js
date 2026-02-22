@@ -9,6 +9,14 @@ export const useViewerSignMode = () => {
   const [selectedItemId, setSelectedItemId] = useState(null);
   const dragRef = useRef(null);
 
+  const resolvePdfPageElement = (pageWrapper, pageNum) => {
+    if (!pageWrapper || !pageNum) return null;
+    const byId = pageWrapper.querySelector?.(`#pdf-page-${pageNum}`) || null;
+    if (byId) return byId;
+    const global = typeof document !== 'undefined' ? document.getElementById(`pdf-page-${pageNum}`) : null;
+    return global || null;
+  };
+
   const moveAnnotation = useCallback((id, x, y) => {
     setAnnotations((prev) => prev.map((a) => (a.id === id ? { ...a, x, y } : a)));
   }, []);
@@ -18,22 +26,31 @@ export const useViewerSignMode = () => {
   }, []);
 
   const startDrag = useCallback((event, item, kind) => {
+    if (dragRef.current) return;
     event.stopPropagation();
-    event.preventDefault();
 
-    const pageWrapper = event.target.closest('[data-page-num]');
-    if (!pageWrapper) return;
+    const dragTarget = event.currentTarget || event.target;
+    const pointerId = Number.isFinite(Number(event.pointerId)) ? Number(event.pointerId) : null;
 
-    const rect = pageWrapper.getBoundingClientRect();
+    const pageNum = item?.pageNum || null;
+    const pageEl =
+      (pageNum && typeof document !== 'undefined' ? document.getElementById(`pdf-page-${pageNum}`) : null)
+      || event.target.closest?.('#pdf-page-1')
+      || event.target.closest?.('[id^="pdf-page-"]')
+      || event.target.closest?.('[data-page-num]')
+      || null;
+    if (!pageEl || !pageNum) return;
+
+    const rect = pageEl.getBoundingClientRect();
     const offsetX = event.clientX - rect.left - item.x;
     const offsetY = event.clientY - rect.top - item.y;
 
     setSelectedItemId(item.id);
-    dragRef.current = { id: item.id, kind, offsetX, offsetY, pageWrapper };
+    dragRef.current = { id: item.id, kind, offsetX, offsetY, pageEl };
 
-    const onMouseMove = (e) => {
+    const onMove = (e) => {
       if (!dragRef.current) return;
-      const r = dragRef.current.pageWrapper.getBoundingClientRect();
+      const r = dragRef.current.pageEl.getBoundingClientRect();
       const newX = e.clientX - r.left - dragRef.current.offsetX;
       const newY = e.clientY - r.top - dragRef.current.offsetY;
       if (dragRef.current.kind === 'annotation') {
@@ -43,29 +60,68 @@ export const useViewerSignMode = () => {
       }
     };
 
-    const onMouseUp = () => {
+    const onEnd = () => {
       dragRef.current = null;
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', onMouseUp);
+      document.removeEventListener('mousemove', onMove, true);
+      document.removeEventListener('mouseup', onEnd, true);
+      document.removeEventListener('pointermove', onMove, true);
+      document.removeEventListener('pointerup', onEnd, true);
+      if (dragTarget?.removeEventListener) {
+        dragTarget.removeEventListener('pointermove', onMove, true);
+        dragTarget.removeEventListener('pointerup', onEnd, true);
+        dragTarget.removeEventListener('pointercancel', onEnd, true);
+      }
     };
 
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', onMouseUp);
+    if (pointerId !== null && dragTarget?.setPointerCapture) {
+      try { dragTarget.setPointerCapture(pointerId); } catch { /* ignore */ }
+    }
+
+    // Use capture in case underlying PDF/text layers stop propagation.
+    document.addEventListener('mousemove', onMove, true);
+    document.addEventListener('mouseup', onEnd, true);
+    document.addEventListener('pointermove', onMove, true);
+    document.addEventListener('pointerup', onEnd, true);
+    if (dragTarget?.addEventListener) {
+      dragTarget.addEventListener('pointermove', onMove, true);
+      dragTarget.addEventListener('pointerup', onEnd, true);
+      dragTarget.addEventListener('pointercancel', onEnd, true);
+    }
   }, [moveAnnotation, moveSignature]);
 
   const handleCanvasClick = (event) => {
+    if (event?.target?.closest?.('[data-testid^="overlay-"]')) return;
     if (activeTool === 'select') {
       setSelectedItemId(null);
       return;
     }
 
-    const pageWrapper = event.target.closest('[data-page-num]');
-    if (!pageWrapper) return;
+    const target = event.target;
+    const pageWrapper = target?.closest?.('[data-page-num]') || null;
+    const pageElFromId = target?.closest?.('[id^="pdf-page-"]') || null;
+    let pageNum =
+      (pageWrapper ? parseInt(pageWrapper.getAttribute('data-page-num'), 10) : NaN)
+      || (pageElFromId?.id ? parseInt(String(pageElFromId.id).replace('pdf-page-', ''), 10) : NaN);
+    let pageEl = resolvePdfPageElement(pageWrapper || pageElFromId, pageNum) || pageElFromId || pageWrapper;
 
-    const pageNum = parseInt(pageWrapper.getAttribute('data-page-num'), 10);
-    if (Number.isNaN(pageNum)) return;
+    // Fallback: resolve page by point-in-rect (covers cases where the click target isn't inside the wrapper).
+    if ((!pageEl || !pageNum || Number.isNaN(pageNum)) && typeof document !== 'undefined') {
+      const pages = Array.from(document.querySelectorAll('[id^="pdf-page-"]'));
+      const hit = pages.find((el) => {
+        const r = el.getBoundingClientRect();
+        return event.clientX >= r.left && event.clientX <= r.right && event.clientY >= r.top && event.clientY <= r.bottom;
+      }) || null;
+      if (hit?.id) {
+        const parsed = parseInt(String(hit.id).replace('pdf-page-', ''), 10);
+        if (!Number.isNaN(parsed) && parsed > 0) {
+          pageNum = parsed;
+          pageEl = hit;
+        }
+      }
+    }
 
-    const rect = pageWrapper.getBoundingClientRect();
+    if (!pageEl || !pageNum || Number.isNaN(pageNum)) return;
+    const rect = pageEl.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
 

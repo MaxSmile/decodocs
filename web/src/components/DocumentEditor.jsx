@@ -326,7 +326,7 @@ const DocumentEditor = () => {
               <div
                 className={`w-full flex justify-center ${activeTool !== 'select' ? 'cursor-crosshair' : ''}`}
                 style={{ minHeight: '100%' }}
-                onClick={handleCanvasClick}
+                onClickCapture={handleCanvasClick}
               >
                 <PDFDisplay
                   pdfDoc={pdfDoc}
