@@ -26,8 +26,8 @@
 
 ## Landing CTA Framing
 - secondary CTA on marketing entry points must be action-oriented and aligned with core workflows
-- replaced "View Demo" copy with "Open Editor" to avoid passive/demo framing
-- canonical secondary CTA target is `/edit/test-docs/offer.pdf` so users land in a real editing workflow
+- replaced "View Demo" copy with "Correct a PDF Document" to avoid passive/demo framing
+- canonical secondary CTA target is `/edit` so users land in the editor (requires sign-in)
 
 ## Use-Case Routing for Founder Conversion Page
 - `/use-cases/startup-founders/` is a dedicated, handcrafted SEO/conversion page (not rendered through the generic `[slug]` use-case template)
@@ -90,7 +90,8 @@
 - Today, `puid == uid`; alias expansion is incremental.
 - puid is **not exposed** to the client UI; it is an internal Functions/backend concept.
 - See: docs/AUTH_LINKING.md
-
+## UI/UX
+- **no sticky headers anywhere**: Headers (site, navigation, sidebars) must never be sticky or fixed. This applies to all projects (snapsign.com.au, decodocs.com, admin.decodocs.com, docs.decodocs.com). Users control viewport scroll position via native browser scrolling without fixed elements.
 ## Optional / Later
 - wallet-based electronic signature is optional and not MVP
 - blockchain timestamping/NFT proof is optional and not core

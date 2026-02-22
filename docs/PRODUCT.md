@@ -146,7 +146,7 @@ Each page has:
 
 Home CTA policy:
 - keep the primary hero CTA focused on decode/upload
-- when a secondary CTA is present, use action copy (`Open Editor`) and route to `/edit/test-docs/offer.pdf`
+- when a secondary CTA is present, use action copy (`Correct a PDF Document`) and route to `/edit`
 - avoid "View Demo" framing because it implies passive viewing instead of real workflow entry
 
 ## Startup Founders Use Case Page Blueprint (2026-02-19)

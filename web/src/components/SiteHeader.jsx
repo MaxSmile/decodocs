@@ -17,6 +17,15 @@ const SiteHeader = ({ variant = 'marketing', onOpenPdf, children }) => {
   const logoSrc = typeof logo === 'string' ? logo : logo.src;
   const location = useLocation();
   const { authState } = useAuth();
+
+  // when the user is looking at a document (/view or /edit) we want the
+  // header to remain in the normal document flow. Although the default
+  // position value for <header> is static, we explicitly add the class so
+  // any upstream/global CSS (or future tweaks) cannot accidentally make it
+  // fixed/sticky while the user is reading/editing.
+  const isWorkspaceRoute =
+    location.pathname.startsWith('/view') ||
+    location.pathname.startsWith('/edit');
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   const isAppLayout = variant === 'app';
@@ -111,7 +120,11 @@ const SiteHeader = ({ variant = 'marketing', onOpenPdf, children }) => {
   };
 
   return (
-    <header className="sticky top-[var(--support-ukraine-banner-height,35px)] z-30 w-full border-b border-white/40 bg-white/70 backdrop-blur-xl">
+    <header
+      className={`z-30 w-full border-b border-white/40 bg-white/70 backdrop-blur-xl ${
+        isWorkspaceRoute ? 'static' : ''
+      }`}
+    >
       <div className={`mx-auto flex w-full items-center justify-between px-5 sm:px-6 ${isAppLayout ? 'h-14 py-2' : 'max-w-6xl py-3 sm:py-4'}`}>
         <Link to="/" className="flex items-center gap-2.5 text-base font-bold tracking-tight text-slate-900 no-underline sm:gap-3 sm:text-lg">
           <img src={logoSrc} alt="DecoDocs" className="h-8 w-8 sm:h-9 sm:w-9" />

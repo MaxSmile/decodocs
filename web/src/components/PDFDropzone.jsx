@@ -59,7 +59,7 @@ const PDFDropzone = ({ onFileSelect }) => {
                 type="file"
                 ref={fileInputRef}
                 onChange={onFileSelect}
-                accept=".pdf,.snapsign,application/pdf,application/zip"
+                accept=".pdf,.snapsign,application/pdf"
                 className="hidden"
             />
         </div>

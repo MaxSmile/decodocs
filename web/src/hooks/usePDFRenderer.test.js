@@ -19,7 +19,7 @@ const makeCanvas = () => {
 describe('usePDFRenderer', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
-    global.alert = vi.fn();
+    vi.spyOn(window, 'dispatchEvent');
     vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
@@ -87,15 +87,17 @@ describe('usePDFRenderer', () => {
     expect(annotations.querySelectorAll('.risk-badge').length).toBe(3);
 
     annotations.querySelector('.clause-marker').onclick();
-    expect(global.alert).toHaveBeenCalledWith(
-      'Clause: Termination\n\nCheck termination notice period'
-    );
+    const firstEvent = window.dispatchEvent.mock.calls.at(-1)[0];
+    expect(firstEvent.type).toBe('decodocs:show-gate');
+    expect(firstEvent.detail.title).toBe('Clause');
+    expect(firstEvent.detail.message).toBe('Termination\n\nCheck termination notice period');
 
     const badges = [...annotations.querySelectorAll('.risk-badge')];
     badges[1].onclick();
-    expect(global.alert).toHaveBeenCalledWith(
-      'Risk: Medium risk\n\nNo explanation available.'
-    );
+    const secondEvent = window.dispatchEvent.mock.calls.at(-1)[0];
+    expect(secondEvent.type).toBe('decodocs:show-gate');
+    expect(secondEvent.detail.title).toBe('Risk');
+    expect(secondEvent.detail.message).toBe('Medium risk\n\nNo explanation available.');
     expect(badges[0].style.backgroundColor).toBe('rgb(220, 53, 69)');
     expect(badges[1].style.backgroundColor).toBe('rgb(253, 126, 20)');
     expect(badges[2].style.backgroundColor).toBe('rgb(255, 193, 7)');
@@ -109,9 +111,10 @@ describe('usePDFRenderer', () => {
       );
     });
     annotations.querySelector('.clause-marker').onclick();
-    expect(global.alert).toHaveBeenCalledWith(
-      'Clause: No details clause\n\nNo details available.'
-    );
+    const thirdEvent = window.dispatchEvent.mock.calls.at(-1)[0];
+    expect(thirdEvent.type).toBe('decodocs:show-gate');
+    expect(thirdEvent.detail.title).toBe('Clause');
+    expect(thirdEvent.detail.message).toBe('No details clause\n\nNo details available.');
   });
 
   it('handles renderTextLayer and renderPage failures gracefully', async () => {

@@ -20,7 +20,6 @@ export const firebaseAuthStore = atom<any | null>(null);
 
 let watcherStarted = false;
 let authReadyPromise: Promise<any> | null = null;
-let authEmulatorConfigured = false;
 
 const DEFAULT_FIREBASE_CONFIG = {
   apiKey: 'AIzaSyDqow-DLrBOZGUbGCN2nxpMCqXcbqDQe5Q',
@@ -43,19 +42,9 @@ const isProbablyPlaceholder = (value: string | undefined) => {
   );
 };
 
-const getViteEnv = () => ((import.meta as any)?.env ?? {});
-
-const isTruthyEnvFlag = (value: unknown) => {
-  if (typeof value === 'boolean') return value;
-  if (typeof value !== 'string') return false;
-  const normalized = value.trim().toLowerCase();
-  return ['1', 'true', 'yes', 'on'].includes(normalized);
-};
-
 const getFirebaseConfig = () => {
-  const env = getViteEnv();
   const read = (key: string, fallback: string) => {
-    const value = env[key];
+    const value = (import.meta as any)?.env?.[key];
     if (typeof value !== 'string') return fallback;
     return isProbablyPlaceholder(value) ? fallback : value.trim();
   };
@@ -69,21 +58,6 @@ const getFirebaseConfig = () => {
     appId: read('VITE_FIREBASE_APP_ID', DEFAULT_FIREBASE_CONFIG.appId),
     measurementId: read('VITE_FIREBASE_MEASUREMENT_ID', DEFAULT_FIREBASE_CONFIG.measurementId),
   };
-};
-
-const shouldUseAuthEmulator = () => isTruthyEnvFlag(getViteEnv().VITE_USE_FIREBASE_EMULATOR);
-
-const getAuthEmulatorUrl = () => {
-  const value = getViteEnv().VITE_FIREBASE_AUTH_EMULATOR_URL;
-  return typeof value === 'string' && value.trim() ? value.trim() : 'http://localhost:9099';
-};
-
-const maybeConnectAuthEmulator = (auth: any, firebaseAuthModule: any) => {
-  if (authEmulatorConfigured || !shouldUseAuthEmulator()) return;
-  if (typeof firebaseAuthModule.connectAuthEmulator !== 'function') return;
-
-  firebaseAuthModule.connectAuthEmulator(auth, getAuthEmulatorUrl(), { disableWarnings: true });
-  authEmulatorConfigured = true;
 };
 
 const createGoogleProvider = (firebaseAuthModule: any) => {
@@ -146,7 +120,6 @@ const initializeFirebaseClient = async () => {
       ? firebaseAppModule.initializeApp(firebaseConfig)
       : firebaseAppModule.getApp();
     const auth = firebaseAuthModule.getAuth(app);
-    maybeConnectAuthEmulator(auth, firebaseAuthModule);
 
     firebaseAppStore.set(app);
     firebaseAuthStore.set(auth);
@@ -293,10 +266,7 @@ export const getFirebaseSnapshot = () => ({ app: firebaseAppStore.get(), auth: f
 // Testing hooks for pure helpers/internal flows.
 export const __testables = {
   isProbablyPlaceholder,
-  isTruthyEnvFlag,
   getFirebaseConfig,
-  shouldUseAuthEmulator,
-  getAuthEmulatorUrl,
   createMicrosoftProvider,
   createAppleProvider,
 };

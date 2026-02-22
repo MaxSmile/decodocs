@@ -10,7 +10,9 @@ crashReporter.installGlobalHandlers();
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <SupportUkraineBanner />
+    <div className="support-ukraine-banner-slot">
+      <SupportUkraineBanner />
+    </div>
     <App />
   </React.StrictMode>,
 );

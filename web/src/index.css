@@ -49,6 +49,11 @@
   }
 }
 
+.support-ukraine-banner-slot {
+  position: relative;
+  height: 35px;
+}
+
 @layer components {
   .dd-page {
     margin-inline: auto;

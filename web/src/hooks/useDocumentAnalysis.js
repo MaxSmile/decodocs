@@ -8,6 +8,7 @@ import { buildDocStats } from '../utils/docStats';
 export const useDocumentAnalysis = ({ functions, authState, isMockMode }) => {
     const [analysisResults, setAnalysisResults] = useState({});
     const [gate, setGate] = useState(null);
+    const [dialog, setDialog] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
 
     const isFirebaseAvailable = () => {
@@ -64,7 +65,7 @@ export const useDocumentAnalysis = ({ functions, authState, isMockMode }) => {
 
         try {
             if (isMockMode) {
-                setGate({
+                setDialog({
                     title: 'Type-specific analysis (beta)',
                     message: 'Not available in mock mode yet.',
                     primaryLabel: 'OK',
@@ -104,19 +105,6 @@ export const useDocumentAnalysis = ({ functions, authState, isMockMode }) => {
                     typeSpecific,
                 },
             }));
-
-            setGate({
-                title: 'Type-specific analysis (beta)',
-                message:
-                    `effectiveTypeId: ${typeSpecific.effectiveTypeId || 'null'}\n` +
-                    `validationSlug: ${typeSpecific.validationSlug || 'null'}\n\n` +
-                    (typeSpecific.validationTitle ? `Spec: ${typeSpecific.validationTitle}\n\n` : '') +
-                    (typeSpecific.message || ''),
-                primaryLabel: 'OK',
-                primaryTo: null,
-                secondaryLabel: null,
-                secondaryTo: null,
-            });
         } catch (e) {
             console.error('analyzeByType error:', e);
             setAnalysisResults((prev) => ({
@@ -126,7 +114,7 @@ export const useDocumentAnalysis = ({ functions, authState, isMockMode }) => {
                     _meta: { status: 'error', message: e?.message || 'Request failed.' },
                 },
             }));
-            setGate({
+            setDialog({
                 title: 'Type-specific analysis failed',
                 message: e?.message || 'Request failed.',
                 primaryLabel: 'OK',
@@ -239,6 +227,7 @@ export const useDocumentAnalysis = ({ functions, authState, isMockMode }) => {
 
             if (result.data.ok) {
                 setGate(null);
+                setDialog(null);
 	                const mappedAnalysis = {
 	                    _meta: { status: 'success' },
 	                    summary: result.data.result.plainExplanation,
@@ -299,7 +288,7 @@ export const useDocumentAnalysis = ({ functions, authState, isMockMode }) => {
                             _meta: { status: 'error', message: msg },
                         },
                     }));
-                    setGate({
+                    setDialog({
                         title: 'Limit reached',
                         message: msg,
                         primaryLabel: 'Create free account',
@@ -342,7 +331,7 @@ export const useDocumentAnalysis = ({ functions, authState, isMockMode }) => {
                     _meta: { status: 'error', message: error?.message || 'Analysis failed.' },
                 },
             }));
-            setGate({
+            setDialog({
                 title: 'Analysis failed',
                 message: error?.message || 'Request failed.',
                 primaryLabel: 'OK',
@@ -367,7 +356,7 @@ export const useDocumentAnalysis = ({ functions, authState, isMockMode }) => {
 
         const selection = args.selection?.text;
         if (!selection) {
-            setGate({
+            setDialog({
                 title: 'No selection',
                 message: 'Please select some text in the document first.',
                 primaryLabel: 'OK',
@@ -394,7 +383,12 @@ export const useDocumentAnalysis = ({ functions, authState, isMockMode }) => {
             }
 
             if (data.ok) { // Fixed: check for ok instead of success
-                alert(`Explanation: ${data.explanation.plainExplanation}`);
+                setDialog({
+                    title: 'Explanation',
+                    message: data.explanation?.plainExplanation || 'No explanation available.',
+                    primaryLabel: 'OK',
+                    primaryTo: null,
+                });
             } else {
                 console.error('Explanation failed:', data);
                 throw new Error(data.error || 'Explanation failed');
@@ -434,7 +428,12 @@ export const useDocumentAnalysis = ({ functions, authState, isMockMode }) => {
             }
 
             if (data.ok) { // Fixed: check for ok
-                alert(`Found ${data.risks.summary.totalRisks} risks in the document.`);
+                setDialog({
+                    title: 'Risk scan complete',
+                    message: `Found ${data.risks?.summary?.totalRisks || 0} risks in the document.`,
+                    primaryLabel: 'OK',
+                    primaryTo: null,
+                });
 
                 const newRiskBadges =
                     data.risks.items?.map((risk, idx) => ({
@@ -488,9 +487,14 @@ export const useDocumentAnalysis = ({ functions, authState, isMockMode }) => {
             }
 
             if (data.ok) { // Fixed: check for ok
-                alert(
-                    `Original: ${data.translation.originalText}\n\nPlain English: ${data.translation.plainEnglishTranslation}`
-                );
+                setDialog({
+                    title: 'Plain English translation',
+                    message:
+                        `Original: ${data.translation?.originalText || ''}\n\n` +
+                        `Plain English: ${data.translation?.plainEnglishTranslation || ''}`,
+                    primaryLabel: 'OK',
+                    primaryTo: null,
+                });
             } else {
                 console.error('Translation failed:', data);
                 throw new Error(data.error || 'Translation failed');
@@ -516,7 +520,9 @@ export const useDocumentAnalysis = ({ functions, authState, isMockMode }) => {
     return {
         analysisResults,
         gate,
+        dialog,
         setGate,
+        setDialog,
         isLoading,
         handleAnalyzeDocument,
         handleAnalyzeByType,

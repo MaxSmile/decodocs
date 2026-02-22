@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
     HiSparkles,
     HiLightningBolt,
     HiShieldExclamation,
     HiTranslate,
+    HiChatAlt2,
+    HiDocumentText,
+    HiPencilAlt,
     HiChevronRight,
     HiChevronLeft
 } from 'react-icons/hi';
@@ -27,14 +30,12 @@ const AnalysisSidebar = ({
     analysisResults,
     textSelection
 }) => {
-    const [activeTab, setActiveTab] = useState('tools'); // 'tools' | 'results'
-
-    // Auto-switch to results tab when analysis is present
-    React.useEffect(() => {
-        if (selectedDocument && analysisResults[selectedDocument.id]) {
-            setActiveTab('results');
-        }
-    }, [analysisResults, selectedDocument]);
+    const MIN_WIDTH = 340;
+    const MAX_WIDTH = 900;
+    const getMaxWidth = () => Math.min(MAX_WIDTH, Math.floor(window.innerWidth * 0.9));
+    const clampWidth = (value) => Math.max(MIN_WIDTH, Math.min(value, getMaxWidth()));
+    const [sidebarWidth, setSidebarWidth] = useState(420);
+    const [isResizing, setIsResizing] = useState(false);
 
     const isDisabled = !hasDocument || !isAuthenticated || isLoading;
     let disabledReason = null;
@@ -47,20 +48,134 @@ const AnalysisSidebar = ({
         disabledReason = 'Sign in to enable AI analysis (Free) and unlock Pro upgrades (OCR / deeper processing).';
     }
 
+    const tools = [
+        {
+            id: 'deep-analysis',
+            icon: HiLightningBolt,
+            label: 'Deep Analysis',
+            railLabel: 'Deep Analysis',
+            sublabel: 'Identify risks, obligations & summary',
+            disabled: isDisabled,
+            onClick: onAnalyzeByType,
+        },
+        {
+            id: 'highlight-risks',
+            icon: HiShieldExclamation,
+            label: 'Highlight Risks',
+            railLabel: 'Highlight Risks',
+            disabled: isDisabled,
+            onClick: onHighlightRisks,
+        },
+        {
+            id: 'explain-selection',
+            icon: HiChatAlt2,
+            label: textSelection ? 'Explain Selection' : 'Explain Selection (Select text first)',
+            railLabel: 'Explain Selection',
+            sublabel: textSelection ? `"${textSelection.text.substring(0, 30)}..."` : null,
+            disabled: isDisabled || !textSelection,
+            onClick: onExplainSelection,
+        },
+        {
+            id: 'plain-english',
+            icon: HiTranslate,
+            label: 'Plain English',
+            railLabel: 'Plain English',
+            disabled: isDisabled,
+            onClick: onTranslateToPlainEnglish,
+        },
+        {
+            id: 'summarize',
+            icon: HiDocumentText,
+            label: 'Summarize Key Points',
+            railLabel: 'Summarize Key Points',
+            disabled: isDisabled,
+            onClick: onSummarizeKeyPoints,
+        },
+        {
+            id: 'suggest-improvements',
+            icon: HiPencilAlt,
+            label: 'Suggest Improvements',
+            railLabel: 'Suggest Improvements',
+            disabled: isDisabled,
+            onClick: onSuggestImprovements,
+        },
+    ];
+
+    useEffect(() => {
+        const onWindowResize = () => setSidebarWidth((prev) => clampWidth(prev));
+        window.addEventListener('resize', onWindowResize);
+        return () => window.removeEventListener('resize', onWindowResize);
+    }, []);
+
+    useEffect(() => {
+        if (!isResizing) return undefined;
+
+        const onMouseMove = (event) => {
+            setSidebarWidth(clampWidth(window.innerWidth - event.clientX));
+        };
+        const onMouseUp = () => setIsResizing(false);
+
+        document.body.style.userSelect = 'none';
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+
+        return () => {
+            document.body.style.userSelect = '';
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+        };
+    }, [isResizing]);
+
     if (!isOpen) {
         return (
-            <button
-                onClick={onToggle}
-                className="absolute right-0 top-1/2 -translate-y-1/2 bg-white border border-slate-200 rounded-l-lg p-2 shadow-md hover:bg-slate-50 z-20"
-                title="Open AI Sidebar"
+            <aside
+                className="w-12 shrink-0 self-stretch border-l border-slate-200 bg-white/80 backdrop-blur-xl flex flex-col items-center py-2 gap-2 relative z-20"
+                aria-label="AI tools"
             >
-                <HiChevronLeft className="w-5 h-5 text-slate-600" />
-            </button>
+                <button
+                    onClick={onToggle}
+                    className="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 bg-white shadow-sm hover:bg-slate-50"
+                    title="Open tools"
+                    aria-label="Open tools"
+                >
+                    <HiChevronLeft className="w-5 h-5 text-slate-600" />
+                </button>
+
+                <div className="w-8 h-px bg-slate-200/70 my-1" />
+
+                {tools.map((tool, index) => (
+                    <RailToolButton
+                        key={tool.id}
+                        icon={tool.icon}
+                        label={tool.railLabel || tool.label}
+                        index={index}
+                        disabled={tool.disabled}
+                        onClick={() => {
+                            onToggle();
+                            if (!tool.disabled) {
+                                // Let the sidebar render before kicking off long-running work.
+                                setTimeout(() => tool.onClick(), 0);
+                            }
+                        }}
+                    />
+                ))}
+            </aside>
         );
     }
 
     return (
-        <div className="w-[350px] bg-white border-l border-slate-200 flex flex-col h-full shadow-xl transition-all relative z-20">
+        <div
+            className="bg-white border-l border-slate-200 flex flex-col h-full shadow-xl transition-all relative z-20"
+            style={{ width: `${sidebarWidth}px`, minWidth: `${MIN_WIDTH}px`, maxWidth: `${MAX_WIDTH}px` }}
+        >
+            <button
+                type="button"
+                onMouseDown={() => setIsResizing(true)}
+                className="absolute left-0 top-0 h-full w-2 -translate-x-1/2 cursor-col-resize bg-transparent"
+                aria-label="Resize AI sidebar"
+                title="Drag to resize"
+            />
+
             {/* Header */}
             <div className="h-14 border-b border-slate-200 flex items-center justify-between px-4 bg-slate-50/50">
                 <h3 className="font-semibold text-slate-800 flex items-center gap-2">
@@ -72,109 +187,63 @@ const AnalysisSidebar = ({
                 </button>
             </div>
 
-            {/* Tabs */}
-            <div className="flex border-b border-slate-200">
-                <button
-                    onClick={() => setActiveTab('tools')}
-                    className={`flex-1 py-3 text-sm font-medium transition-colors ${activeTab === 'tools'
-                        ? 'text-purple-600 border-b-2 border-purple-600 bg-purple-50/50'
-                        : 'text-slate-600 hover:bg-slate-50'
-                        }`}
-                >
-                    Tools
-                </button>
-                <button
-                    onClick={() => setActiveTab('results')}
-                    disabled={!selectedDocument || !analysisResults[selectedDocument.id]}
-                    className={`flex-1 py-3 text-sm font-medium transition-colors ${activeTab === 'results'
-                        ? 'text-purple-600 border-b-2 border-purple-600 bg-purple-50/50'
-                        : 'text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed'
-                        }`}
-                >
-                    Results
-                </button>
-            </div>
-
             {/* Content */}
             <div className="flex-1 overflow-y-auto p-5">
-                {activeTab === 'tools' ? (
-                    <div className="flex flex-col gap-3">
-                        {disabledReason && (
-                            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
-                                <div className="font-semibold text-slate-900">Why are buttons disabled?</div>
-                                <div className="mt-1">{disabledReason}</div>
-                                {!isAuthenticated && hasDocument && !isLoading && (
-                                    <div className="mt-3 flex gap-2.5 flex-wrap">
-                                        <Link
-                                            to="/sign-in"
-                                            className="rounded-full bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white no-underline"
-                                        >
-                                            Sign in
-                                        </Link>
-                                        <Link
-                                            to="/pricing"
-                                            className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 no-underline"
-                                        >
-                                            See Free vs Pro
-                                        </Link>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
-                        <ActionButton
-                            icon={HiLightningBolt}
-                            label="Deep Analysis"
-                            sublabel="Identify risks, obligations & summary"
-                            onClick={() => { onAnalyzeByType(); setActiveTab('results'); }}
-                            disabled={isDisabled}
-                            primary
-                        />
-
-                        <div className="h-px bg-slate-100 my-2" />
-
-                        <ActionButton
-                            icon={HiShieldExclamation}
-                            label="Highlight Risks"
-                            onClick={onHighlightRisks}
-                            disabled={isDisabled}
-                        />
-                        <div className="h-px bg-slate-100 my-2" />
-                        <ActionButton
-                            icon={HiSparkles}
-                            label={textSelection ? "Explain Selection" : "Explain Selection (Select text first)"}
-                            sublabel={textSelection ? `"${textSelection.text.substring(0, 30)}..."` : null}
-                            onClick={onExplainSelection}
-                            disabled={isDisabled || !textSelection}
-                        />
-                        <ActionButton
-                            icon={HiTranslate}
-                            label="Plain English"
-                            onClick={onTranslateToPlainEnglish}
-                            disabled={isDisabled}
-                        />
-                        <ActionButton
-                            icon={HiLightningBolt}
-                            label="Summarize Key Points"
-                            onClick={onSummarizeKeyPoints}
-                            disabled={isDisabled}
-                        />
-                        <ActionButton
-                            icon={HiSparkles}
-                            label="Suggest Improvements"
-                            onClick={onSuggestImprovements}
-                            disabled={isDisabled}
-                        />
+                <div className="flex flex-col gap-3">
+                    <div>
+                        <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Tools</h4>
                     </div>
-                ) : (
-                    <div className="prose prose-sm">
+
+                    {disabledReason && (
+                        <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+                            <div className="font-semibold text-slate-900">Why are buttons disabled?</div>
+                            <div className="mt-1">{disabledReason}</div>
+                            {!isAuthenticated && hasDocument && !isLoading && (
+                                <div className="mt-3 flex gap-2.5 flex-wrap">
+                                    <Link
+                                        to="/sign-in"
+                                        className="rounded-full bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white no-underline"
+                                    >
+                                        Sign in
+                                    </Link>
+                                    <Link
+                                        to="/pricing"
+                                        className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 no-underline"
+                                    >
+                                        See Free vs Pro
+                                    </Link>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {tools.map((tool, idx) => (
+                        <React.Fragment key={tool.id}>
+                            <ActionButton
+                                icon={tool.icon}
+                                label={tool.label}
+                                sublabel={tool.sublabel}
+                                onClick={tool.onClick}
+                                disabled={tool.disabled}
+                                primary={idx === 0}
+                            />
+                            {idx === 0 || idx === 1 ? <div className="h-px bg-slate-100 my-2" /> : null}
+                        </React.Fragment>
+                    ))}
+
+                    <div className="h-px bg-slate-200 my-3" />
+
+                    <div>
+                        <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Results</h4>
+                    </div>
+                    <div className="prose prose-sm max-w-none">
                         {selectedDocument && analysisResults[selectedDocument.id] ? (
                             <AnalysisResults analysis={analysisResults[selectedDocument.id]} />
                         ) : (
-                            <div className="text-center text-slate-500 mt-10">No analysis results yet. Run a tool to see output here.</div>
+                            <div className="text-center text-slate-500 mt-6">No analysis results yet. Run a tool to see output here.</div>
                         )}
                     </div>
-                )}
+                </div>
             </div>
         </div>
     );
@@ -198,5 +267,29 @@ const ActionButton = ({ icon: Icon, label, sublabel, onClick, disabled, primary 
         </div>
     </button>
 );
+
+const RailToolButton = ({ icon: Icon, label, index, disabled, onClick }) => {
+    const fallback = (label || '').trim().slice(0, 1).toUpperCase() || String(index + 1);
+
+    return (
+        <button
+            type="button"
+            onClick={onClick}
+            aria-disabled={disabled}
+            className={`w-9 h-9 flex items-center justify-center rounded-lg border transition-colors ${disabled
+                ? 'border-slate-200 bg-slate-50 text-slate-400'
+                : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                }`}
+            title={label}
+            aria-label={label}
+        >
+            {Icon ? (
+                <Icon className={`w-5 h-5 ${disabled ? 'text-slate-400' : 'text-slate-600'}`} />
+            ) : (
+                <span className="text-xs font-bold text-slate-600">{fallback}</span>
+            )}
+        </button>
+    );
+};
 
 export default AnalysisSidebar;

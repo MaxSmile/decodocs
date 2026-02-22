@@ -1,45 +1,59 @@
 import React, { useEffect, useRef } from 'react';
 
+const isRenderCancellation = (err) => {
+    if (!err) return false;
+    const message = String(err?.message || err);
+    return err?.name === 'RenderingCancelledException' || message.includes('Rendering cancelled');
+};
+
 const PageThumbnail = ({ pdfDoc, pageNum, onClick, isActive }) => {
     const canvasRef = useRef(null);
+    const renderTaskRef = useRef(null);
 
     useEffect(() => {
         if (!pdfDoc || !canvasRef.current) return;
 
-        let currentRender = null;
         let cancelled = false;
 
         const renderThumb = async () => {
             try {
                 const page = await pdfDoc.getPage(pageNum);
+                if (cancelled) return;
                 const viewport = page.getViewport({ scale: 0.15 });
 
                 const canvas = canvasRef.current;
-                if (!canvas) {
-                    console.error(`PageThumbnail: canvasRef missing for page ${pageNum}`);
-                    return;
-                }
+                if (!canvas) return;
 
                 const context = (canvas.getContext && canvas.getContext('2d')) || null;
-                if (!context) {
-                    console.error(`PageThumbnail: canvas.getContext() returned null for page ${pageNum}`);
-                    return;
+                if (!context) return;
+
+                const prevTask = renderTaskRef.current;
+                if (prevTask) {
+                    try {
+                        prevTask.cancel?.();
+                        await prevTask.promise;
+                    } catch (e) {
+                        // expected during cancellation
+                    } finally {
+                        if (renderTaskRef.current === prevTask) {
+                            renderTaskRef.current = null;
+                        }
+                    }
                 }
+                if (cancelled) return;
 
                 canvas.height = viewport.height;
                 canvas.width = viewport.width;
 
                 // Start render and keep a handle so we can cancel if needed
-                currentRender = page.render({ canvasContext: context, viewport });
-                await currentRender.promise;
-                if (cancelled) {
-                    currentRender?.cancel?.();
-                }
+                const renderTask = page.render({ canvasContext: context, viewport });
+                renderTaskRef.current = renderTask;
+                await renderTask.promise;
             } catch (err) {
-                // Log concise message to client console
+                if (isRenderCancellation(err)) return;
                 console.error('Error rendering thumbnail:', err?.message || err);
             } finally {
-                currentRender = null;
+                renderTaskRef.current = null;
             }
         };
 
@@ -48,11 +62,11 @@ const PageThumbnail = ({ pdfDoc, pageNum, onClick, isActive }) => {
         return () => {
             cancelled = true;
             try {
-                currentRender?.cancel?.();
+                renderTaskRef.current?.cancel?.();
             } catch (e) {
                 /* ignore */
             }
-            currentRender = null;
+            renderTaskRef.current = null;
         };
     }, [pdfDoc, pageNum]);
 

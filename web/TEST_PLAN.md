@@ -3,6 +3,41 @@
 ## Objective
 Verify that the dummy PDF from the repository can be properly loaded and rendered by PDF.js specifically within the /view route environment.
 
+---
+
+# Test Plan: Client-side PDF Extraction + AI API Calls (Real Firebase)
+
+## Objective
+Verify the two production-critical client-side flows that are easy to regress:
+1) **PDF text extraction** (non-OCR PDFs) produces deterministic, non-empty text and accurate stats.
+2) **Document analysis APIs** (`preflightCheck`, `analyzeText`, `analyzeByType`) work end-to-end when invoked from the client, using Firebase Auth + callable Functions.
+
+## Policy
+- We do **not** use Firebase emulators in this repo.
+- Tests are run against the **real deployed Firebase project** and **real Functions** (production-like behavior).
+- We do **not** use `.env*` files or dotenv loaders.
+
+## Strategy (closest to production frontend)
+- Use **real PDFs** from `public/test-docs/`.
+- Let the app perform **anonymous sign-in** via Firebase Auth (same as production).
+- Exercise the UI buttons that call the callable Functions (same payload shape as production).
+
+## Test Cases
+
+### 1) PDF extraction (e2e)
+- Open `/view/test-docs/offer.pdf`
+- Wait until the AI tools become enabled (PDF opened + auth ready)
+
+### 2) Document analysis APIs (e2e)
+- Click **Summarize Key Points** (calls `preflightCheck` + `analyzeText`)
+- Assert results render successfully and include a non-trivial summary
+
+## How to Run
+From `Decodocs/web/`:
+- `npm run test:ai:firebase`
+
+The test lives in `playwright-tests-real/` so it doesn’t run as part of the default `npm run test:e2e` suite.
+
 ## Test Cases
 
 ### 1. Unit Test - Component Logic Verification

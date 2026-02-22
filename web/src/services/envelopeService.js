@@ -166,12 +166,13 @@ export async function extractEnvelope(envelopeBytes) {
 export async function openPdfOrEnvelopeFile(file) {
   if (!file) throw new Error('No file provided');
 
-  const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+  const lowerName = String(file.name || '').toLowerCase();
+  const isPdf = file.type === 'application/pdf' || lowerName.endsWith('.pdf');
   if (isPdf) {
     return { source: 'pdf', pdfFile: file, envelope: null };
   }
 
-  const isEnvelope = file.name.toLowerCase().endsWith('.snapsign') || file.type === 'application/zip';
+  const isEnvelope = lowerName.endsWith('.snapsign');
   if (!isEnvelope) {
     throw new Error('Unsupported file type. Please upload a .pdf or .snapsign file.');
   }

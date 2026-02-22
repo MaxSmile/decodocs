@@ -11,7 +11,7 @@ const outlineBtnClass = 'dd-btn dd-btn-outline';
 const subtleBtnClass = 'dd-btn dd-btn-subtle';
 
 export default function ProfilePage() {
-  const { authState, auth } = useAuth();
+  const { authState, auth, app } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const search = useMemo(() => new URLSearchParams(location.search), [location.search]);
@@ -42,7 +42,8 @@ export default function ProfilePage() {
     setNotice(null);
     try {
       const { getFunctions, httpsCallable } = await import('firebase/functions');
-      const fns = getFunctions();
+      const fns = app ? getFunctions(app) : null;
+      if (!fns) throw new Error('Billing portal unavailable (Firebase not ready).');
       const createPortal = httpsCallable(fns, 'stripeCreatePortalSession');
       const resp = await createPortal({});
       const url = resp?.data?.url;

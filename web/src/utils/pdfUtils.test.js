@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { computeSHA256, detectScannedDocument, extractPdfText } from './pdfUtils';
+import { describe, it, expect, vi } from 'vitest';
+import { computeSHA256, detectScannedDocument, extractPdfText, extractPdfTextAllPages } from './pdfUtils';
 
 describe('pdfUtils.computeSHA256', () => {
   it('computes correct SHA256 for string input', async () => {
@@ -32,5 +32,59 @@ describe('pdfUtils.extractPdfText error path', () => {
   it('throws when pdf.getPage fails', async () => {
     const pdf = { getPage: () => { throw new Error('no page'); } };
     await expect(extractPdfText(pdf, 1)).rejects.toThrow('no page');
+  });
+});
+
+describe('pdfUtils.extractPdfText', () => {
+  it('extracts text from a single page', async () => {
+    const mockPage = {
+      getTextContent: vi.fn().mockResolvedValue({
+        items: [{ str: 'Hello' }, { str: 'World' }]
+      })
+    };
+    const pdf = {
+      getPage: vi.fn().mockResolvedValue(mockPage)
+    };
+
+    const text = await extractPdfText(pdf, 1);
+    expect(pdf.getPage).toHaveBeenCalledWith(1);
+    expect(mockPage.getTextContent).toHaveBeenCalled();
+    expect(text).toBe('Hello World');
+  });
+});
+
+describe('pdfUtils.extractPdfTextAllPages', () => {
+  it('extracts text from all pages and joins with form feed', async () => {
+    const mockPage1 = {
+      getTextContent: vi.fn().mockResolvedValue({
+        items: [{ str: 'Page' }, { str: '1' }]
+      })
+    };
+    const mockPage2 = {
+      getTextContent: vi.fn().mockResolvedValue({
+        items: [{ str: 'Page' }, { str: '2' }]
+      })
+    };
+    const pdf = {
+      numPages: 2,
+      getPage: vi.fn().mockImplementation((pageNum) => {
+        if (pageNum === 1) return Promise.resolve(mockPage1);
+        if (pageNum === 2) return Promise.resolve(mockPage2);
+        return Promise.reject(new Error('Invalid page'));
+      })
+    };
+
+    const text = await extractPdfTextAllPages(pdf);
+    expect(pdf.getPage).toHaveBeenCalledTimes(2);
+    expect(text).toBe('Page 1\fPage 2\f');
+  });
+
+  it('throws on error (do not silently substitute placeholder text)', async () => {
+    const pdf = {
+      numPages: 1,
+      getPage: vi.fn().mockRejectedValue(new Error('Failed to get page'))
+    };
+
+    await expect(extractPdfTextAllPages(pdf)).rejects.toThrow('Failed to get page');
   });
 });

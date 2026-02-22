@@ -6,6 +6,7 @@ import PDFDropzone from './PDFDropzone';
 import PageThumbnails from './PageThumbnails';
 import EditorToolbar from './editor/EditorToolbar.jsx';
 import EditorOverlay from './editor/EditorOverlay.jsx';
+import AppDialog from './ui/AppDialog.jsx';
 import { usePdfJs } from '../hooks/usePdfJs';
 import { useSignMode } from '../hooks/useSignMode.js';
 
@@ -29,13 +30,17 @@ const DocumentEditor = () => {
   } = usePdfJs();
 
   const [selectedDocument, setSelectedDocument] = useState(null);
+  const [dialog, setDialog] = useState(null);
   const {
     activeTool,
     setActiveTool,
     signatures,
     annotations,
     signatureDimensions,
+    selectedItemId,
+    setSelectedItemId,
     handleCanvasClick,
+    startDrag,
   } = useSignMode();
 
   useEffect(() => {
@@ -69,6 +74,23 @@ const DocumentEditor = () => {
       });
     }
   }, [location, documentId, pdfLibLoaded, pdfDoc, loadPdfFromBlob, loadTestPdf]);
+
+  useEffect(() => {
+    const onShowGate = (event) => {
+      const detail = event?.detail || {};
+      setDialog({
+        title: detail.title || 'Notice',
+        message: detail.message || '',
+        primaryLabel: detail.primaryLabel || 'OK',
+        primaryTo: detail.primaryTo || null,
+        secondaryLabel: detail.secondaryLabel || null,
+        secondaryTo: detail.secondaryTo || null,
+      });
+    };
+
+    window.addEventListener('decodocs:show-gate', onShowGate);
+    return () => window.removeEventListener('decodocs:show-gate', onShowGate);
+  }, []);
 
   const handleFileUpload = (event) => {
     const files = Array.from(event.target.files);
@@ -202,8 +224,12 @@ const DocumentEditor = () => {
 
   const handleDownloadEditedPdf = async () => {
     if (!pdfDoc) {
-      // eslint-disable-next-line no-alert
-      alert('Open a PDF first.');
+      setDialog({
+        title: 'No PDF open',
+        message: 'Open a PDF first.',
+        primaryLabel: 'OK',
+        primaryTo: null,
+      });
       return;
     }
 
@@ -215,8 +241,12 @@ const DocumentEditor = () => {
       openPrintWindowForPdfSave(pageImages);
     } catch (err) {
       console.error('Failed to export edited PDF:', err);
-      // eslint-disable-next-line no-alert
-      alert(err?.message || 'Unable to export edited PDF.');
+      setDialog({
+        title: 'Export failed',
+        message: err?.message || 'Unable to export edited PDF.',
+        primaryLabel: 'OK',
+        primaryTo: null,
+      });
     }
   };
 
@@ -229,23 +259,53 @@ const DocumentEditor = () => {
   };
 
   const renderOverlay = (pageNum) => (
-    <EditorOverlay pageNum={pageNum} signatures={signatures} annotations={annotations} />
+    <EditorOverlay
+      pageNum={pageNum}
+      signatures={signatures}
+      annotations={annotations}
+      selectedItemId={selectedItemId}
+      onStartDrag={startDrag}
+      onSelect={setSelectedItemId}
+    />
   );
 
   return (
     <div className="contents">
+      <AppDialog
+        dialog={dialog}
+        onCancel={() => setDialog(null)}
+        onConfirm={() => {
+          if (dialog?.primaryTo) {
+            navigate(dialog.primaryTo);
+          }
+          setDialog(null);
+        }}
+      />
+
       <div className="flex flex-col h-full bg-slate-100">
         <EditorToolbar
           fileName={selectedDocument?.name}
           activeTool={activeTool}
           setActiveTool={setActiveTool}
           onShare={() => {
-            // eslint-disable-next-line no-alert
-            alert('Upgrade to Pro to share links!');
+            setDialog({
+              title: 'Pro required',
+              message: 'Upgrade to Pro to share links.',
+              primaryLabel: 'Upgrade to Pro',
+              primaryTo: '/pricing',
+              secondaryLabel: 'Cancel',
+              secondaryTo: null,
+            });
           }}
           onUpload={() => {
-            // eslint-disable-next-line no-alert
-            alert('Upgrade to Pro to upload to cloud!');
+            setDialog({
+              title: 'Pro required',
+              message: 'Upgrade to Pro to upload to cloud.',
+              primaryLabel: 'Upgrade to Pro',
+              primaryTo: '/pricing',
+              secondaryLabel: 'Cancel',
+              secondaryTo: null,
+            });
           }}
           onCancel={() => navigate('/view')}
           onDownload={handleDownloadEditedPdf}

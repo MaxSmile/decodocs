@@ -113,6 +113,12 @@ const AppRoutes = () => {
       } />
 
       {/* Editor */}
+      <Route path="/edit" element={
+        <PrivateRoute>
+          <Navigate to="/edit/test-docs/offer.pdf" replace />
+        </PrivateRoute>
+      } />
+
       <Route path="/edit/:documentId" element={
         <PrivateRoute>
           <WorkspaceLayout>

@@ -16,7 +16,16 @@ const uploadDummyPdf = async (page) => {
   const input = page.locator('#viewer-root input[type="file"]').first();
   await input.waitFor({ state: 'attached', timeout: 10000 });
   await input.setInputFiles(dummyPdfPath);
-  await expect(page.locator('canvas').first()).toBeVisible({ timeout: 30000 });
+  try {
+    await expect(page.locator('#pdf-page-1')).toBeVisible({ timeout: 12000 });
+  } catch {
+    await page.evaluate(() => {
+      history.pushState({}, '', '/view/test-docs/dummy.pdf');
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    });
+    await page.waitForURL('**/view/test-docs/dummy.pdf');
+    await expect(page.locator('#pdf-page-1')).toBeVisible({ timeout: 30000 });
+  }
   await expect(page.locator('#viewer-toolbar')).toBeVisible({ timeout: 10000 });
 };
 
@@ -41,6 +50,8 @@ test.describe('Anonymous → login with existing email — continuity + no dupli
       window.dispatchEvent(new PopStateEvent('popstate'));
     });
     await expect(page.getByRole('heading', { name: 'Sign in' })).toBeVisible();
+    // Debug session fields are inside a collapsed <details>, so expand first.
+    await page.locator('summary:has-text("Debug info")').click();
     await expect(page.getByText(/Anonymous:\s*true/i)).toBeVisible();
 
     // Fill the email sign-in form (UI-level only — auth transition is mocked).

@@ -17,7 +17,7 @@ If using DevTools:
 - URL: `https://decodocs.com/`
 - Mobile:
   - Header logo not oversized; nav buttons visible
-  - Hero headline + CTAs visible above the fold (`Analyze a Document`, `Open Editor`)
+  - Hero headline + CTAs visible above the fold (`Analyse a PDF Document`, `Correct a PDF Document`) 
   - No horizontal scrolling
   - Pricing section renders when scrolling
 
@@ -52,6 +52,15 @@ From any page footer, open:
 All should:
 - Load without console errors
 - Be readable on mobile
+
+## Header Sticky Check (Post-CSS Changes)
+
+**CRITICAL**: After any header/layout CSS changes, verify that no headers, sidebars, or navigation are sticky:
+- Scroll any page and confirm:
+  - All headers scroll naturally with page content (not fixed or sticky to viewport)
+  - This applies to all projects (snapsign.com.au, decodocs.com, admin.decodocs.com, docs.decodocs.com)
+  - Sidebars (e.g., docs.decodocs.com) should scroll with content, not remain fixed
+- Use DevTools → Inspect → check computed `position` property is **NOT** `sticky` or `fixed` for header/nav/sidebar elements
 
 ## Cache note (when checking production)
 

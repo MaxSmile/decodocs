@@ -4,6 +4,7 @@ import Footer from './landing/Footer.jsx';
 import GoogleOneTap from './auth/GoogleOneTap.jsx';
 import SiteHeader from './SiteHeader.jsx';
 import ReportWidget from './ReportWidget.jsx';
+import { useLocation } from 'react-router-dom';
 
 /**
  * Shared app layout.
@@ -22,8 +23,22 @@ const Layout = ({
 }) => {
   const isAppLayout = variant === 'app';
 
+  // when the app is rendering the document workspace (/view or /edit)
+  // we want the header to behave like a normal page header – static and
+  // allow the browser window to scroll rather than locking the viewport
+  // height. otherwise, `h-screen overflow-hidden` keeps the header pinned
+  // while inner containers scroll.
+  const location = useLocation();
+  const isWorkspaceRoute =
+    location?.pathname?.startsWith('/view') ||
+    location?.pathname?.startsWith('/edit');
+
   return (
-    <div className={`min-h-screen bg-[#f7f6f2] text-slate-900 flex flex-col ${isAppLayout ? 'h-screen overflow-hidden' : ''}`}>
+    <div
+      className={`min-h-screen bg-[#f7f6f2] text-slate-900 flex flex-col ${
+        isAppLayout && !isWorkspaceRoute ? 'h-screen overflow-hidden' : ''
+      }`}
+    >
       {showOneTap ? <GoogleOneTap /> : null}
       <div className={`relative flex min-h-0 flex-1 flex-col ${showDecor ? 'overflow-hidden' : ''}`}>
         {showDecor ? (

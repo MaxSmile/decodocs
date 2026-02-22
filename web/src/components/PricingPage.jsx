@@ -33,7 +33,7 @@ export default function PricingPage() {
   const isSandboxMode = stripeMode !== 'live';
   const navigate = useNavigate();
   const location = useLocation();
-  const { authState } = useAuth();
+  const { authState, app } = useAuth();
   const search = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const initialBilling = search.get('billing') === 'annual' ? 'annual' : 'monthly';
   const [billing, setBilling] = useState(initialBilling);
@@ -69,7 +69,8 @@ export default function PricingPage() {
 
     try {
       const { getFunctions, httpsCallable } = await import('firebase/functions');
-      const fns = getFunctions();
+      const fns = app ? getFunctions(app) : null;
+      if (!fns) throw new Error('Checkout unavailable (Firebase not ready).');
       const createSession = httpsCallable(fns, 'stripeCreateCheckoutSession');
       const resp = await createSession({ billing: selectedBilling, plan });
       const url = resp?.data?.url;

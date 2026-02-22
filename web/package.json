@@ -1,6 +1,6 @@
 {
   "name": "decodocs-react",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "private": true,
   "type": "module",
   "dependencies": {
@@ -28,6 +28,7 @@
     "test": "vitest run",
     "test:unit": "vitest run",
     "test:unit:single": "vitest run --coverage.enabled=false",
+    "test:ai:firebase": "playwright test playwright-tests-real/ai-workflow-firebase.spec.js",
     "test:e2e": "playwright test playwright-tests/",
     "test:debug": "vitest --reporter=verbose",
     "test:coverage": "vitest run --coverage",

@@ -51,3 +51,7 @@ Current scope:
 ## Documentation & project context
 - Both code and UI/copy edits require understanding of product intent and ownership. Before changing UI text or adding features, consult `Decodocs/docs/README.md` and the umbrella `DOCS_INDEX.md` to find the right docs and reviewers.
 - Use the index to ensure consistency between implementation and written copy.
+
+## Task tracking ownership
+- Track admin portal work in `Decodocs/admin/TODO.md`.
+- If a task impacts whole-product behavior across web/functions, mirror or escalate it in `Decodocs/TODO.md`.

@@ -202,6 +202,10 @@ If you change architecture decisions, update this file first.
 - Runtime toggles may come from platform-provided environment at process start (CI/shell), but never from local env files.
 - Product/runtime secrets and mutable config must stay server-side (Firestore admin docs or backend runtime), not in web env files.
 
+## Testing Policy (Web)
+- Firebase emulators are **not used** in this repo.
+- Client tests should exercise the **real deployed Firebase Functions** (production-like) from the frontend, using the same payload shapes as production.
+
 ## Canonical deployment script
 - Production deploys for DecoDocs web are performed from the parent SnapSign-AU repo using `./test-build-deploy.sh`. Do not deploy `Decodocs/web` directly using `firebase deploy` from inside this nested repo unless explicitly approved.
 - For local development you may run `npm run dev` or `npm run build`, but integration/production deploys must use the umbrella script.

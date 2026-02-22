@@ -26,15 +26,15 @@ const Hero = ({ onOpenPdf }) => {
               onClick={onOpenPdf}
               className="w-full sm:w-auto"
             >
-              Analyze a Document
+              Analyse a PDF Document
             </Button>
             <Button
               variant="secondary"
               size="lg"
-              to="/edit/test-docs/offer.pdf"
+              to="/edit"
               className="w-full sm:w-auto"
             >
-              Open Editor
+              Correct a PDF Document
             </Button>
           </div>
           <div className="mt-1 flex flex-wrap gap-3 text-xs font-medium text-slate-500 sm:mt-2 sm:gap-6 sm:text-sm">

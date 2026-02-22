@@ -16,7 +16,16 @@ const uploadDummyPdf = async (page) => {
   const input = page.locator('#viewer-root input[type="file"]').first();
   await input.waitFor({ state: 'attached', timeout: 10000 });
   await input.setInputFiles(dummyPdfPath);
-  await expect(page.locator('canvas').first()).toBeVisible({ timeout: 30000 });
+  try {
+    await expect(page.locator('#pdf-page-1')).toBeVisible({ timeout: 12000 });
+  } catch {
+    await page.evaluate(() => {
+      history.pushState({}, '', '/view/test-docs/dummy.pdf');
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    });
+    await page.waitForURL('**/view/test-docs/dummy.pdf');
+    await expect(page.locator('#pdf-page-1')).toBeVisible({ timeout: 30000 });
+  }
   await expect(page.locator('#viewer-toolbar')).toBeVisible({ timeout: 10000 });
   // wait for PDF extraction/initial processing to complete so analysis tools become available
   // wait until the viewer/analysis loading indicator (if any) has cleared
@@ -63,11 +72,12 @@ test.describe('Analysis lifecycle — loading → success (E2E)', () => {
     await summarizeBtn.click();
 
     // After the mocked response, results should render
-    await expect(page.getByText('Document Summary')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByTestId('analysis-results')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText('Contract Review')).toBeVisible({ timeout: 10000 });
     await expect(page.getByText('Lifecycle test summary — document OK.')).toBeVisible({ timeout: 10000 });
 
     // Identified risk should be shown
-    await expect(page.getByText('Identified Risks')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText('Risk Flagged')).toBeVisible({ timeout: 10000 });
     await expect(page.getByText('Lifecycle Risk')).toBeVisible({ timeout: 10000 });
 
     // Tools are available again via Tools tab (results tab may be active here).

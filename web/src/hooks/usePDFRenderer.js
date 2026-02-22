@@ -1,5 +1,10 @@
 import { useRef, useCallback, useEffect } from 'react';
 
+const isRenderCancellation = (error) => {
+  const message = String(error?.message || error || '');
+  return error?.name === 'RenderingCancelledException' || message.includes('Rendering cancelled');
+};
+
 /**
  * Hook for PDF rendering operations
  * Handles canvas rendering, text layer, and annotations
@@ -8,17 +13,23 @@ export const usePDFRenderer = (pdfDoc, pageScale) => {
   const canvasRef = useRef(null);
   const textLayerRef = useRef(null);
   const annotationsRef = useRef(null);
+  const showDialog = (title, message) => {
+    if (typeof window === 'undefined' || typeof window.dispatchEvent !== 'function') return;
+    window.dispatchEvent(
+      new CustomEvent('decodocs:show-gate', {
+        detail: { title, message, primaryLabel: 'OK', primaryTo: null },
+      })
+    );
+  };
 
   // Show clause details
   const showClauseDetails = (clauseMarker) => {
-    alert(`Clause: ${clauseMarker.text}\n\n${clauseMarker.details || 'No details available.'}`);
+    showDialog('Clause', `${clauseMarker.text}\n\n${clauseMarker.details || 'No details available.'}`);
   };
 
   // Show risk details
   const showRiskDetails = (riskBadge) => {
-    alert(
-      `Risk: ${riskBadge.description}\n\n${riskBadge.explanation || 'No explanation available.'}`
-    );
+    showDialog('Risk', `${riskBadge.description}\n\n${riskBadge.explanation || 'No explanation available.'}`);
   };
 
   // Render text layer for selection and searching
@@ -55,6 +66,7 @@ export const usePDFRenderer = (pdfDoc, pageScale) => {
         textLayerRef.current.appendChild(span);
       }
     } catch (error) {
+      if (isRenderCancellation(error)) return;
       // preserve original behavior for tests (error object) and also log a concise message
       console.error('Error rendering text layer:', error);
       console.error('Error rendering text layer message:', error?.message || error);
@@ -172,15 +184,9 @@ export const usePDFRenderer = (pdfDoc, pageScale) => {
       try {
         const page = await pdfDoc.getPage(pageNum);
         const canvas = canvasRef.current;
-        if (!canvas) {
-          console.error(`renderPage: canvasRef is null for page ${pageNum}`);
-          return;
-        }
+        if (!canvas) return;
         const context = (canvas.getContext && canvas.getContext('2d')) || null;
-        if (!context) {
-          console.error(`renderPage: canvas.getContext() returned null for page ${pageNum}`);
-          return;
-        }
+        if (!context) return;
 
         // Calculate viewport
         const scale = pageScale;
@@ -210,6 +216,7 @@ export const usePDFRenderer = (pdfDoc, pageScale) => {
         // Render annotations/highlights if any
         renderAnnotations(pageNum, viewport, highlights, clauseMarkers, riskBadges);
       } catch (error) {
+        if (isRenderCancellation(error)) return;
         // preserve original behavior for tests (error object) and also log a concise message
         console.error('Error rendering page:', error);
         console.error('Error rendering page message:', error?.message || error);

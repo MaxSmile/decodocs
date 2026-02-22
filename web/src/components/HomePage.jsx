@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import PublicLayout from './layouts/PublicLayout.jsx';
@@ -9,10 +9,12 @@ import FeatureGrid from './landing/FeatureGrid.jsx';
 import UseCases from './landing/UseCases.jsx';
 import Integrations from './landing/Integrations.jsx';
 import SecureByDesign from './landing/SecureByDesign.jsx';
+import AppDialog from './ui/AppDialog.jsx';
 
 const HomePage = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
+  const [dialog, setDialog] = useState(null);
 
   const openFilePicker = () => {
     if (fileInputRef.current) fileInputRef.current.click();
@@ -23,8 +25,12 @@ const HomePage = () => {
     if (!file) return;
 
     if (file.type !== 'application/pdf') {
-      // eslint-disable-next-line no-alert
-      alert('Please select a valid PDF file');
+      setDialog({
+        title: 'Unsupported file',
+        message: 'Please select a valid PDF file.',
+        primaryLabel: 'OK',
+        primaryTo: null,
+      });
       event.target.value = '';
       return;
     }
@@ -56,6 +62,11 @@ const HomePage = () => {
 
   return (
     <PublicLayout showOneTap showDecor onOpenPdf={openFilePicker}>
+      <AppDialog
+        dialog={dialog}
+        onCancel={() => setDialog(null)}
+        onConfirm={() => setDialog(null)}
+      />
       <input
         ref={fileInputRef}
         type="file"

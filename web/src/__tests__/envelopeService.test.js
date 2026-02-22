@@ -80,6 +80,19 @@ describe('envelopeService', () => {
     expect(openedEnvelope.pdfFile.type).toBe('application/pdf');
   });
 
+  test('rejects plain .zip uploads that are not .snapsign', async () => {
+    const zipBytes = new Uint8Array([80, 75, 3, 4]);
+    const zipFile = makeMockFile({
+      name: 'archive.zip',
+      type: 'application/zip',
+      bytes: zipBytes,
+    });
+
+    await expect(openPdfOrEnvelopeFile(zipFile)).rejects.toThrow(
+      'Unsupported file type. Please upload a .pdf or .snapsign file.'
+    );
+  });
+
   test('classifies preflight limits client-side', () => {
     const ok = runClientPreflight({
       pageCount: 2,

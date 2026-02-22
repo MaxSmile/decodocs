@@ -1,6 +1,6 @@
 # TODO - DecoDocs Admin Portal
 
-_Last updated: February 19, 2026_
+_Last updated: February 21, 2026_
 
 ## Decisions (confirmed)
 - **Admins:** any signed-in user with `@snapsign.com.au` email = super admin (single role for now).
@@ -64,3 +64,54 @@ _Last updated: February 19, 2026_
 - [x] Add admin page to view and manage report status (`/reports`).
 - [x] Add web intake for `feedback` and `bug` reports from decodocs.com.
 - [x] Log backend exceptions to Firestore operational reports for admin triage.
+
+## Per-file code quality audit (February 21, 2026)
+
+### `src/pages/AdminHome.jsx`
+- [ ] Replace hardcoded config cards with a shared route/config registry used by both `AdminHome` and `ConfigEditor` to avoid route drift.
+- [ ] Move repeated inline button/card styles into reusable UI components or shared style tokens (current inline duplication across most pages).
+
+### `src/pages/AccessDenied.jsx`
+- [ ] Add test coverage for sign-out flow and rendered account identity (`Signed in as`) so access-denied UX does not regress.
+- [ ] Align layout/styling with shared page shell to remove one-off inline styling.
+
+### `src/pages/LoginPage.jsx`
+- [ ] Normalize Firebase auth error messages before rendering (currently raw `e.message` is shown directly).
+- [ ] Add focused tests for login failure/success state transitions and disabled submit state.
+
+### `src/pages/RegisterPage.jsx`
+- [ ] Remove hardcoded password rule duplication (`password.length < 10`) by sourcing from shared validation policy to prevent UI/backend drift.
+- [ ] Normalize Firebase auth error messages before rendering (currently raw `e.message` is shown directly).
+- [ ] Add tests for password policy UI behavior and registration failure states.
+
+### `src/pages/ConfigEditor.jsx`
+- [ ] Fix stale hook dependency: `const saveConfig = useMemo(() => httpsCallable(fn, 'setAdminConfig'), [])` should include `fn`.
+- [ ] Add unsaved-changes route leave protection (confirm before navigating away when `dirty` is true).
+- [ ] Add tests for server validation error rendering path (`e.details.errors`), unknown config key path, and load failure path.
+
+### `src/pages/AiEventsPage.jsx`
+- [ ] Prevent state updates after unmount during async load (mirror `active` guard pattern already used in `ConfigEditor`).
+- [ ] Add tests for loading/error/empty states and timestamp formatter behavior.
+- [ ] Consider pagination/cursor loading instead of fixed cap (`MAX_ROWS = 150`) for better long-term operability.
+
+### `src/pages/ReportsPage.jsx`
+- [ ] Remove expensive full-table remount key (`key={filtered.map(...).join(',')}`); this scales poorly with row count.
+- [ ] Add per-row pending state for status updates to prevent repeated rapid writes on the same report.
+- [ ] Add tests for status update flow, filtering behavior, and error state rendering.
+
+### `src/pages/UsersPage.jsx`
+- [ ] Remove dead code: `rowsRef` is created and assigned but never used.
+- [ ] Replace index-based row access in actions (`row.cells[4]`) with safer id-based mapping to reduce break risk when columns change.
+- [ ] Remove expensive full-table remount key (`key={rows.map(...).join(',')}`) and use targeted row updates instead.
+- [ ] Add per-row pending states for disable/delete actions to avoid duplicate requests from repeated clicks.
+- [ ] Add tests for pagination (`nextPageToken`), disable/enable toggles, and delete confirmation paths.
+
+### `src/App.jsx`
+- [ ] Add integration test coverage for all protected admin routes (`/users`, `/reports`, `/ai-events`, `/config/:key`) under signed-out/non-admin/admin states.
+
+### `src/AuthContext.jsx`
+- [ ] Resolve lint warning from `react-refresh/only-export-components` by moving hook/context exports to a component-only module split.
+
+### `src/test/HeaderLayout.test.jsx`
+- [ ] Fix failing test setup: wrap `App` with required auth provider or mock `useAuth`; current test crashes with `useAuth must be used inside AuthProvider`.
+- [ ] Narrow assertion scope to app-owned headers/components and avoid global computed-style checks that can be brittle in jsdom.

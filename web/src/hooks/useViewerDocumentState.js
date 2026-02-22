@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import {
   createUploadUrl,
   createDownloadUrl,
@@ -18,7 +18,7 @@ export const useViewerDocumentState = ({
   loadTestPdf,
   loadPdfFromBlob,
   loadError,
-  setGate,
+  setDialog,
   loadLocalOverride,
   loadServerTypeState,
   runServerDetection,
@@ -29,9 +29,13 @@ export const useViewerDocumentState = ({
   const [selectedDocument, setSelectedDocument] = useState(null);
   const [cloudObjectKey, setCloudObjectKey] = useState(null);
   const [isCloudBusy, setIsCloudBusy] = useState(false);
+  const loadedDocIdRef = useRef(null); // Track which document was already loaded to prevent re-loads
 
   useEffect(() => {
     if (!fileName || !pdfLibLoaded) return;
+    // Skip reload if same file was already loaded
+    if (loadedDocIdRef.current === `test:${fileName}`) return;
+    loadedDocIdRef.current = `test:${fileName}`;
 
     const load = async () => {
       try {
@@ -49,7 +53,7 @@ export const useViewerDocumentState = ({
         await loadServerTypeState(result.docHash);
         runServerDetection({ docHashValue: result.docHash, stats: result.stats, text: result.text });
       } catch (err) {
-        setGate({
+        setDialog({
           title: 'Could not load PDF',
           message: err?.message || 'Failed to load test PDF.',
           primaryLabel: 'OK',
@@ -61,14 +65,19 @@ export const useViewerDocumentState = ({
     };
 
     load();
-  }, [fileName, pdfLibLoaded, loadLocalOverride, loadPdfFromBlob, loadServerTypeState, loadTestPdf, runServerDetection, setGate]);
+  }, [fileName, pdfLibLoaded, loadLocalOverride, loadServerTypeState, loadTestPdf, runServerDetection, setDialog]);
 
   useEffect(() => {
     if (!location.state?.document || fileName || !pdfLibLoaded) return;
 
     const doc = location.state.document;
+    // Skip reload if same document was already loaded (prevents re-load on unrelated re-renders)
+    const docId = doc.id || doc.name;
+    if (loadedDocIdRef.current === docId) return;
+
     setSelectedDocument(doc);
     setCloudObjectKey(doc?.cloudKey || null);
+    loadedDocIdRef.current = docId;
 
     const load = async () => {
       try {
@@ -89,7 +98,7 @@ export const useViewerDocumentState = ({
   useEffect(() => {
     if (!loadError) return;
 
-    setGate({
+    setDialog({
       title: 'Could not load PDF',
       message: loadError?.message || 'Failed to load PDF.',
       primaryLabel: 'OK',
@@ -97,7 +106,7 @@ export const useViewerDocumentState = ({
     });
     setSelectedDocument(null);
     navigate('/view');
-  }, [loadError, navigate, setGate]);
+  }, [loadError, navigate, setDialog]);
 
   const handleFileUpload = async (event) => {
     const files = Array.from(event.target.files);
@@ -120,7 +129,7 @@ export const useViewerDocumentState = ({
       setCloudObjectKey(null);
       navigate('/view', { state: { document: newDocument } });
     } catch (err) {
-      setGate({
+      setDialog({
         title: 'Unsupported or invalid file',
         message: err?.message || 'Please upload a valid .pdf or .snapsign file.',
         primaryLabel: 'OK',
@@ -135,7 +144,7 @@ export const useViewerDocumentState = ({
     if (!functions && !hasMockUploadCallable) return;
 
     if (!selectedDocument?.file) {
-      setGate({
+      setDialog({
         title: 'No local file to upload',
         message: 'Open a local PDF first, then save it to DecoDocs cloud storage.',
         primaryLabel: 'OK',
@@ -160,7 +169,7 @@ export const useViewerDocumentState = ({
 
       setCloudObjectKey(uploadInfo.key);
       setSelectedDocument((prev) => ({ ...(prev || {}), cloudKey: uploadInfo.key }));
-      setGate({
+      setDialog({
         title: 'Saved to DecoDocs',
         message: `Document uploaded successfully.\nObject key: ${uploadInfo.key}`,
         primaryLabel: 'OK',
@@ -168,7 +177,7 @@ export const useViewerDocumentState = ({
     } catch (err) {
       const code = err?.code || '';
       const isProGate = String(code).includes('permission-denied');
-      setGate({
+      setDialog({
         title: isProGate ? 'Pro required' : 'Cloud upload failed',
         message: isProGate
           ? 'Cloud storage is available for Pro plans. Upgrade to continue.'
@@ -205,7 +214,7 @@ export const useViewerDocumentState = ({
         link.download = selectedDocument?.name || 'document.pdf';
         link.click();
       } catch (err) {
-        setGate({
+        setDialog({
           title: 'Download failed',
           message: err?.message || 'Unable to download cloud document.',
           primaryLabel: 'OK',

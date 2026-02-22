@@ -3,6 +3,7 @@ import { ClientRouter } from 'astro:transitions';
 import SEO from '../components/astro/SEO.astro';
 import Header from '../components/islands/Header.tsx';
 import AuthWatcher from '../components/islands/AuthWatcher.tsx';
+import SupportUkraineBannerIsland from '../components/islands/SupportUkraineBannerIsland.jsx';
 import '../index.css';
 
 const {
@@ -45,6 +46,9 @@ const {
   </head>
   <body>
     <AuthWatcher client:load transition:persist />
+    <div class="support-ukraine-banner-slot">
+      <SupportUkraineBannerIsland client:only="react" transition:persist />
+    </div>
     {showHeader ? <Header client:load transition:persist /> : null}
     <slot />
   </body>

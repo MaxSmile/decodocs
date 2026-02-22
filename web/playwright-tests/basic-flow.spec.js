@@ -16,12 +16,12 @@ test.describe('DecoDocs Application Flow', () => {
     // Verify we're on the home page with new content
     await expect(page.locator('#hero h1')).toContainText('Decode documents');
 
-    // Verify the main CTA link exists (use role-based selector)
-    const openPdfButton = page.getByRole('link', { name: 'Analyze a Document' });
+    // Main CTA is a button that opens the file picker
+    const openPdfButton = page.getByRole('link', { name: 'Analyse a PDF Document' });
     await expect(openPdfButton).toBeVisible();
 
-    // Verify secondary CTA exists
-    const openEditorButton = page.locator('a', { hasText: 'Open Editor' });
+    // Secondary CTA is a link to editor
+    const openEditorButton = page.getByRole('link', { name: 'Edit a PDF Document' });
     await expect(openEditorButton).toBeVisible();
   });
 

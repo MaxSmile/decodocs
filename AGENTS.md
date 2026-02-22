@@ -39,3 +39,8 @@ If any hosting or function scripts require Blaze/Cloud Build, re-check your fire
 ## Canonical deployment script
 - DecoDocs is deployed as part of the SnapSign-AU umbrella. Use the repo-root `./test-build-deploy.sh` to build and deploy DecoDocs together with the other subprojects.
 - Do NOT deploy `Decodocs` independently using ad-hoc `firebase deploy` — the umbrella script guarantees the expected nested output paths and build verification.
+
+## Task tracking ownership
+- This DecoDocs repo tracks product work in `Decodocs/TODO.md`.
+- Do not log umbrella Firebase integration work here; use root `TASKS.md`.
+- Admin-portal-only work should be tracked in `Decodocs/admin/TODO.md`.

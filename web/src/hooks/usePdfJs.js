@@ -1,5 +1,10 @@
-import { useState, useEffect } from 'react';
-import { computeSHA256, extractPdfTextAllPages } from '../utils/pdfUtils';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import {
+    computeSHA256,
+    ensurePdfJsWorkerConfigured,
+    extractPdfTextAllPages,
+    getPdfJsStandardFontDataUrl,
+} from '../utils/pdfUtils';
 import { buildDocStats } from '../utils/docStats';
 
 export const usePdfJs = () => {
@@ -19,6 +24,7 @@ export const usePdfJs = () => {
     useEffect(() => {
         const initPdfJs = async () => {
             if (window.pdfjsLib) {
+                ensurePdfJsWorkerConfigured();
                 setPdfLibLoaded(true);
                 return;
             }
@@ -26,6 +32,7 @@ export const usePdfJs = () => {
             try {
                 const pdfjsLib = await import('pdfjs-dist');
                 window.pdfjsLib = pdfjsLib;
+                ensurePdfJsWorkerConfigured();
                 setPdfLibLoaded(true);
             } catch (err) {
                 console.error('Failed to load PDF.js:', err);
@@ -36,7 +43,7 @@ export const usePdfJs = () => {
         initPdfJs();
     }, []);
 
-    const loadPdfFromBlob = async (fileBlob) => {
+    const loadPdfFromBlob = useCallback(async (fileBlob) => {
         if (!window.pdfjsLib || !fileBlob) return;
 
         try {
@@ -58,6 +65,7 @@ export const usePdfJs = () => {
                         setLoadingMessage(`Loading ${fileNameForDisplay}: ${percent}%`);
                     }
                 },
+                standardFontDataUrl: getPdfJsStandardFontDataUrl(),
             }).promise;
 
             setPdfDoc(pdf);
@@ -82,9 +90,9 @@ export const usePdfJs = () => {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, []);
 
-    const loadTestPdf = async (fileName) => {
+    const loadTestPdf = useCallback(async (fileName) => {
         if (!window.pdfjsLib) return;
 
         try {
@@ -111,6 +119,7 @@ export const usePdfJs = () => {
                         setLoadingMessage(`Loading ${fileName}: ${percent}%`);
                     }
                 },
+                standardFontDataUrl: getPdfJsStandardFontDataUrl(),
             }).promise;
 
             setPdfDoc(pdf);
@@ -144,18 +153,18 @@ export const usePdfJs = () => {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, []);
 
-    const navigation = {
+    const navigation = useMemo(() => ({
         goToPreviousPage: () => setPageNumber((prev) => Math.max(prev - 1, 1)),
         goToNextPage: () => setPageNumber((prev) => Math.min(prev + 1, numPages || 1)),
         zoomIn: () => setPageScale((prev) => Math.min(prev + 0.2, 3.0)),
         zoomOut: () => setPageScale((prev) => Math.max(prev - 0.2, 0.5)),
         setPageNumber,
         setPageScale,
-    };
+    }), [numPages]);
 
-    const resetPdf = () => {
+    const resetPdf = useCallback(() => {
         try { pdfDoc?.destroy?.(); } catch (e) { /* ignore */ }
         setPdfDoc(null);
         setNumPages(null);
@@ -167,7 +176,7 @@ export const usePdfJs = () => {
         setIsLoading(false);
         setLoadingMessage('');
         setLoadError(null);
-    };
+    }, [pdfDoc]);
 
     return {
         pdfLibLoaded,

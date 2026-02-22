@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { getFunctions } from 'firebase/functions';
 import { useAuth } from '../context/AuthContext';
@@ -9,7 +9,7 @@ import PageThumbnails from './PageThumbnails';
 import AnalysisSidebar from './AnalysisSidebar';
 import SignatureModal from './SignatureModal';
 import DocumentTypeSelector from './DocumentTypeSelector';
-import GateDialog from './GateDialog';
+import AppDialog from './ui/AppDialog.jsx';
 import ViewerToolbar from './ViewerToolbar';
 import ViewerPageOverlay from './viewer/ViewerPageOverlay.jsx';
 import { useDocumentTypes } from '../hooks/useDocumentTypes';
@@ -54,7 +54,9 @@ const DocumentViewer = () => {
   const {
     analysisResults,
     gate,
+    dialog,
     setGate,
+    setDialog,
     isLoading: isAnalysisLoading,
     handleAnalyzeDocument,
     handleAnalyzeByType,
@@ -86,9 +88,13 @@ const DocumentViewer = () => {
     annotations,
     signatureModalOpen,
     setSignatureModalOpen,
+    selectedItemId,
+    setSelectedItemId,
     handleCanvasClick,
     handleSignClick,
     handleSignatureAdopt,
+    startDrag,
+    deleteSelectedItem,
   } = useViewerSignMode();
 
   const [highlights] = useState([]);
@@ -96,6 +102,23 @@ const DocumentViewer = () => {
   const [riskBadges, setRiskBadges] = useState([]);
   const [typeSelectorOpen, setTypeSelectorOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  useEffect(() => {
+    const onShowGate = (event) => {
+      const detail = event?.detail || {};
+      setDialog({
+        title: detail.title || 'Notice',
+        message: detail.message || '',
+        primaryLabel: detail.primaryLabel || 'OK',
+        primaryTo: detail.primaryTo || null,
+        secondaryLabel: detail.secondaryLabel || null,
+        secondaryTo: detail.secondaryTo || null,
+      });
+    };
+
+    window.addEventListener('decodocs:show-gate', onShowGate);
+    return () => window.removeEventListener('decodocs:show-gate', onShowGate);
+  }, [setDialog]);
 
   const {
     selectedDocument,
@@ -113,7 +136,7 @@ const DocumentViewer = () => {
     loadTestPdf,
     loadPdfFromBlob,
     loadError,
-    setGate,
+    setDialog,
     loadLocalOverride,
     loadServerTypeState,
     runServerDetection,
@@ -147,6 +170,16 @@ const DocumentViewer = () => {
     }
   };
 
+  const handlePreviousPage = () => {
+    const target = Math.max((pageNumber || 1) - 1, 1);
+    scrollToPage(target);
+  };
+
+  const handleNextPage = () => {
+    const target = Math.min((pageNumber || 1) + 1, numPages || 1);
+    scrollToPage(target);
+  };
+
   const updateAnnotationsFromAnalysis = (analysis) => {
     const newRiskBadges = [];
     if (analysis.risks && analysis.risks.length > 0) {
@@ -166,8 +199,17 @@ const DocumentViewer = () => {
   };
 
   const renderPageOverlay = (pageNum) => (
-    <ViewerPageOverlay pageNum={pageNum} signatures={signatures} annotations={annotations} />
+    <ViewerPageOverlay
+      pageNum={pageNum}
+      signatures={signatures}
+      annotations={annotations}
+      selectedItemId={selectedItemId}
+      onStartDrag={startDrag}
+      onSelect={setSelectedItemId}
+    />
   );
+
+  const activeDialog = gate || dialog;
 
   return (
     <div className="contents">
@@ -178,22 +220,26 @@ const DocumentViewer = () => {
         onAdopt={handleSignatureAdopt}
       />
 
-      {/* Gate Dialog */}
-      <GateDialog
-        gate={gate}
-        onCancel={() => setGate(null)}
+      {/* App Dialog */}
+      <AppDialog
+        dialog={activeDialog}
+        onCancel={() => {
+          setGate(null);
+          setDialog(null);
+        }}
         onConfirm={async () => {
-          if (gate._kind === 'confirm-override' && pendingOverride && docHash) {
+          if (activeDialog?._kind === 'confirm-override' && pendingOverride && docHash) {
             const typeId = pendingOverride.id;
             setOverrideDocTypeId(typeId);
             await persistOverride(docHash, typeId);
             setPendingOverride(null);
-            setGate(null);
+            setDialog(null);
             return;
           }
 
           setGate(null);
-          if (gate.primaryTo) navigate(gate.primaryTo);
+          setDialog(null);
+          if (activeDialog?.primaryTo) navigate(activeDialog.primaryTo);
         }}
       />
 
@@ -205,7 +251,7 @@ const DocumentViewer = () => {
         onPick={(t) => {
           setTypeSelectorOpen(false);
           setPendingOverride(t);
-          setGate({
+          setDialog({
             title: 'Confirm document type',
             message: `Set document type to “${t.label}”? This will change the actions/checks we show for this document.`,
             primaryLabel: 'Confirm',
@@ -289,8 +335,8 @@ const DocumentViewer = () => {
                 pageNumber={pageNumber}
                 numPages={numPages}
                 pageScale={pageScale}
-                onPreviousPage={navigation.goToPreviousPage}
-                onNextPage={navigation.goToNextPage}
+                onPreviousPage={handlePreviousPage}
+                onNextPage={handleNextPage}
                 onZoomIn={navigation.zoomIn}
                 onZoomOut={navigation.zoomOut}
                 fileInputRef={fileInputRef}

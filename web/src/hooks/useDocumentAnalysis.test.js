@@ -54,7 +54,6 @@ describe('useDocumentAnalysis', () => {
     vi.restoreAllMocks();
     vi.clearAllMocks();
     global.fetch = vi.fn();
-    global.alert = vi.fn();
     vi.spyOn(console, 'error').mockImplementation(() => {});
     vi.spyOn(console, 'warn').mockImplementation(() => {});
 
@@ -100,6 +99,7 @@ describe('useDocumentAnalysis', () => {
     const { result } = setupHook();
     expect(result.current.analysisResults).toEqual({});
     expect(result.current.gate).toBeNull();
+    expect(result.current.dialog).toBeNull();
     expect(result.current.isLoading).toBe(false);
   });
 
@@ -120,7 +120,7 @@ describe('useDocumentAnalysis', () => {
     await act(async () => {
       await mockMode.current.handleAnalyzeByType({ selectedDocument: DOC, pdfTextContent: PDF_TEXT, docHash: DOC_HASH });
     });
-    expect(mockMode.current.gate.title).toBe('Type-specific analysis (beta)');
+    expect(mockMode.current.dialog.title).toBe('Type-specific analysis (beta)');
     expect(mockMode.current.analysisResults[DOC.id]._meta.status).toBe('error');
 
     const { result: okMode } = setupHook();
@@ -129,7 +129,7 @@ describe('useDocumentAnalysis', () => {
     });
     expect(analyzeByTypeCall).toHaveBeenCalledWith({ functions: {}, docHash: DOC_HASH, text: PDF_TEXT });
     expect(okMode.current.analysisResults[DOC.id].typeSpecific.validationTitle).toBe('Contract Spec');
-    expect(okMode.current.gate.message).toContain('Spec: Contract Spec');
+    expect(okMode.current.gate).toBeNull();
 
     analyzeByTypeCall.mockResolvedValueOnce({
       ok: true,
@@ -139,28 +139,27 @@ describe('useDocumentAnalysis', () => {
     await act(async () => {
       await okMode.current.handleAnalyzeByType({ selectedDocument: DOC, pdfTextContent: PDF_TEXT, docHash: DOC_HASH });
     });
-    expect(okMode.current.gate.message).toContain('effectiveTypeId: general_letter');
+    expect(okMode.current.analysisResults[DOC.id].typeSpecific.effectiveTypeId).toBe('general_letter');
 
     analyzeByTypeCall.mockResolvedValueOnce(undefined);
     await act(async () => {
       await okMode.current.handleAnalyzeByType({ selectedDocument: DOC, pdfTextContent: PDF_TEXT, docHash: DOC_HASH });
     });
     expect(okMode.current.analysisResults[DOC.id].typeSpecific.ok).toBe(false);
-    expect(okMode.current.gate.message).toContain('effectiveTypeId: null');
-    expect(okMode.current.gate.message).toContain('validationSlug: null');
+    expect(okMode.current.gate).toBeNull();
 
     analyzeByTypeCall.mockRejectedValueOnce(new Error('type failure'));
     await act(async () => {
       await okMode.current.handleAnalyzeByType({ selectedDocument: DOC, pdfTextContent: PDF_TEXT, docHash: DOC_HASH });
     });
     expect(okMode.current.analysisResults[DOC.id]._meta.status).toBe('error');
-    expect(okMode.current.gate.title).toBe('Type-specific analysis failed');
+    expect(okMode.current.dialog.title).toBe('Type-specific analysis failed');
 
     analyzeByTypeCall.mockRejectedValueOnce({});
     await act(async () => {
       await okMode.current.handleAnalyzeByType({ selectedDocument: DOC, pdfTextContent: PDF_TEXT, docHash: DOC_HASH });
     });
-    expect(okMode.current.gate.message).toBe('Request failed.');
+    expect(okMode.current.dialog.message).toBe('Request failed.');
   });
 
   it('handles analyzeDocument guard/unavailable/preflight failure/pro-required branches', async () => {
@@ -196,7 +195,7 @@ describe('useDocumentAnalysis', () => {
         numPages: 2,
       });
     });
-    expect(hook.current.gate.title).toBe('Analysis failed');
+    expect(hook.current.dialog.title).toBe('Analysis failed');
     expect(hook.current.analysisResults[DOC.id]._meta.message).toContain('Nope');
 
     preflightCheckCall.mockResolvedValueOnce({ ok: false });
@@ -345,8 +344,8 @@ describe('useDocumentAnalysis', () => {
         numPages: 2,
       });
     });
-    expect(result.current.gate.title).toBe('Limit reached');
-    expect(result.current.gate.message).toBe('Anon blocked');
+    expect(result.current.dialog.title).toBe('Limit reached');
+    expect(result.current.dialog.message).toBe('Anon blocked');
 
     analyzeTextCall.mockResolvedValueOnce({
       data: { ok: false, code: 'ANON_TOKEN_LIMIT' },
@@ -359,7 +358,7 @@ describe('useDocumentAnalysis', () => {
         numPages: 2,
       });
     });
-    expect(result.current.gate.message).toContain('Anonymous token limit reached');
+    expect(result.current.dialog.message).toContain('Anonymous token limit reached');
 
     analyzeTextCall.mockResolvedValueOnce({
       data: { ok: false, code: 'FREE_TOKEN_LIMIT', message: 'Free blocked' },
@@ -399,7 +398,7 @@ describe('useDocumentAnalysis', () => {
         numPages: 2,
       });
     });
-    expect(result.current.gate.title).toBe('Analysis failed');
+    expect(result.current.dialog.title).toBe('Analysis failed');
     expect(result.current.analysisResults[DOC.id]._meta.message).toBe('Other fail');
 
     analyzeTextCall.mockResolvedValueOnce({
@@ -425,7 +424,7 @@ describe('useDocumentAnalysis', () => {
       });
     });
     expect(result.current.analysisResults[DOC.id]._meta.message).toBe('Analysis failed.');
-    expect(result.current.gate.message).toBe('Request failed.');
+    expect(result.current.dialog.message).toBe('Request failed.');
   });
 
   it('handles analyzeDocument mock-mode fetch and preflight catch fallback', async () => {
@@ -480,7 +479,7 @@ describe('useDocumentAnalysis', () => {
     await act(async () => {
       await result.current.handleExplainSelection({ selectedDocument: DOC, docHash: DOC_HASH, pdfTextContent: PDF_TEXT, selection: null });
     });
-    expect(result.current.gate.title).toBe('No selection');
+    expect(result.current.dialog.title).toBe('No selection');
 
     global.fetch.mockResolvedValueOnce({
       json: async () => ({ ok: true, explanation: { plainExplanation: 'Mock explain' } }),
@@ -494,7 +493,8 @@ describe('useDocumentAnalysis', () => {
         selection: { text: 'Clause text' },
       });
     });
-    expect(global.alert).toHaveBeenCalledWith('Explanation: Mock explain');
+    expect(mockMode.current.dialog.title).toBe('Explanation');
+    expect(mockMode.current.dialog.message).toBe('Mock explain');
 
     explainSelectionCall.mockResolvedValueOnce({ ok: false, error: 'Explain failed' });
     let thrown = null;
@@ -578,7 +578,8 @@ describe('useDocumentAnalysis', () => {
         setRiskBadges,
       });
     });
-    expect(global.alert).toHaveBeenCalledWith('Found 2 risks in the document.');
+    expect(result.current.dialog.title).toBe('Risk scan complete');
+    expect(result.current.dialog.message).toBe('Found 2 risks in the document.');
     expect(setRiskBadges.mock.calls.at(-1)[0][0].level).toBe('high');
 
     highlightRisksCall.mockResolvedValueOnce({
@@ -687,7 +688,8 @@ describe('useDocumentAnalysis', () => {
         pdfTextContent: `${'x'.repeat(700)}-tail`,
       });
     });
-    expect(global.alert).toHaveBeenCalledWith('Original: Original\n\nPlain English: Plain');
+    expect(result.current.dialog.title).toBe('Plain English translation');
+    expect(result.current.dialog.message).toBe('Original: Original\n\nPlain English: Plain');
     expect(translateToPlainEnglishCall).toHaveBeenCalledWith(
       expect.objectContaining({
         legalText: expect.any(String),

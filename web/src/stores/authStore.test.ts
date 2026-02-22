@@ -122,25 +122,7 @@ describe('authStore', () => {
     expect(store.__testables.isProbablyPlaceholder('replace_me_please')).toBe(true);
     expect(store.__testables.isProbablyPlaceholder('changeme')).toBe(true);
     expect(store.__testables.isProbablyPlaceholder('real-value')).toBe(false);
-    expect(store.__testables.isTruthyEnvFlag('true')).toBe(true);
-    expect(store.__testables.isTruthyEnvFlag('0')).toBe(false);
     expect(store.__testables.getFirebaseConfig().projectId).toBe('snapsign-au');
-  });
-
-  it('connects auth emulator when VITE_USE_FIREBASE_EMULATOR=true', async () => {
-    vi.stubEnv('VITE_USE_FIREBASE_EMULATOR', 'true');
-    vi.stubEnv('VITE_FIREBASE_AUTH_EMULATOR_URL', 'http://localhost:9199');
-
-    const { store, firebaseAuthModule, auth } = await loadStore({
-      onAuthStateChangedImpl: (next) => next({ uid: 'emulator-user', isAnonymous: false }),
-    });
-    await store.startAuthWatcher();
-
-    expect(store.__testables.shouldUseAuthEmulator()).toBe(true);
-    expect(store.__testables.getAuthEmulatorUrl()).toBe('http://localhost:9199');
-    expect(firebaseAuthModule.connectAuthEmulator).toHaveBeenCalledWith(auth, 'http://localhost:9199', {
-      disableWarnings: true,
-    });
   });
 
   it('returns early when watcher already started or window is undefined', async () => {

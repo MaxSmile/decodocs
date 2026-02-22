@@ -1,17 +1,31 @@
 // utils/pdfUtils.js
 import * as pdfjsLib from 'pdfjs-dist';
 
-// PDF.js worker
-//
-// Important: pdfjs-dist ships the worker as an ES module (.mjs). If we load it as a classic
-// worker script, browsers will throw: "Unexpected token 'export'".
-//
-// Using workerPort with { type: 'module' } avoids Firebase hosting/static-path issues and works
-// reliably with Vite.
-pdfjsLib.GlobalWorkerOptions.workerPort = new Worker(
-  new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url),
-  { type: 'module' }
-);
+let workerConfigured = false;
+
+export const ensurePdfJsWorkerConfigured = () => {
+  // Avoid trying to create real workers in Vitest/JSDOM (Worker is stubbed).
+  if (import.meta?.env?.VITEST) return;
+  if (workerConfigured) return;
+  if (typeof Worker === 'undefined') return;
+
+  // PDF.js worker
+  //
+  // Important: pdfjs-dist ships the worker as an ES module (.mjs). If we load it as a classic
+  // worker script, browsers will throw: "Unexpected token 'export'".
+  //
+  // Using workerPort with { type: 'module' } avoids Firebase hosting/static-path issues and works
+  // reliably with Vite.
+  pdfjsLib.GlobalWorkerOptions.workerPort = new Worker(
+    new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url),
+    { type: 'module' }
+  );
+  workerConfigured = true;
+};
+
+export const getPdfJsStandardFontDataUrl = () =>
+  // Vitest/JSDOM doesn't need font data URLs (and may not have a full URL implementation).
+  (import.meta?.env?.VITEST ? undefined : new URL('pdfjs-dist/standard_fonts/', import.meta.url).toString());
 
 
 /**
@@ -21,9 +35,11 @@ pdfjsLib.GlobalWorkerOptions.workerPort = new Worker(
  */
 export const loadPdf = async (url) => {
   try {
+    ensurePdfJsWorkerConfigured();
     const loadingTask = pdfjsLib.getDocument({
       url: url,
       withCredentials: false,
+      standardFontDataUrl: getPdfJsStandardFontDataUrl(),
     });
     const pdf = await loadingTask.promise;
     return pdf;
@@ -94,8 +110,8 @@ export const extractPdfTextAllPages = async (pdf) => {
     }
     return fullText;
   } catch (error) {
-    console.error('Error extracting text from PDF:', error);
-    return 'PDF text content';
+    console.error('Error extracting text from PDF:', error?.message || error);
+    throw error;
   }
 };
 
