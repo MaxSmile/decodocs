@@ -4,8 +4,9 @@ import { BrowserRouter, MemoryRouter } from 'react-router-dom';
 import SiteHeader from '../components/SiteHeader.jsx';
 
 /**
- * Test to ensure headers are NOT sticky per DECISIONS.md
- * Decision: no sticky headers anywhere in the project
+ * SiteHeader is non-sticky by default.
+ * Workspace routes may opt into sticky behavior via the `sticky` prop
+ * (used by the document workspace layout).
  */
 describe('SiteHeader Component', () => {
   let container;
@@ -48,27 +49,15 @@ describe('SiteHeader Component', () => {
     expect(header.className).toMatch(/\bz-30\b/);
   });
 
-  test('header has explicit static class on /view workspace route', () => {
+  test('adds sticky positioning when sticky prop is enabled', () => {
     const { container: container2 } = render(
       <MemoryRouter initialEntries={['/view']}>
-        <SiteHeader />
+        <SiteHeader sticky />
       </MemoryRouter>
     );
     const header = container2.querySelector('header');
     expect(header).toBeTruthy();
-    // jsdom doesn't compute position, but our component should add the
-    // `static` tailwind utility on workspace routes
-    expect(header.className).toMatch(/\bstatic\b/);
-  });
-
-  test('header has explicit static class on /edit workspace route', () => {
-    const { container: container3 } = render(
-      <MemoryRouter initialEntries={['/edit']}>
-        <SiteHeader />
-      </MemoryRouter>
-    );
-    const header = container3.querySelector('header');
-    expect(header).toBeTruthy();
-    expect(header.className).toMatch(/\bstatic\b/);
+    expect(header.className).toMatch(/\bsticky\b/);
+    expect(header.className).toMatch(/\btop-0\b/);
   });
 });

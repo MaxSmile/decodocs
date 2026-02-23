@@ -2,6 +2,7 @@ import React from 'react';
 import {
     HiLink,
     HiCloudUpload,
+    HiPencilAlt,
     HiCursorClick,
     HiPencil,
     HiAnnotation,
@@ -10,6 +11,8 @@ import {
     HiCheck,
     HiDownload,
     HiArrowRight,
+    HiTrash,
+    HiArrowLeft,
 } from 'react-icons/hi';
 
 const TOOL_META = {
@@ -109,6 +112,7 @@ const ViewerToolbar = ({
     onShare,
     onSaveCloud,
     onDownload,
+    onEdit,
     onFinish,
     isCloudBusy,
     effectiveDocType,
@@ -116,6 +120,12 @@ const ViewerToolbar = ({
     activeTool,
     setActiveTool,
     onSignClick,
+    canUndo = false,
+    canRedo = false,
+    hasSelection = false,
+    onUndo,
+    onRedo,
+    onDelete,
 }) => {
     return (
         <div id="viewer-toolbar" className="flex flex-col bg-white border-b border-slate-200 z-20 relative">
@@ -125,6 +135,37 @@ const ViewerToolbar = ({
                         {fileName || 'Untitled Document'}
                     </span>
                     <div id="viewer-quick-actions" className="flex items-center gap-0.5 ml-1">
+                        <button
+                            type="button"
+                            onClick={onUndo}
+                            disabled={!canUndo}
+                            className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors disabled:opacity-40 disabled:hover:bg-transparent"
+                            title="Undo (Ctrl/⌘+Z)"
+                            aria-label="Undo"
+                        >
+                            <HiArrowLeft className="w-4 h-4" />
+                        </button>
+                        <button
+                            type="button"
+                            onClick={onRedo}
+                            disabled={!canRedo}
+                            className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors disabled:opacity-40 disabled:hover:bg-transparent"
+                            title="Redo (Ctrl/⌘+Shift+Z)"
+                        aria-label="Redo"
+                        >
+                            <HiArrowRight className="w-4 h-4" />
+                        </button>
+                        <button
+                            type="button"
+                            onClick={onDelete}
+                            disabled={!hasSelection}
+                            className="p-1.5 rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors disabled:opacity-40 disabled:hover:bg-transparent"
+                            title="Delete selected (Del/Backspace)"
+                            aria-label="Delete selected"
+                        >
+                            <HiTrash className="w-4 h-4" />
+                        </button>
+                        <div className="w-px h-5 bg-slate-200 mx-1" />
                         <button
                             id="btn-share-link"
                             onClick={onShare}
@@ -145,6 +186,15 @@ const ViewerToolbar = ({
                     </div>
                 </div>
                 <div id="viewer-primary-actions" className="flex items-center gap-2">
+                    <button
+                        type="button"
+                        onClick={onEdit}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-lg transition-colors shadow-sm border border-slate-200"
+                        title="Edit — switch to edit mode"
+                    >
+                        <HiPencilAlt className="w-3.5 h-3.5" />
+                        Edit
+                    </button>
                     <button
                         id="btn-download"
                         onClick={onDownload}

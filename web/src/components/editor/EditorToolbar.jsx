@@ -9,6 +9,10 @@ import {
   HiDownload,
   HiLink,
   HiUpload,
+  HiTrash,
+  HiArrowLeft,
+  HiArrowRight,
+  HiEye,
 } from 'react-icons/hi';
 
 const TOOL_META = {
@@ -110,7 +114,14 @@ const EditorToolbar = ({
   onShare,
   onUpload,
   onCancel,
+  onView,
   onDownload,
+  canUndo = false,
+  canRedo = false,
+  hasSelection = false,
+  onUndo,
+  onRedo,
+  onDelete,
 }) => (
   <div className="flex flex-col bg-white border-b border-slate-200 z-20 relative font-sans">
     <div className="h-14 px-4 flex items-center justify-between border-b border-slate-100">
@@ -119,6 +130,38 @@ const EditorToolbar = ({
           <span className="font-bold text-slate-800 text-base truncate max-w-[250px]">
             {fileName || 'Untitled Document'}
           </span>
+          <div className="flex items-center gap-1 ml-1">
+            <button
+              type="button"
+              onClick={onUndo}
+              disabled={!canUndo}
+              title="Undo (Ctrl/⌘+Z)"
+              aria-label="Undo"
+              className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors disabled:opacity-40 disabled:hover:bg-transparent"
+            >
+              <HiArrowLeft className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={onRedo}
+              disabled={!canRedo}
+              title="Redo (Ctrl/⌘+Shift+Z)"
+              aria-label="Redo"
+              className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors disabled:opacity-40 disabled:hover:bg-transparent"
+            >
+              <HiArrowRight className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={onDelete}
+              disabled={!hasSelection}
+              title="Delete selected (Del/Backspace)"
+              aria-label="Delete selected"
+              className="p-1.5 rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors disabled:opacity-40 disabled:hover:bg-transparent"
+            >
+              <HiTrash className="w-4 h-4" />
+            </button>
+          </div>
           <div className="flex items-center gap-1 ml-2">
             <button
               onClick={onShare}
@@ -138,6 +181,15 @@ const EditorToolbar = ({
         </div>
       </div>
       <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={onView}
+          title="View — switch to view mode"
+          className="flex items-center gap-2 px-3 py-1.5 text-slate-600 text-sm font-semibold hover:bg-slate-100 rounded-lg transition-colors"
+        >
+          <HiEye className="w-4 h-4" />
+          View
+        </button>
         <button
           onClick={onCancel}
           title="Cancel — discard changes and go back"

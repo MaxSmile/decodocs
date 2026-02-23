@@ -23,20 +23,17 @@ const Layout = ({
 }) => {
   const isAppLayout = variant === 'app';
 
-  // when the app is rendering the document workspace (/view or /edit)
-  // we want the header to behave like a normal page header – static and
-  // allow the browser window to scroll rather than locking the viewport
-  // height. otherwise, `h-screen overflow-hidden` keeps the header pinned
-  // while inner containers scroll.
   const location = useLocation();
   const isWorkspaceRoute =
     location?.pathname?.startsWith('/view') ||
     location?.pathname?.startsWith('/edit');
 
+  const appViewportClass = isAppLayout ? 'h-screen overflow-hidden' : '';
+
   return (
     <div
       className={`min-h-screen bg-[#f7f6f2] text-slate-900 flex flex-col ${
-        isAppLayout && !isWorkspaceRoute ? 'h-screen overflow-hidden' : ''
+        appViewportClass
       }`}
     >
       {showOneTap ? <GoogleOneTap /> : null}
@@ -49,7 +46,13 @@ const Layout = ({
         ) : null}
 
         {/* Header */}
-        {showHeader ? <SiteHeader variant={variant} onOpenPdf={onOpenPdf} /> : null}
+        {showHeader ? (
+          <SiteHeader
+            variant={variant}
+            onOpenPdf={onOpenPdf}
+            sticky={isAppLayout && isWorkspaceRoute}
+          />
+        ) : null}
 
         {/* Main Content */}
         <main className={`flex-1 flex flex-col min-h-0 ${showDecor ? 'relative z-10' : ''}`}>

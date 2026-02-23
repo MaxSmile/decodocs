@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, test, expect, beforeEach, vi, afterEach } from 'vitest';
-import { render, screen, waitFor, act } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { BrowserRouter, useParams, useNavigate } from 'react-router-dom';
 import DocumentViewer from '../components/DocumentViewer';
 
@@ -195,14 +195,16 @@ describe('DocumentViewer PDF Loading Tests', () => {
       </BrowserRouter>
     );
 
-    // Initially, there should be no canvas
-    expect(screen.queryByRole('canvas')).not.toBeInTheDocument();
+    // Wait for the PDF load to kick off (more stable than checking canvas immediately)
+    await waitFor(() => {
+      expect(fetch).toHaveBeenCalledWith('/test-docs/dummy.pdf');
+    });
 
     // After PDF is loaded, canvas should appear
     await waitFor(() => {
       const canvas = document.querySelector('canvas');
       expect(canvas).toBeInTheDocument();
-    });
+    }, { timeout: 5000 });
   });
 
   test('should not load test PDF when fileName parameter is not present', async () => {

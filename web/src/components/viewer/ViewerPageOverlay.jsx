@@ -1,5 +1,23 @@
 import React from 'react';
 
+const ImageAnnotation = ({ annotation }) => {
+  const src = annotation?.dataUrl || '';
+  return (
+    <div className="w-full h-full flex items-center justify-center bg-white/60">
+      {src ? (
+        <img
+          src={src}
+          alt={annotation?.text || 'Image'}
+          className="w-full h-full object-contain pointer-events-none select-none"
+          draggable={false}
+        />
+      ) : (
+        <span className="text-purple-700 text-xs font-semibold pointer-events-none">Image</span>
+      )}
+    </div>
+  );
+};
+
 const ViewerPageOverlay = ({ pageNum, signatures, annotations, selectedItemId, onStartDrag, onSelect }) => (
   <>
     {signatures.filter((sig) => sig.pageNum === pageNum).map((signature) => (
@@ -33,18 +51,25 @@ const ViewerPageOverlay = ({ pageNum, signatures, annotations, selectedItemId, o
       <div
         key={annotation.id}
         data-testid={`overlay-annotation-${annotation.id}`}
-        className={`absolute px-2 py-1 text-sm shadow-sm cursor-move rounded select-none ${
+        className={`absolute shadow-sm cursor-move rounded select-none overflow-hidden ${
           selectedItemId === annotation.id ? 'ring-2 ring-blue-400' : ''
         } ${
           annotation.type === 'checkmark'
-            ? 'text-green-700 text-2xl font-bold'
+            ? 'px-2 py-1 text-green-700 text-2xl font-bold'
             : annotation.type === 'date'
-              ? 'bg-amber-50 border border-amber-300 text-amber-800'
+              ? 'px-2 py-1 bg-amber-50 border border-amber-300 text-amber-800'
               : annotation.type === 'image'
-                ? 'bg-purple-50 border border-purple-300 text-purple-700'
-                : 'bg-yellow-100 border border-yellow-300 text-slate-800'
+                ? 'border border-purple-300 bg-purple-50/30'
+                : 'px-2 py-1 bg-yellow-100 border border-yellow-300 text-slate-800'
         }`}
-        style={{ left: annotation.x, top: annotation.y, zIndex: 50, touchAction: 'none' }}
+        style={{
+          left: annotation.x,
+          top: annotation.y,
+          zIndex: 50,
+          touchAction: 'none',
+          width: annotation.type === 'image' ? (annotation.width || 180) : undefined,
+          height: annotation.type === 'image' ? (annotation.height || 120) : undefined,
+        }}
         onClick={(e) => { e.stopPropagation(); onSelect && onSelect(annotation.id); }}
         onMouseDown={(e) => {
           if (typeof window !== 'undefined' && 'PointerEvent' in window) return;
@@ -52,7 +77,7 @@ const ViewerPageOverlay = ({ pageNum, signatures, annotations, selectedItemId, o
         }}
         onPointerDown={(e) => onStartDrag && onStartDrag(e, annotation, 'annotation')}
       >
-        {annotation.text}
+        {annotation.type === 'image' ? <ImageAnnotation annotation={annotation} /> : annotation.text}
       </div>
     ))}
   </>

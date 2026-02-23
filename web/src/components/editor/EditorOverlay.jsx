@@ -1,5 +1,26 @@
 import React from 'react';
 
+const ImageAnnotation = ({ annotation }) => {
+  const width = Number(annotation?.width) > 0 ? Number(annotation.width) : 180;
+  const height = Number(annotation?.height) > 0 ? Number(annotation.height) : 120;
+  const src = annotation?.dataUrl || '';
+
+  return (
+    <div className="w-full h-full flex items-center justify-center bg-white/60">
+      {src ? (
+        <img
+          src={src}
+          alt={annotation?.text || 'Image'}
+          className="w-full h-full object-contain pointer-events-none select-none"
+          draggable={false}
+        />
+      ) : (
+        <span className="text-purple-700 text-xs font-semibold pointer-events-none">Image</span>
+      )}
+    </div>
+  );
+};
+
 const EditorOverlay = ({ pageNum, signatures, annotations, selectedItemId, onStartDrag, onSelect }) => (
   <>
     {signatures
@@ -33,8 +54,25 @@ const EditorOverlay = ({ pageNum, signatures, annotations, selectedItemId, onSta
         <div
           key={annotation.id}
           data-testid={`overlay-annotation-${annotation.id}`}
-          className={`absolute px-2 py-1 text-sm shadow-sm cursor-move rounded select-none ${selectedItemId === annotation.id ? 'ring-2 ring-blue-400' : ''} ${annotation.type === 'checkmark' ? 'text-green-700 text-2xl font-bold' : annotation.type === 'date' ? 'bg-amber-50 border border-amber-300 text-amber-800' : annotation.type === 'image' ? 'bg-purple-50 border border-purple-300 text-purple-700' : 'bg-yellow-100 border border-yellow-300 text-slate-800'}`}
-          style={{ left: annotation.x, top: annotation.y, zIndex: 50, touchAction: 'none' }}
+          className={`absolute shadow-sm cursor-move rounded select-none overflow-hidden ${
+            selectedItemId === annotation.id ? 'ring-2 ring-blue-400' : ''
+          } ${
+            annotation.type === 'checkmark'
+              ? 'px-2 py-1 text-green-700 text-2xl font-bold'
+              : annotation.type === 'date'
+                ? 'px-2 py-1 bg-amber-50 border border-amber-300 text-amber-800'
+                : annotation.type === 'image'
+                  ? 'border border-purple-300 bg-purple-50/30'
+                  : 'px-2 py-1 bg-yellow-100 border border-yellow-300 text-slate-800'
+          }`}
+          style={{
+            left: annotation.x,
+            top: annotation.y,
+            zIndex: 50,
+            touchAction: 'none',
+            width: annotation.type === 'image' ? (annotation.width || 180) : undefined,
+            height: annotation.type === 'image' ? (annotation.height || 120) : undefined,
+          }}
           onClick={(event) => { event.stopPropagation(); onSelect && onSelect(annotation.id); }}
           onMouseDown={(e) => {
             if (typeof window !== 'undefined' && 'PointerEvent' in window) return;
@@ -42,7 +80,7 @@ const EditorOverlay = ({ pageNum, signatures, annotations, selectedItemId, onSta
           }}
           onPointerDown={(e) => onStartDrag && onStartDrag(e, annotation, 'annotation')}
         >
-          {annotation.text}
+          {annotation.type === 'image' ? <ImageAnnotation annotation={annotation} /> : annotation.text}
         </div>
       ))}
   </>

@@ -8,24 +8,16 @@ import logo from '../assets/DecoDocsLogo.svg';
 const coreNav = [
   { label: 'How it works', href: '#how-it-works' },
   { label: 'Features', href: '#features' },
-  { label: 'Use cases', to: '/uses-cases' },
-  { label: 'Pricing', to: '/pricing' },
+  { label: 'Use cases', to: '/use-cases', external: true },
+  { label: 'Pricing', to: '/pricing', external: true },
   { label: 'About', to: '/about' },
 ];
 
-const SiteHeader = ({ variant = 'marketing', onOpenPdf, children }) => {
+const SiteHeader = ({ variant = 'marketing', onOpenPdf, sticky = false, children }) => {
   const logoSrc = typeof logo === 'string' ? logo : logo.src;
   const location = useLocation();
   const { authState } = useAuth();
 
-  // when the user is looking at a document (/view or /edit) we want the
-  // header to remain in the normal document flow. Although the default
-  // position value for <header> is static, we explicitly add the class so
-  // any upstream/global CSS (or future tweaks) cannot accidentally make it
-  // fixed/sticky while the user is reading/editing.
-  const isWorkspaceRoute =
-    location.pathname.startsWith('/view') ||
-    location.pathname.startsWith('/edit');
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   const isAppLayout = variant === 'app';
@@ -88,6 +80,15 @@ const SiteHeader = ({ variant = 'marketing', onOpenPdf, children }) => {
       );
     }
 
+    // external flag means use a plain anchor so router doesn't intercept
+    if (item.external) {
+      return (
+        <a className={className} href={item.to} onClick={closeMenu}>
+          {item.label}
+        </a>
+      );
+    }
+
     return (
       <Link className={className} to={item.to} onClick={closeMenu}>
         {item.label}
@@ -122,7 +123,7 @@ const SiteHeader = ({ variant = 'marketing', onOpenPdf, children }) => {
   return (
     <header
       className={`z-30 w-full border-b border-white/40 bg-white/70 backdrop-blur-xl ${
-        isWorkspaceRoute ? 'static' : ''
+        sticky ? 'sticky top-0' : ''
       }`}
     >
       <div className={`mx-auto flex w-full items-center justify-between px-5 sm:px-6 ${isAppLayout ? 'h-14 py-2' : 'max-w-6xl py-3 sm:py-4'}`}>

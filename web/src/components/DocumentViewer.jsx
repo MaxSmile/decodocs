@@ -20,6 +20,7 @@ import { useDocumentTypeDetection } from '../hooks/useDocumentTypeDetection';
 import { useTextSelection } from '../hooks/useTextSelection';
 import { useViewerSignMode } from '../hooks/useViewerSignMode';
 import { useViewerDocumentState } from '../hooks/useViewerDocumentState';
+import { useOverlayHotkeys } from '../hooks/useOverlayHotkeys.js';
 
 const DocumentViewer = () => {
   const { authState, app } = useAuth();
@@ -95,13 +96,30 @@ const DocumentViewer = () => {
     handleSignatureAdopt,
     startDrag,
     deleteSelectedItem,
-  } = useViewerSignMode();
+    canUndo,
+    canRedo,
+    undo,
+    redo,
+  } = useViewerSignMode({
+    initialSignatures: location.state?.overlays?.signatures,
+    initialAnnotations: location.state?.overlays?.annotations,
+  });
 
   const [highlights] = useState([]);
   const [clauseMarkers] = useState([]);
   const [riskBadges, setRiskBadges] = useState([]);
   const [typeSelectorOpen, setTypeSelectorOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  useOverlayHotkeys({
+    enabled: true,
+    canUndo,
+    canRedo,
+    hasSelection: !!selectedItemId,
+    onUndo: undo,
+    onRedo: redo,
+    onDelete: deleteSelectedItem,
+  });
 
   useEffect(() => {
     const onShowGate = (event) => {
@@ -144,6 +162,12 @@ const DocumentViewer = () => {
     pdfDoc,
     resetPdf,
   });
+
+  const handleDownloadWithOverlays = () =>
+    handleDownload({ signatures, annotations, pageScale });
+
+  const handleEditWithOverlays = () =>
+    handleEditDocument({ overlays: { signatures, annotations } });
 
   // Derived State
   const isPdfBusy = isPdfLoading;
@@ -274,7 +298,8 @@ const DocumentViewer = () => {
               navigate('/sign', { state: { document: selectedDocument } });
             }}
             onSaveCloud={handleSaveToCloud}
-            onDownload={handleDownload}
+            onDownload={handleDownloadWithOverlays}
+            onEdit={handleEditWithOverlays}
             onFinish={handleFinishDocument}
             isCloudBusy={isCloudBusy}
             effectiveDocType={effectiveDocType}
@@ -282,6 +307,12 @@ const DocumentViewer = () => {
             activeTool={activeTool}
             setActiveTool={setActiveTool}
             onSignClick={handleSignClick}
+            canUndo={canUndo}
+            canRedo={canRedo}
+            hasSelection={!!selectedItemId}
+            onUndo={undo}
+            onRedo={redo}
+            onDelete={deleteSelectedItem}
           />
         )}
 
@@ -331,7 +362,7 @@ const DocumentViewer = () => {
             {pdfDoc && (
               <PDFControls
                 onFileSelect={handleFileUpload}
-                onEdit={handleEditDocument}
+                onEdit={handleEditWithOverlays}
                 pageNumber={pageNumber}
                 numPages={numPages}
                 pageScale={pageScale}

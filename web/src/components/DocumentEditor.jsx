@@ -9,6 +9,8 @@ import EditorOverlay from './editor/EditorOverlay.jsx';
 import AppDialog from './ui/AppDialog.jsx';
 import { usePdfJs } from '../hooks/usePdfJs';
 import { useSignMode } from '../hooks/useSignMode.js';
+import { buildEditedPdfBytes } from '../utils/pdfExport.js';
+import { useOverlayHotkeys } from '../hooks/useOverlayHotkeys.js';
 
 const DocumentEditor = () => {
   const { documentId } = useParams();
@@ -36,12 +38,29 @@ const DocumentEditor = () => {
     setActiveTool,
     signatures,
     annotations,
-    signatureDimensions,
     selectedItemId,
     setSelectedItemId,
     handleCanvasClick,
     startDrag,
-  } = useSignMode();
+    deleteSelectedItem,
+    canUndo,
+    canRedo,
+    undo,
+    redo,
+  } = useSignMode({
+    initialSignatures: location.state?.overlays?.signatures,
+    initialAnnotations: location.state?.overlays?.annotations,
+  });
+
+  useOverlayHotkeys({
+    enabled: true,
+    canUndo,
+    canRedo,
+    hasSelection: !!selectedItemId,
+    onUndo: undo,
+    onRedo: redo,
+    onDelete: deleteSelectedItem,
+  });
 
   useEffect(() => {
     if (location.state?.document && !pdfDoc && pdfLibLoaded) {
@@ -110,118 +129,6 @@ const DocumentEditor = () => {
     loadPdfFromBlob(file);
   };
 
-  const loadImageFromDataUrl = (dataUrl) =>
-    new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => resolve(img);
-      img.onerror = () => reject(new Error('Failed to load image'));
-      img.src = dataUrl;
-    });
-
-  const buildFlattenedPageImageData = async () => {
-    const pageImages = [];
-
-    for (let pageNum = 1; pageNum <= (numPages || 0); pageNum += 1) {
-      const pageElement = document.getElementById(`pdf-page-${pageNum}`);
-      const baseCanvas = pageElement?.querySelector('canvas');
-      if (!baseCanvas) continue;
-
-      const displayRect = pageElement.getBoundingClientRect();
-      const scaleX = displayRect.width ? baseCanvas.width / displayRect.width : 1;
-      const scaleY = displayRect.height ? baseCanvas.height / displayRect.height : 1;
-
-      const outCanvas = document.createElement('canvas');
-      outCanvas.width = baseCanvas.width;
-      outCanvas.height = baseCanvas.height;
-      const ctx = outCanvas.getContext('2d');
-      if (!ctx) continue;
-
-      ctx.drawImage(baseCanvas, 0, 0);
-
-      const pageSignatures = signatures.filter((sig) => sig.pageNum === pageNum);
-      for (const sig of pageSignatures) {
-        const x = (sig.x || 0) * scaleX;
-        const y = (sig.y || 0) * scaleY;
-        const width = (sig.width || signatureDimensions.width) * scaleX;
-        const height = (sig.height || signatureDimensions.height) * scaleY;
-
-        if (sig.dataUrl) {
-          try {
-            const sigImage = await loadImageFromDataUrl(sig.dataUrl);
-            ctx.drawImage(sigImage, x, y, width, height);
-          } catch {
-            ctx.font = `${Math.max(16, Math.floor(height * 0.5))}px serif`;
-            ctx.fillStyle = '#1d4ed8';
-            ctx.fillText('Signature', x + 4, y + height * 0.65);
-          }
-        } else {
-          ctx.font = `${Math.max(16, Math.floor(height * 0.5))}px serif`;
-          ctx.fillStyle = '#1d4ed8';
-          ctx.fillText(sig.text || 'Signature', x + 4, y + height * 0.65);
-        }
-      }
-
-      const pageAnnotations = annotations.filter((ann) => ann.pageNum === pageNum);
-      for (const ann of pageAnnotations) {
-        const x = (ann.x || 0) * scaleX;
-        const y = (ann.y || 0) * scaleY;
-        const label = ann.text || '';
-
-        if (ann.type === 'checkmark') {
-          ctx.font = `${Math.max(18, Math.floor(28 * scaleY))}px sans-serif`;
-          ctx.fillStyle = '#15803d';
-          ctx.fillText(label || '✓', x, y + 22 * scaleY);
-        } else {
-          ctx.fillStyle = ann.type === 'date' ? '#fef3c7' : '#fef9c3';
-          ctx.fillRect(x - 2, y - 2, Math.max(110 * scaleX, label.length * 7 * scaleX), 24 * scaleY);
-          ctx.strokeStyle = '#e2e8f0';
-          ctx.strokeRect(x - 2, y - 2, Math.max(110 * scaleX, label.length * 7 * scaleX), 24 * scaleY);
-          ctx.font = `${Math.max(12, Math.floor(13 * scaleY))}px sans-serif`;
-          ctx.fillStyle = '#0f172a';
-          ctx.fillText(label, x + 2, y + 14 * scaleY);
-        }
-      }
-
-      pageImages.push(outCanvas.toDataURL('image/png'));
-    }
-
-    return pageImages;
-  };
-
-  const openPrintWindowForPdfSave = (pageImages) => {
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) {
-      throw new Error('Pop-up blocked. Please allow pop-ups to export the edited PDF.');
-    }
-
-    const pagesMarkup = pageImages
-      .map((src) => `<div class="page"><img src="${src}" alt="Edited page" /></div>`)
-      .join('');
-
-    printWindow.document.write(`
-      <!doctype html>
-      <html>
-        <head>
-          <title>${(selectedDocument?.name || 'document').replace(/</g, '&lt;')}</title>
-          <style>
-            body { margin: 0; font-family: sans-serif; background: #fff; }
-            .page { page-break-after: always; break-after: page; display: block; }
-            .page img { width: 100%; display: block; }
-            @media print {
-              body { margin: 0; }
-            }
-          </style>
-        </head>
-        <body>${pagesMarkup}</body>
-      </html>
-    `);
-    printWindow.document.close();
-    printWindow.focus();
-    setTimeout(() => {
-      printWindow.print();
-    }, 250);
-  };
-
   const handleDownloadEditedPdf = async () => {
     if (!pdfDoc) {
       setDialog({
@@ -234,11 +141,19 @@ const DocumentEditor = () => {
     }
 
     try {
-      const pageImages = await buildFlattenedPageImageData();
-      if (pageImages.length === 0) {
-        throw new Error('No rendered pages found.');
-      }
-      openPrintWindowForPdfSave(pageImages);
+      const baseBytes = await pdfDoc.getData();
+      const editedBytes = await buildEditedPdfBytes({
+        pdfBytes: baseBytes,
+        pageScale,
+        signatures,
+        annotations,
+      });
+      const blob = new Blob([editedBytes], { type: 'application/pdf' });
+      const name = (selectedDocument?.name || 'document.pdf').replace(/\\.pdf$/i, '');
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `${name}-edited.pdf`;
+      link.click();
     } catch (err) {
       console.error('Failed to export edited PDF:', err);
       setDialog({
@@ -276,7 +191,11 @@ const DocumentEditor = () => {
         onCancel={() => setDialog(null)}
         onConfirm={() => {
           if (dialog?.primaryTo) {
-            navigate(dialog.primaryTo);
+            if (dialog.primaryTo === '/pricing' || dialog.primaryTo.startsWith('http')) {
+              window.location.assign(dialog.primaryTo);
+            } else {
+              navigate(dialog.primaryTo);
+            }
           }
           setDialog(null);
         }}
@@ -307,8 +226,22 @@ const DocumentEditor = () => {
               secondaryTo: null,
             });
           }}
+          onView={() => {
+            const overlays = { signatures, annotations };
+            if (location.pathname.includes('/edit/test-docs/') && selectedDocument?.name) {
+              navigate(`/view/test-docs/${selectedDocument.name}`, { state: { overlays } });
+              return;
+            }
+            navigate('/view', { state: { document: selectedDocument, overlays } });
+          }}
           onCancel={() => navigate('/view')}
           onDownload={handleDownloadEditedPdf}
+          canUndo={canUndo}
+          canRedo={canRedo}
+          hasSelection={!!selectedItemId}
+          onUndo={undo}
+          onRedo={redo}
+          onDelete={deleteSelectedItem}
         />
 
         <div className="flex-1 flex overflow-hidden relative">

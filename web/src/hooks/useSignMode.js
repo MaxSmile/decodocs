@@ -1,12 +1,89 @@
-import { useState, useCallback, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 
-export const useSignMode = () => {
+const clampHistory = (stack, limit = 50) => {
+  if (!Array.isArray(stack)) return [];
+  if (stack.length <= limit) return stack;
+  return stack.slice(stack.length - limit);
+};
+
+const snapshotState = ({ signatures, annotations, selectedItemId }) => ({
+  signatures: Array.isArray(signatures) ? signatures.map((s) => ({ ...s })) : [],
+  annotations: Array.isArray(annotations) ? annotations.map((a) => ({ ...a })) : [],
+  selectedItemId: selectedItemId || null,
+});
+
+export const useSignMode = ({
+  initialSignatures = [],
+  initialAnnotations = [],
+} = {}) => {
   const [activeTool, setActiveTool] = useState('select');
-  const [signatures, setSignatures] = useState([]);
-  const [annotations, setAnnotations] = useState([]);
+  const [signatures, setSignatures] = useState(() => (Array.isArray(initialSignatures) ? initialSignatures : []));
+  const [annotations, setAnnotations] = useState(() => (Array.isArray(initialAnnotations) ? initialAnnotations : []));
   const [selectedItemId, setSelectedItemId] = useState(null);
   const dragRef = useRef(null);
   const signatureDimensions = { width: 150, height: 50 };
+
+  const signaturesRef = useRef(signatures);
+  const annotationsRef = useRef(annotations);
+  const selectedItemIdRef = useRef(selectedItemId);
+  useEffect(() => { signaturesRef.current = signatures; }, [signatures]);
+  useEffect(() => { annotationsRef.current = annotations; }, [annotations]);
+  useEffect(() => { selectedItemIdRef.current = selectedItemId; }, [selectedItemId]);
+
+  const historyRef = useRef(null);
+  const [historyIndex, setHistoryIndex] = useState(0);
+
+  if (!historyRef.current) {
+    const initial = snapshotState({
+      signatures: Array.isArray(initialSignatures) ? initialSignatures : [],
+      annotations: Array.isArray(initialAnnotations) ? initialAnnotations : [],
+      selectedItemId: null,
+    });
+    historyRef.current = { stack: [initial], index: 0 };
+  }
+
+  const canUndo = historyIndex > 0;
+  const canRedo = useMemo(() => {
+    const stackLen = historyRef.current?.stack?.length || 0;
+    return historyIndex < stackLen - 1;
+  }, [historyIndex]);
+
+  const commitSnapshot = useCallback((next) => {
+    const h = historyRef.current;
+    if (!h) return;
+    const nextSnap = snapshotState(next);
+    const truncated = h.stack.slice(0, h.index + 1);
+    const nextStack = clampHistory([...truncated, nextSnap], 60);
+    h.stack = nextStack;
+    h.index = nextStack.length - 1;
+    setHistoryIndex(h.index);
+  }, []);
+
+  const undo = useCallback(() => {
+    const h = historyRef.current;
+    if (!h || h.index <= 0) return;
+    const nextIndex = h.index - 1;
+    const snap = h.stack[nextIndex];
+    if (!snap) return;
+    h.index = nextIndex;
+    setHistoryIndex(nextIndex);
+    setSignatures(snap.signatures);
+    setAnnotations(snap.annotations);
+    setSelectedItemId(snap.selectedItemId);
+  }, []);
+
+  const redo = useCallback(() => {
+    const h = historyRef.current;
+    if (!h || h.index >= (h.stack.length - 1)) return;
+    const nextIndex = h.index + 1;
+    const snap = h.stack[nextIndex];
+    if (!snap) return;
+    h.index = nextIndex;
+    setHistoryIndex(nextIndex);
+    setSignatures(snap.signatures);
+    setAnnotations(snap.annotations);
+    setSelectedItemId(snap.selectedItemId);
+  }, []);
 
   const resolvePdfPageElement = (pageWrapper, pageNum) => {
     if (!pageWrapper || !pageNum) return null;
@@ -45,10 +122,11 @@ export const useSignMode = () => {
     const offsetY = event.clientY - rect.top - item.y;
 
     setSelectedItemId(item.id);
-    dragRef.current = { id: item.id, kind, offsetX, offsetY, pageEl };
+    dragRef.current = { id: item.id, kind, offsetX, offsetY, pageEl, hasMoved: false };
 
     const onMove = (e) => {
       if (!dragRef.current) return;
+      dragRef.current.hasMoved = true;
       const r = dragRef.current.pageEl.getBoundingClientRect();
       const newX = e.clientX - r.left - dragRef.current.offsetX;
       const newY = e.clientY - r.top - dragRef.current.offsetY;
@@ -60,6 +138,7 @@ export const useSignMode = () => {
     };
 
     const onEnd = () => {
+      const didMove = !!dragRef.current?.hasMoved;
       dragRef.current = null;
       document.removeEventListener('mousemove', onMove, true);
       document.removeEventListener('mouseup', onEnd, true);
@@ -69,6 +148,13 @@ export const useSignMode = () => {
         dragTarget.removeEventListener('pointermove', onMove, true);
         dragTarget.removeEventListener('pointerup', onEnd, true);
         dragTarget.removeEventListener('pointercancel', onEnd, true);
+      }
+      if (didMove) {
+        commitSnapshot({
+          signatures: signaturesRef.current,
+          annotations: annotationsRef.current,
+          selectedItemId: selectedItemIdRef.current,
+        });
       }
     };
 
@@ -86,11 +172,76 @@ export const useSignMode = () => {
       dragTarget.addEventListener('pointerup', onEnd, true);
       dragTarget.addEventListener('pointercancel', onEnd, true);
     }
-  }, [moveAnnotation, moveSignature]);
+  }, [commitSnapshot, moveAnnotation, moveSignature]);
+
+  const isPickingImageRef = useRef(false);
+
+  const chooseImageFile = useCallback(async () => {
+    if (typeof document === 'undefined') return null;
+
+    return await new Promise((resolve) => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.multiple = false;
+
+      const cleanup = () => {
+        input.onchange = null;
+        try { input.remove(); } catch { /* ignore */ }
+      };
+
+      input.onchange = async () => {
+        try {
+          const file = input.files?.[0] || null;
+          if (!file) {
+            cleanup();
+            resolve(null);
+            return;
+          }
+
+          const dataUrl = await new Promise((res, rej) => {
+            const reader = new FileReader();
+            reader.onload = () => res(String(reader.result || ''));
+            reader.onerror = () => rej(new Error('Failed to read image file'));
+            reader.readAsDataURL(file);
+          });
+
+          const img = new Image();
+          img.onload = () => {
+            const info = {
+              dataUrl,
+              width: img.naturalWidth || img.width || 0,
+              height: img.naturalHeight || img.height || 0,
+              mimeType: file.type || '',
+              name: file.name || '',
+            };
+            cleanup();
+            resolve(info);
+          };
+          img.onerror = () => {
+            cleanup();
+            resolve({ dataUrl, width: 0, height: 0, mimeType: file.type || '', name: file.name || '' });
+          };
+          img.src = dataUrl;
+        } catch {
+          cleanup();
+          resolve(null);
+        }
+      };
+
+      input.style.position = 'fixed';
+      input.style.left = '-9999px';
+      document.body.appendChild(input);
+      input.click();
+    });
+  }, []);
 
   const handleCanvasClick = (event) => {
     if (event?.target?.closest?.('[data-testid^="overlay-"]')) return;
-    if (activeTool === 'select') return;
+    if (activeTool === 'select') {
+      setSelectedItemId(null);
+      return;
+    }
 
     const target = event.target;
     const pageWrapper = target?.closest?.('[data-page-num]') || null;
@@ -120,6 +271,12 @@ export const useSignMode = () => {
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
 
+    const nextBase = {
+      signatures: signaturesRef.current,
+      annotations: annotationsRef.current,
+      selectedItemId: null,
+    };
+
     if (activeTool === 'signature') {
       const newSig = {
         id: Date.now(),
@@ -131,43 +288,98 @@ export const useSignMode = () => {
         text: 'John Doe',
         type: 'signature',
       };
-      setSignatures((prev) => [...prev, newSig]);
+      const nextSignatures = [...nextBase.signatures, newSig];
+      setSignatures(nextSignatures);
       setSelectedItemId(newSig.id);
+      commitSnapshot({ ...nextBase, signatures: nextSignatures, selectedItemId: newSig.id });
       setActiveTool('select');
       return;
     }
 
     if (activeTool === 'text') {
       const newAnn = { id: Date.now(), pageNum, x, y, text: 'Type something...', type: 'text' };
-      setAnnotations((prev) => [...prev, newAnn]);
+      const nextAnnotations = [...nextBase.annotations, newAnn];
+      setAnnotations(nextAnnotations);
       setSelectedItemId(newAnn.id);
+      commitSnapshot({ ...nextBase, annotations: nextAnnotations, selectedItemId: newAnn.id });
       setActiveTool('select');
       return;
     }
 
     if (activeTool === 'date') {
       const newAnn = { id: Date.now(), pageNum, x, y, text: new Date().toLocaleDateString(), type: 'date' };
-      setAnnotations((prev) => [...prev, newAnn]);
+      const nextAnnotations = [...nextBase.annotations, newAnn];
+      setAnnotations(nextAnnotations);
       setSelectedItemId(newAnn.id);
+      commitSnapshot({ ...nextBase, annotations: nextAnnotations, selectedItemId: newAnn.id });
       setActiveTool('select');
       return;
     }
 
     if (activeTool === 'image') {
-      const newAnn = { id: Date.now(), pageNum, x, y, text: '🖼 Image', type: 'image' };
-      setAnnotations((prev) => [...prev, newAnn]);
-      setSelectedItemId(newAnn.id);
-      setActiveTool('select');
+      if (isPickingImageRef.current) return;
+      isPickingImageRef.current = true;
+
+      (async () => {
+        try {
+          const picked = await chooseImageFile();
+          if (!picked?.dataUrl) return;
+
+          const maxW = 240;
+          const maxH = 240;
+          const srcW = Number(picked.width) || 0;
+          const srcH = Number(picked.height) || 0;
+          const shrink = srcW > 0 && srcH > 0
+            ? Math.min(1, maxW / srcW, maxH / srcH)
+            : 1;
+          const drawW = Math.max(48, Math.round((srcW || 220) * shrink));
+          const drawH = Math.max(48, Math.round((srcH || 120) * shrink));
+
+          const clampedX = Math.max(0, Math.min(x - drawW / 2, rect.width - drawW));
+          const clampedY = Math.max(0, Math.min(y - drawH / 2, rect.height - drawH));
+
+          const newAnn = {
+            id: Date.now(),
+            pageNum,
+            x: clampedX,
+            y: clampedY,
+            type: 'image',
+            text: picked.name || 'Image',
+            dataUrl: picked.dataUrl,
+            width: drawW,
+            height: drawH,
+          };
+          const nextAnnotations = [...annotationsRef.current, newAnn];
+          setAnnotations(nextAnnotations);
+          setSelectedItemId(newAnn.id);
+          commitSnapshot({ ...nextBase, annotations: nextAnnotations, selectedItemId: newAnn.id });
+          setActiveTool('select');
+        } finally {
+          isPickingImageRef.current = false;
+        }
+      })();
       return;
     }
 
     if (activeTool === 'checkmark') {
       const newAnn = { id: Date.now(), pageNum, x, y, text: '✓', type: 'checkmark' };
-      setAnnotations((prev) => [...prev, newAnn]);
+      const nextAnnotations = [...nextBase.annotations, newAnn];
+      setAnnotations(nextAnnotations);
       setSelectedItemId(newAnn.id);
+      commitSnapshot({ ...nextBase, annotations: nextAnnotations, selectedItemId: newAnn.id });
       setActiveTool('select');
     }
   };
+
+  const deleteSelectedItem = useCallback(() => {
+    if (!selectedItemId) return;
+    const nextAnnotations = annotationsRef.current.filter((a) => a.id !== selectedItemId);
+    const nextSignatures = signaturesRef.current.filter((s) => s.id !== selectedItemId);
+    setAnnotations(nextAnnotations);
+    setSignatures(nextSignatures);
+    setSelectedItemId(null);
+    commitSnapshot({ signatures: nextSignatures, annotations: nextAnnotations, selectedItemId: null });
+  }, [commitSnapshot, selectedItemId]);
 
   return {
     activeTool,
@@ -179,5 +391,10 @@ export const useSignMode = () => {
     setSelectedItemId,
     handleCanvasClick,
     startDrag,
+    deleteSelectedItem,
+    canUndo,
+    canRedo,
+    undo,
+    redo,
   };
 };

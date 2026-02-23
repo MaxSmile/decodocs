@@ -6,6 +6,7 @@ import {
   downloadBlobViaPresignedUrl,
 } from '../services/storageService';
 import { openPdfOrEnvelopeFile } from '../services/envelopeService';
+import { buildEditedPdfBytes } from '../utils/pdfExport.js';
 
 const sanitizeFileName = (name) =>
   String(name || 'document.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');
@@ -190,8 +191,41 @@ export const useViewerDocumentState = ({
     }
   };
 
-  const handleDownload = async () => {
+  const handleDownload = async ({ signatures = [], annotations = [], pageScale = 1 } = {}) => {
     if (!pdfDoc) return;
+
+    const hasOverlays =
+      (Array.isArray(signatures) && signatures.length > 0)
+      || (Array.isArray(annotations) && annotations.length > 0);
+
+    if (hasOverlays) {
+      try {
+        setIsCloudBusy(true);
+        const baseBytes = await pdfDoc.getData();
+        const editedBytes = await buildEditedPdfBytes({
+          pdfBytes: baseBytes,
+          pageScale,
+          signatures,
+          annotations,
+        });
+        const blob = new Blob([editedBytes], { type: 'application/pdf' });
+        const name = (selectedDocument?.name || 'document.pdf').replace(/\\.pdf$/i, '');
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `${name}-edited.pdf`;
+        link.click();
+        return;
+      } catch (err) {
+        setDialog({
+          title: 'Download failed',
+          message: err?.message || 'Unable to download edited PDF.',
+          primaryLabel: 'OK',
+        });
+        return;
+      } finally {
+        setIsCloudBusy(false);
+      }
+    }
 
     if (selectedDocument?.file) {
       const link = document.createElement('a');
@@ -225,9 +259,9 @@ export const useViewerDocumentState = ({
     }
   };
 
-  const handleEditDocument = () => {
+  const handleEditDocument = ({ overlays } = {}) => {
     if (!selectedDocument) return;
-    navigate(`/edit/${selectedDocument.id}`, { state: { document: selectedDocument } });
+    navigate(`/edit/${selectedDocument.id}`, { state: { document: selectedDocument, overlays: overlays || null } });
   };
 
   const handleFinishDocument = () => {
