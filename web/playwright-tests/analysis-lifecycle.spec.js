@@ -38,9 +38,6 @@ test.describe('Analysis lifecycle — loading → success (E2E)', () => {
   });
 
   test('shows loading UI during analysis and renders results on success', async ({ page }) => {
-    await openViewer(page);
-    await uploadDummyPdf(page);
-
     // Delay the analyzeText response to observe the loading UI
     await page.route('**/analyzeText', async (route) => {
       await new Promise((r) => setTimeout(r, 600));
@@ -65,11 +62,12 @@ test.describe('Analysis lifecycle — loading → success (E2E)', () => {
       });
     });
 
-    const summarizeBtn = page.getByRole('button', { name: 'Summarize Key Points' });
-    await expect(summarizeBtn).toBeEnabled();
+    await openViewer(page);
+    await uploadDummyPdf(page);
 
-    // Trigger analysis.
-    await summarizeBtn.click();
+    // Auto-analysis starts immediately on open; loading UI should appear.
+    await expect(page.getByTestId('analysis-results')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText('Analysing…')).toBeVisible({ timeout: 10000 });
 
     // After the mocked response, results should render
     await expect(page.getByTestId('analysis-results')).toBeVisible({ timeout: 10000 });

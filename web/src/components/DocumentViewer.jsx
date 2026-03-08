@@ -30,6 +30,7 @@ const DocumentViewer = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
+  const lastAutoAnalysisHashRef = useRef(null);
 
   // Initialize Firebase functions
   const functions = app ? getFunctions(app) : null;
@@ -221,6 +222,42 @@ const DocumentViewer = () => {
     }
     setRiskBadges(newRiskBadges);
   };
+
+  // Auto-run plain-English analysis immediately when a document is opened.
+  // If the backend has a cached analysis for this docHash, it will be served instantly.
+  useEffect(() => {
+    if (!selectedDocument || !docHash || !numPages) return;
+    if (!pdfTextContent && !isMockMode) return;
+    if (authState.status !== 'authenticated') return;
+    if (isAnalysisBusy) return;
+
+    if (lastAutoAnalysisHashRef.current === docHash) return;
+
+    const existing = analysisResults?.[selectedDocument.id];
+    if (existing?._meta?.status === 'success') {
+      lastAutoAnalysisHashRef.current = docHash;
+      return;
+    }
+
+    lastAutoAnalysisHashRef.current = docHash;
+    handleAnalyzeDocument({
+      selectedDocument,
+      pdfTextContent,
+      docHash,
+      numPages,
+      updateAnnotations: updateAnnotationsFromAnalysis,
+    });
+  }, [
+    authState.status,
+    docHash,
+    numPages,
+    pdfTextContent,
+    selectedDocument,
+    analysisResults,
+    handleAnalyzeDocument,
+    isAnalysisBusy,
+    isMockMode,
+  ]);
 
   const renderPageOverlay = (pageNum) => (
     <ViewerPageOverlay

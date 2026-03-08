@@ -15,7 +15,25 @@ vi.mock('firebase/auth', () => ({
 
 vi.mock('firebase/functions', () => ({
   getFunctions: vi.fn(() => ({ name: 'mock-functions' })),
-  httpsCallable: vi.fn(),
+  httpsCallable: vi.fn((_functions, name) => {
+    if (name === 'preflightCheck') {
+      return vi.fn(async () => ({ data: { ok: true, classification: 'OK' } }));
+    }
+    if (name === 'analyzeText') {
+      return vi.fn(async () => ({
+        data: {
+          ok: true,
+          result: { plainExplanation: 'Test summary', risks: [] },
+        },
+      }));
+    }
+    if (name === 'analyzeByType') {
+      return vi.fn(async () => ({
+        data: { ok: true, effectiveTypeId: null, validationSpec: null, result: null },
+      }));
+    }
+    return vi.fn(async () => ({ data: { ok: true } }));
+  }),
 }));
 
 vi.mock('firebase/app', () => ({

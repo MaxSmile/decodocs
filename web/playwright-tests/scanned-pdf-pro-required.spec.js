@@ -27,10 +27,7 @@ test.describe('Scanned / large PDF gating (Pro required) — E2E', () => {
   });
 
   test('scanned PDF triggers Pro gate with CTA and preserves document context', async ({ page }) => {
-    await openViewer(page);
-    await uploadDummyPdf(page);
-
-    // Mock analyzeText to return SCAN_DETECTED_PRO_REQUIRED
+    // Mock analyzeText to return SCAN_DETECTED_PRO_REQUIRED (auto-analysis runs on open)
     await page.route('**/analyzeText', async (route) => {
       await route.fulfill({
         status: 200,
@@ -39,10 +36,8 @@ test.describe('Scanned / large PDF gating (Pro required) — E2E', () => {
       });
     });
 
-    // Trigger analysis action that calls analyzeText in mock mode
-    const summarizeBtn = page.getByRole('button', { name: 'Summarize Key Points' });
-    await expect(summarizeBtn).toBeEnabled();
-    await summarizeBtn.click();
+    await openViewer(page);
+    await uploadDummyPdf(page);
 
     // Gate dialog should appear with clear title/message and Upgrade CTA.
     const dialog = page.locator('#viewer-gate-dialog');

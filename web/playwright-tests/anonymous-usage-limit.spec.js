@@ -27,10 +27,7 @@ test.describe('Anonymous usage limit (gating) — E2E', () => {
   });
 
   test('anonymous usage limit reached shows gate + upgrade/sign-in CTA', async ({ page }) => {
-    await openViewer(page);
-    await uploadDummyPdf(page);
-
-    // Mock analyzeText to return ANON_TOKEN_LIMIT
+    // Mock analyzeText to return ANON_TOKEN_LIMIT (auto-analysis runs on open)
     await page.route('**/analyzeText', async (route) => {
       await route.fulfill({
         status: 200,
@@ -39,10 +36,8 @@ test.describe('Anonymous usage limit (gating) — E2E', () => {
       });
     });
 
-    // Trigger an analysis action (Summarize Key Points uses analyzeText in mock mode)
-    const summarizeBtn = page.getByRole('button', { name: 'Summarize Key Points' });
-    await expect(summarizeBtn).toBeEnabled();
-    await summarizeBtn.click();
+    await openViewer(page);
+    await uploadDummyPdf(page);
 
     // Gate dialog should appear with appropriate title/message and CTA.
     const dialog = page.locator('#viewer-gate-dialog');

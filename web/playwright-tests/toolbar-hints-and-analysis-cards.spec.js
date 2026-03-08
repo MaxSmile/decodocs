@@ -340,9 +340,6 @@ test.describe('Analysis Results — Contract Review cards', () => {
   });
 
   test.fixme('CARD-01: analysis results render Risk Flagged, Plain English, and Recommendation cards', async ({ page }) => {
-    await openViewer(page);
-    await uploadDummyPdf(page);
-
     // Mock the analyzeText endpoint to return test data
     await page.route('**/analyzeText', async (route) => {
       await route.fulfill({
@@ -366,10 +363,8 @@ test.describe('Analysis Results — Contract Review cards', () => {
       });
     });
 
-    // Click "Summarize Key Points" to trigger analysis
-    const summarizeBtn = page.getByRole('button', { name: 'Summarize Key Points' });
-    await expect(summarizeBtn).toBeEnabled({ timeout: 10000 });
-    await summarizeBtn.click();
+    await openViewer(page);
+    await uploadDummyPdf(page);
 
     // Wait for the analysis results container
     const resultsContainer = page.locator('[data-testid="analysis-results"]');
@@ -412,9 +407,6 @@ test.describe('Analysis Results — Contract Review cards', () => {
   });
 
   test('CARD-03: error state shows gate dialog and error analysis', async ({ page }) => {
-    await openViewer(page);
-    await uploadDummyPdf(page);
-
     // Mock analyzeText to return a structured error (not ok)
     await page.route('**/analyzeText', async (route) => {
       await route.fulfill({
@@ -424,9 +416,8 @@ test.describe('Analysis Results — Contract Review cards', () => {
       });
     });
 
-    const summarizeBtn = page.getByRole('button', { name: 'Summarize Key Points' });
-    await expect(summarizeBtn).toBeEnabled({ timeout: 10000 });
-    await summarizeBtn.click();
+    await openViewer(page);
+    await uploadDummyPdf(page);
 
     // A gate dialog should appear with the failure message
     const gateDialog = page.locator('#viewer-gate-dialog');
@@ -443,19 +434,13 @@ test.describe('Analysis Results — Contract Review cards', () => {
       await gateDialog.locator('button').first().click();
     }
 
-    // After dismissing the gate, the Results tab should be enabled (error data exists)
-    const resultsTab = page.getByRole('button', { name: 'Results' });
-    // The results tab auto-switches when analysis data (even error state) is set
-    // Wait for the analysis-results to appear (AnalysisSidebar auto-switches on data)
+    // After dismissing the gate, the error card should be present in the sidebar.
     const resultsContainer = page.locator('[data-testid="analysis-results"]');
     await expect(resultsContainer).toBeVisible({ timeout: 10000 });
     await expect(resultsContainer).toContainText('Analysis Error');
   });
 
   test('CARD-04: success state shows status pill', async ({ page }) => {
-    await openViewer(page);
-    await uploadDummyPdf(page);
-
     await page.route('**/analyzeText', async (route) => {
       await route.fulfill({
         status: 200,
@@ -478,7 +463,8 @@ test.describe('Analysis Results — Contract Review cards', () => {
       });
     });
 
-    await page.getByRole('button', { name: 'Summarize Key Points' }).click();
+    await openViewer(page);
+    await uploadDummyPdf(page);
 
     const resultsContainer = page.locator('[data-testid="analysis-results"]');
     await expect(resultsContainer).toBeVisible({ timeout: 15000 });
@@ -489,9 +475,6 @@ test.describe('Analysis Results — Contract Review cards', () => {
   });
 
   test('CARD-05: legal disclaimer is present in success results', async ({ page }) => {
-    await openViewer(page);
-    await uploadDummyPdf(page);
-
     await page.route('**/analyzeText', async (route) => {
       await route.fulfill({
         status: 200,
@@ -514,7 +497,8 @@ test.describe('Analysis Results — Contract Review cards', () => {
       });
     });
 
-    await page.getByRole('button', { name: 'Summarize Key Points' }).click();
+    await openViewer(page);
+    await uploadDummyPdf(page);
 
     const resultsContainer = page.locator('[data-testid="analysis-results"]');
     await expect(resultsContainer).toBeVisible({ timeout: 15000 });
