@@ -52,10 +52,17 @@ Input:
 - `text` (object with `value`, required)
 - `options` (object, optional)
 
+Behavior:
+- Viewer auto-calls this shortly after a document is opened and text extraction completes.
+- Server checks Firestore cache `doc_analyses/{docHash}` first.
+- If cache exists with matching schema, response returns cached result immediately (`cached: true`, zero estimated tokens).
+- If not cached, server runs Gemini analysis, validates schema, stores result in `doc_analyses/{docHash}`, and returns fresh output.
+
 Response shape:
 ```json
 {
   "ok": true,
+  "cached": false,
   "docHash": "sha256...",
   "result": {
     "plainExplanation": "...",
@@ -64,6 +71,11 @@ Response shape:
   "usage": {}
 }
 ```
+
+Firestore persistence (`analyzeText`):
+- `doc_analyses/{docHash}`: normalized analysis cache
+- `docshashes/{docHash}`: ledger/last-seen metadata
+- `usage_events/{autoId}`: `analyze` or `analyze_cached` events
 
 #### `explainSelection`
 Explains selected text in plain language.

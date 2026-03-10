@@ -256,7 +256,7 @@ const ActionButton = ({ icon: Icon, label, sublabel, onClick, disabled, primary 
         className={`w-full flex items-start gap-3 p-3 rounded-xl border text-left transition-all ${primary
             ? 'bg-slate-900 border-slate-900 text-white hover:bg-slate-800 shadow-md'
             : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50'
-            } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+            } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:cursor-pointer'}`}
     >
         <div className={`p-2 rounded-lg ${primary ? 'bg-white/10' : 'bg-slate-100'} shrink-0`}>
             <Icon className={`w-5 h-5 ${primary ? 'text-white' : 'text-slate-600'}`} />

@@ -40,9 +40,10 @@ Authentication is active now (not planned):
 
 1. Client extracts text from PDF/DOCX and computes `docHash`.
 2. Client calls `preflightCheck`.
-3. Client calls `analyzeText` or `analyzeByType`.
-4. Functions enforce tier budgets and OCR gating.
-5. Functions return structured analysis payload.
+3. On document open, the viewer auto-triggers a basic `analyzeText` run immediately after extraction/hash is ready.
+4. `analyzeText` first checks Firestore cache `doc_analyses/{docHash}` and returns cached results when present.
+5. Client can run additional/manual tools (`analyzeByType`, explain, highlight, translate) as needed.
+6. Functions enforce tier budgets and OCR gating, then return structured analysis payloads.
 
 ## Envelope Pipeline (.snapsign)
 
@@ -71,6 +72,7 @@ Current enforced budgets:
   - `usage_daily`
   - `usage_events`
   - `docshashes`
+  - `doc_analyses` (analysis cache by `docHash`)
 - Firestore collections used for user/admin reporting:
   - `user_reports` (dedicated feedback + bug intake)
   - `admin_reports` (operator triage stream, includes user reports and backend/client exceptions)
@@ -92,6 +94,19 @@ Each document in `user_reports` includes:
 - `uid`, `email`, `authProvider` (nullable auth context)
 - `input` (sanitized metadata object)
 
+### Analysis Cache Schema (`doc_analyses`)
+
+Each document is keyed by `docHash` and stores normalized analysis output:
+- `docHash`
+- `analysisSchemaVersion`
+- `result` (validated analysis payload returned by `analyzeText`)
+- `provider`, `model`
+- `createdAt`, `createdByPuid`
+- `updatedAt`
+- `lastServedAt`, `lastServedByPuid`
+- `stats` (`pageCount`, `totalChars`, `languageHint`)
+- `options` (`documentType`, `tasks`, `targetLanguage`)
+
 ## Security
 
 - All auth/entitlement checks are server-side
@@ -103,3 +118,10 @@ Each document in `user_reports` includes:
 
 - Some advanced AI/type-specific execution is still placeholder/heuristic and is documented in roadmap/spec files.
 - See `SUBSCRIPTION_TIERS.md` and `STATUS_SUMMARY.md` for product-policy and status updates.
+
+### State and Caching (Local Storage)
+DecoDocs uses `localStorage` to cache responses and maintain uninterrupted user experiences for critical data. Below is a list of commonly used local storage keys:
+- \`decodocs_analysis_results\`: Caches the results of AI document analyses locally so that when reopening a document or returning to the app, tools populate immediately without requiring network calls until invalidated.
+- \`decodocs:doctype:<docHash>\`: Stores user-overridden document type classification specific to a document.
+- Local drafts: In the Document Editor, signatures and annotations may be stored in localStorage as lightweight drafts before final commitment.
+- Google One Tap Cooldown: Used to respect 7-day cooldown rules when users dismiss authentication prompts.

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import PDFControls from './PDFControls';
 import PDFDisplay from './PDFDisplay';
@@ -11,6 +11,7 @@ import { usePdfJs } from '../hooks/usePdfJs';
 import { useSignMode } from '../hooks/useSignMode.js';
 import { buildEditedPdfBytes } from '../utils/pdfExport.js';
 import { useOverlayHotkeys } from '../hooks/useOverlayHotkeys.js';
+import { usePageManagement } from '../hooks/usePageManagement.js';
 
 const DocumentEditor = () => {
   const { documentId } = useParams();
@@ -33,6 +34,12 @@ const DocumentEditor = () => {
 
   const [selectedDocument, setSelectedDocument] = useState(null);
   const [dialog, setDialog] = useState(null);
+  
+  // Page management state
+  const [pdfBytes, setPdfBytes] = useState(null);
+  const [pageRotations, setPageRotations] = useState({});
+  const pdfBytesRef = useRef(null);
+  
   const {
     activeTool,
     setActiveTool,
@@ -62,6 +69,7 @@ const DocumentEditor = () => {
     onDelete: deleteSelectedItem,
   });
 
+  // Load document on mount
   useEffect(() => {
     if (location.state?.document && !pdfDoc && pdfLibLoaded) {
       const doc = location.state.document;
@@ -93,6 +101,17 @@ const DocumentEditor = () => {
       });
     }
   }, [location, documentId, pdfLibLoaded, pdfDoc, loadPdfFromBlob, loadTestPdf]);
+
+  // Store PDF bytes when document loads
+  useEffect(() => {
+    if (pdfDoc && selectedDocument?.file) {
+      selectedDocument.file.arrayBuffer().then(buffer => {
+        const bytes = new Uint8Array(buffer);
+        setPdfBytes(bytes);
+        pdfBytesRef.current = bytes;
+      });
+    }
+  }, [pdfDoc, selectedDocument]);
 
   useEffect(() => {
     const onShowGate = (event) => {
@@ -173,6 +192,121 @@ const DocumentEditor = () => {
     }
   };
 
+  // Handle PDF bytes change from page operations
+  const handlePdfBytesChange = useCallback(async (newBytes) => {
+    if (!newBytes) return;
+    
+    setPdfBytes(newBytes);
+    pdfBytesRef.current = newBytes;
+    
+    // Reload the PDF document with new bytes
+    try {
+      const blob = new Blob([newBytes], { type: 'application/pdf' });
+      const file = new File([blob], selectedDocument?.name || 'document.pdf', { type: 'application/pdf' });
+      await loadPdfFromBlob(file);
+    } catch (err) {
+      console.error('Failed to reload PDF after page operation:', err);
+      setDialog({
+        title: 'Page Operation Failed',
+        message: 'The page operation completed but the document could not be refreshed. Please try again.',
+        primaryLabel: 'OK',
+        primaryTo: null,
+      });
+    }
+  }, [loadPdfFromBlob, selectedDocument, setDialog]);
+
+  // Handle page count change
+  const handlePageCountChange = useCallback((updater) => {
+    // This will be handled by the PDF reload
+  }, []);
+
+  // Handle page change
+  const handlePageChangeFromOperation = useCallback((updater) => {
+    const newPage = typeof updater === 'function' ? updater(pageNumber) : updater;
+    navigation.setPageNumber(newPage);
+    handleThumbnailClick(newPage);
+  }, [pageNumber, navigation]);
+
+  // Page management hook
+  const {
+    isProcessing: isPageOperationProcessing,
+    error: pageOperationError,
+    setPdfBytes: setPageManagementPdfBytes,
+    duplicatePage: handleDuplicatePage,
+    rotatePage: handleRotatePage,
+    deletePage: handleDeletePage,
+    addPage: handleAddPage,
+  } = usePageManagement({
+    onPdfBytesChange: handlePdfBytesChange,
+    onPageCountChange: handlePageCountChange,
+    onPageChange: handlePageChangeFromOperation,
+  });
+
+  // Update page management hook with current PDF bytes
+  useEffect(() => {
+    if (pdfBytes) {
+      setPageManagementPdfBytes(pdfBytes);
+    }
+  }, [pdfBytes, setPageManagementPdfBytes]);
+
+  // Page operation handlers
+  const onDuplicatePage = useCallback(async (pageIndex) => {
+    try {
+      await handleDuplicatePage(pageIndex);
+    } catch (err) {
+      setDialog({
+        title: 'Duplicate Failed',
+        message: err.message || 'Failed to duplicate the page.',
+        primaryLabel: 'OK',
+        primaryTo: null,
+      });
+    }
+  }, [handleDuplicatePage, setDialog]);
+
+  const onRotatePage = useCallback(async (pageIndex) => {
+    try {
+      await handleRotatePage(pageIndex, 90);
+      // Track rotation for UI update
+      setPageRotations(prev => ({
+        ...prev,
+        [pageIndex + 1]: ((prev[pageIndex + 1] || 0) + 90) % 360,
+      }));
+    } catch (err) {
+      setDialog({
+        title: 'Rotate Failed',
+        message: err.message || 'Failed to rotate the page.',
+        primaryLabel: 'OK',
+        primaryTo: null,
+      });
+    }
+  }, [handleRotatePage, setDialog]);
+
+  const onDeletePage = useCallback(async (pageIndex) => {
+    try {
+      await handleDeletePage(pageIndex);
+    } catch (err) {
+      setDialog({
+        title: 'Delete Failed',
+        message: err.message || 'Failed to delete the page.',
+        primaryLabel: 'OK',
+        primaryTo: null,
+      });
+    }
+  }, [handleDeletePage, setDialog]);
+
+  const onAddPage = useCallback(async (insertIndex) => {
+    try {
+      await handleAddPage(insertIndex);
+    } catch (err) {
+      setDialog({
+        title: 'Add Page Failed',
+        message: err.message || 'Failed to add a new page.',
+        primaryLabel: 'OK',
+        primaryTo: null,
+      });
+    }
+  }, [handleAddPage, setDialog]);
+
   const renderOverlay = (pageNum) => (
     <EditorOverlay
       pageNum={pageNum}
@@ -251,6 +385,12 @@ const DocumentEditor = () => {
               numPages={numPages}
               currentPage={pageNumber}
               onPageClick={handleThumbnailClick}
+              onDuplicatePage={onDuplicatePage}
+              onRotatePage={onRotatePage}
+              onDeletePage={onDeletePage}
+              onAddPage={onAddPage}
+              isProcessing={isPageOperationProcessing}
+              pageRotations={pageRotations}
             />
           )}
 

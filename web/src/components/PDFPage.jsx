@@ -32,7 +32,7 @@ const PDFPage = ({
             {/* Text layer for selection and searching */}
             <div
                 ref={textLayerRef}
-                className="absolute top-0 left-0 w-full h-full overflow-hidden opacity-0 leading-none"
+                className="absolute top-0 left-0 w-full h-full overflow-hidden leading-none selection:bg-blue-200/50" style={{ userSelect: "text", WebkitUserSelect: "text", cursor: "text" }}
             />
             {/* Annotations overlay */}
             <div

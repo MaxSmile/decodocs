@@ -1,12 +1,23 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { analyzeByTypeCall } from '../services/typeAnalysisService';
 import { preflightCheckCall } from '../services/preflightService';
 import { analyzeTextCall } from '../services/analyzeTextService';
 import { explainSelectionCall, highlightRisksCall, translateToPlainEnglishCall } from '../services/analysisService';
 import { buildDocStats } from '../utils/docStats';
 
+const loadFromStorage = () => {
+    try {
+        const stored = localStorage.getItem('decodocs_analysis_results');
+        return stored ? JSON.parse(stored) : {};
+    } catch { return {}; }
+};
+
 export const useDocumentAnalysis = ({ functions, authState, isMockMode }) => {
-    const [analysisResults, setAnalysisResults] = useState({});
+    const [analysisResults, setAnalysisResults] = useState(loadFromStorage);
+
+    useEffect(() => {
+        try { localStorage.setItem('decodocs_analysis_results', JSON.stringify(analysisResults)); } catch {}
+    }, [analysisResults]);
     const [gate, setGate] = useState(null);
     const [dialog, setDialog] = useState(null);
     const [isLoading, setIsLoading] = useState(false);

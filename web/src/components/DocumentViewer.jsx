@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, Suspense, lazy } from 'react';
+import React, { useEffect, useState, useRef, Suspense, lazy, useCallback } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { getFunctions } from 'firebase/functions';
 import { useAuth } from '../context/AuthContext';
@@ -25,6 +25,7 @@ import { useTextSelection } from '../hooks/useTextSelection';
 import { useViewerSignMode } from '../hooks/useViewerSignMode';
 import { useViewerDocumentState } from '../hooks/useViewerDocumentState';
 import { useOverlayHotkeys } from '../hooks/useOverlayHotkeys.js';
+import { usePageManagement } from '../hooks/usePageManagement.js';
 
 const DocumentViewer = () => {
   const { authState, app } = useAuth();
@@ -34,7 +35,7 @@ const DocumentViewer = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
-  const lastAutoAnalysisHashRef = useRef(null);
+  const lastAutoAnalysisRunKeyRef = useRef(null);
 
   // Initialize Firebase functions
   const functions = app ? getFunctions(app) : null;
@@ -118,6 +119,162 @@ const DocumentViewer = () => {
   const [typeSelectorOpen, setTypeSelectorOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
+  const {
+    selectedDocument,
+    isCloudBusy,
+    handleFileUpload,
+    handleSaveToCloud,
+    handleDownload,
+    handleEditDocument,
+    handleFinishDocument,
+  } = useViewerDocumentState({
+    fileName,
+    pdfLibLoaded,
+    location,
+    navigate,
+    loadTestPdf,
+    loadPdfFromBlob,
+    loadError,
+    setDialog,
+    loadLocalOverride,
+    loadServerTypeState,
+    runServerDetection,
+    functions,
+    pdfDoc,
+    resetPdf,
+  });
+  
+  // Page management state
+  const [pdfBytes, setPdfBytes] = useState(null);
+  const [pageRotations, setPageRotations] = useState({});
+  const pdfBytesRef = useRef(null);
+  
+  // Store PDF bytes when document loads
+  useEffect(() => {
+    if (pdfDoc && selectedDocument?.file) {
+      selectedDocument.file.arrayBuffer().then(buffer => {
+        const bytes = new Uint8Array(buffer);
+        setPdfBytes(bytes);
+        pdfBytesRef.current = bytes;
+      });
+    }
+  }, [pdfDoc, selectedDocument]);
+  
+  // Handle PDF bytes change from page operations
+  const handlePdfBytesChange = useCallback(async (newBytes) => {
+    if (!newBytes) return;
+    
+    setPdfBytes(newBytes);
+    pdfBytesRef.current = newBytes;
+    
+    // Reload the PDF document with new bytes
+    try {
+      const blob = new Blob([newBytes], { type: 'application/pdf' });
+      const file = new File([blob], selectedDocument?.name || 'document.pdf', { type: 'application/pdf' });
+      await loadPdfFromBlob(file);
+    } catch (err) {
+      console.error('Failed to reload PDF after page operation:', err);
+      setDialog({
+        title: 'Page Operation Failed',
+        message: 'The page operation completed but the document could not be refreshed. Please try again.',
+        primaryLabel: 'OK',
+        primaryTo: null,
+      });
+    }
+  }, [loadPdfFromBlob, selectedDocument, setDialog]);
+  
+  // Handle page count change
+  const handlePageCountChange = useCallback((updater) => {
+    // This will be handled by the PDF reload
+  }, []);
+  
+  // Handle page change
+  const handlePageChangeFromOperation = useCallback((updater) => {
+    const newPage = typeof updater === 'function' ? updater(pageNumber) : updater;
+    navigation.setPageNumber(newPage);
+    scrollToPage(newPage);
+  }, [pageNumber, navigation]);
+  
+  // Page management hook
+  const {
+    isProcessing: isPageOperationProcessing,
+    error: pageOperationError,
+    setPdfBytes: setPageManagementPdfBytes,
+    duplicatePage: handleDuplicatePage,
+    rotatePage: handleRotatePage,
+    deletePage: handleDeletePage,
+    addPage: handleAddPage,
+  } = usePageManagement({
+    onPdfBytesChange: handlePdfBytesChange,
+    onPageCountChange: handlePageCountChange,
+    onPageChange: handlePageChangeFromOperation,
+  });
+  
+  // Update page management hook with current PDF bytes
+  useEffect(() => {
+    if (pdfBytes) {
+      setPageManagementPdfBytes(pdfBytes);
+    }
+  }, [pdfBytes, setPageManagementPdfBytes]);
+  
+  // Page operation handlers
+  const onDuplicatePage = useCallback(async (pageIndex) => {
+    try {
+      await handleDuplicatePage(pageIndex);
+    } catch (err) {
+      setDialog({
+        title: 'Duplicate Failed',
+        message: err.message || 'Failed to duplicate the page.',
+        primaryLabel: 'OK',
+        primaryTo: null,
+      });
+    }
+  }, [handleDuplicatePage, setDialog]);
+  
+  const onRotatePage = useCallback(async (pageIndex) => {
+    try {
+      await handleRotatePage(pageIndex, 90);
+      // Track rotation for UI update
+      setPageRotations(prev => ({
+        ...prev,
+        [pageIndex + 1]: ((prev[pageIndex + 1] || 0) + 90) % 360,
+      }));
+    } catch (err) {
+      setDialog({
+        title: 'Rotate Failed',
+        message: err.message || 'Failed to rotate the page.',
+        primaryLabel: 'OK',
+        primaryTo: null,
+      });
+    }
+  }, [handleRotatePage, setDialog]);
+  
+  const onDeletePage = useCallback(async (pageIndex) => {
+    try {
+      await handleDeletePage(pageIndex);
+    } catch (err) {
+      setDialog({
+        title: 'Delete Failed',
+        message: err.message || 'Failed to delete the page.',
+        primaryLabel: 'OK',
+        primaryTo: null,
+      });
+    }
+  }, [handleDeletePage, setDialog]);
+  
+  const onAddPage = useCallback(async (insertIndex) => {
+    try {
+      await handleAddPage(insertIndex);
+    } catch (err) {
+      setDialog({
+        title: 'Add Page Failed',
+        message: err.message || 'Failed to add a new page.',
+        primaryLabel: 'OK',
+        primaryTo: null,
+      });
+    }
+  }, [handleAddPage, setDialog]);
+
   useOverlayHotkeys({
     enabled: true,
     canUndo,
@@ -144,31 +301,6 @@ const DocumentViewer = () => {
     window.addEventListener('decodocs:show-gate', onShowGate);
     return () => window.removeEventListener('decodocs:show-gate', onShowGate);
   }, [setDialog]);
-
-  const {
-    selectedDocument,
-    isCloudBusy,
-    handleFileUpload,
-    handleSaveToCloud,
-    handleDownload,
-    handleEditDocument,
-    handleFinishDocument,
-  } = useViewerDocumentState({
-    fileName,
-    pdfLibLoaded,
-    location,
-    navigate,
-    loadTestPdf,
-    loadPdfFromBlob,
-    loadError,
-    setDialog,
-    loadLocalOverride,
-    loadServerTypeState,
-    runServerDetection,
-    functions,
-    pdfDoc,
-    resetPdf,
-  });
 
   const handleDownloadWithOverlays = () =>
     handleDownload({ signatures, annotations, pageScale });
@@ -229,7 +361,7 @@ const DocumentViewer = () => {
     setRiskBadges(newRiskBadges);
   };
 
-  // Auto-run plain-English analysis immediately when a document is opened.
+  // Auto-run basic analysis immediately when a document is opened.
   // If the backend has a cached analysis for this docHash, it will be served instantly.
   useEffect(() => {
     if (!selectedDocument || !docHash || !numPages) return;
@@ -237,15 +369,16 @@ const DocumentViewer = () => {
     if (authState.status !== 'authenticated') return;
     if (isAnalysisBusy) return;
 
-    if (lastAutoAnalysisHashRef.current === docHash) return;
+    const runKey = `${selectedDocument.id}:${docHash}`;
+    if (lastAutoAnalysisRunKeyRef.current === runKey) return;
 
     const existing = analysisResults?.[selectedDocument.id];
     if (existing?._meta?.status === 'success') {
-      lastAutoAnalysisHashRef.current = docHash;
+      lastAutoAnalysisRunKeyRef.current = runKey;
       return;
     }
 
-    lastAutoAnalysisHashRef.current = docHash;
+    lastAutoAnalysisRunKeyRef.current = runKey;
     handleAnalyzeDocument({
       selectedDocument,
       pdfTextContent,
@@ -264,6 +397,12 @@ const DocumentViewer = () => {
     isAnalysisBusy,
     isMockMode,
   ]);
+
+  useEffect(() => {
+    if (!selectedDocument || !docHash) {
+      lastAutoAnalysisRunKeyRef.current = null;
+    }
+  }, [selectedDocument, docHash]);
 
   const renderPageOverlay = (pageNum) => (
     <ViewerPageOverlay
@@ -374,6 +513,12 @@ const DocumentViewer = () => {
                     numPages={numPages}
                     currentPage={pageNumber}
                     onPageClick={scrollToPage}
+                    onDuplicatePage={onDuplicatePage}
+                    onRotatePage={onRotatePage}
+                    onDeletePage={onDeletePage}
+                    onAddPage={onAddPage}
+                    isProcessing={isPageOperationProcessing}
+                    pageRotations={pageRotations}
                   />
                 )}
 

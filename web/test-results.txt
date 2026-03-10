@@ -1,0 +1,62 @@
+
+Running 2 tests using 2 workers
+
+  ✘  2 [chromium] › playwright-tests/text-selection.spec.js:15:5 › Document Text Selection › user can select text and trigger Explain action on PDF (7.9s)
+  ✘  1 [chromium] › playwright-tests/text-selection.spec.js:44:5 › Document Text Selection › user can select text and trigger Explain action on DOCX (31.5s)
+
+
+  1) [chromium] › playwright-tests/text-selection.spec.js:15:5 › Document Text Selection › user can select text and trigger Explain action on PDF 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).not.[22mtoBeDisabled[2m([22m[2m)[22m failed
+
+    Locator:  getByRole('button', { name: /Explain Selection/i })
+    Expected: not disabled
+    Received: disabled
+    Timeout:  5000ms
+
+    Call log:
+    [2m  - Expect "not toBeDisabled" with timeout 5000ms[22m
+    [2m  - waiting for getByRole('button', { name: /Explain Selection/i })[22m
+    [2m    9 × locator resolved to <button disabled class="w-full flex items-start gap-3 p-3 rounded-xl border text-left transition-all bg-white border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50 opacity-50 cursor-not-allowed">…</button>[22m
+    [2m      - unexpected value "disabled"[22m
+
+
+      39 |         // Explain Selection button should no longer be disabled
+      40 |         const explainBtn = page.getByRole('button', { name: /Explain Selection/i });
+    > 41 |         await expect(explainBtn).not.toBeDisabled();
+         |                                      ^
+      42 |     });
+      43 |     
+      44 |     test('user can select text and trigger Explain action on DOCX', async ({ page }) => {
+        at /Users/vasilkoff/Projects/SnapSign-AU.AU/Decodocs/web/playwright-tests/text-selection.spec.js:41:38
+
+    Error Context: test-results/text-selection-Document-Te-4bf1b-igger-Explain-action-on-PDF-chromium/error-context.md
+
+  2) [chromium] › playwright-tests/text-selection.spec.js:44:5 › Document Text Selection › user can select text and trigger Explain action on DOCX 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: locator('.docx-wrapper')
+    Expected: visible
+    Timeout: 30000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 30000ms[22m
+    [2m  - waiting for locator('.docx-wrapper')[22m
+
+
+      49 |         await fileInput.setInputFiles(docxPath);
+      50 |
+    > 51 |         await expect(page.locator('.docx-wrapper')).toBeVisible({ timeout: 30000 });
+         |                                                     ^
+      52 |         
+      53 |         // Wait for text node. We just pick any span or p that might contain text
+      54 |         const firstTextP = page.locator('.docx-wrapper section p').first();
+        at /Users/vasilkoff/Projects/SnapSign-AU.AU/Decodocs/web/playwright-tests/text-selection.spec.js:51:53
+
+    Error Context: test-results/text-selection-Document-Te-8b53e-gger-Explain-action-on-DOCX-chromium/error-context.md
+
+  2 failed
+    [chromium] › playwright-tests/text-selection.spec.js:15:5 › Document Text Selection › user can select text and trigger Explain action on PDF 
+    [chromium] › playwright-tests/text-selection.spec.js:44:5 › Document Text Selection › user can select text and trigger Explain action on DOCX 

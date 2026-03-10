@@ -1,4 +1,4 @@
-import{j as X}from"./jsx-runtime.D_zvdyIk.js";import{r as G}from"./index._ZYCRPvf.js";import{J as be}from"./ReactAppIsland.BEkCyf_r.js";import"./index.esm.DAC6xlWs.js";import"./DecoDocsLogo.Ci4jsDhU.js";import"./index.esm.BpoIeuRg.js";import"./authStore.Buaj28wK.js";/*
+import{j as X}from"./jsx-runtime.D_zvdyIk.js";import{r as G}from"./index._ZYCRPvf.js";import{J as be}from"./ReactAppIsland.CAFVJvU9.js";import"./index.esm.DAC6xlWs.js";import"./DecoDocsLogo.Ci4jsDhU.js";import"./index.esm.BpoIeuRg.js";import"./authStore.Buaj28wK.js";/*
  * @license
  * docx-preview <https://github.com/VolodymyrBaydalka/docxjs>
  * Released under Apache License 2.0  <https://github.com/VolodymyrBaydalka/docxjs/blob/master/LICENSE>
