@@ -38,7 +38,7 @@ Authentication is active now (not planned):
 
 ## AI Analysis Pipeline
 
-1. Client extracts text from PDF and computes `docHash`.
+1. Client extracts text from PDF/DOCX and computes `docHash`.
 2. Client calls `preflightCheck`.
 3. Client calls `analyzeText` or `analyzeByType`.
 4. Functions enforce tier budgets and OCR gating.

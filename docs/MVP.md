@@ -5,7 +5,7 @@ Validate the core flow for freelancers and SMBs:
 **Understand -> Manage -> Act**.
 ## Must-Have Capabilities
 - auth via Firebase (identity only)
-- open PDF locally in the web app (client-first)
+- open PDF and DOCX locally in the web app (client-first)
 - extract text client-side and send to backend for AI decode
 - display explanations, summaries, and risk highlights
 - basic annotation or notes UI
@@ -38,7 +38,7 @@ Validate the core flow for freelancers and SMBs:
 ## IN SCOPE (MVP)
 
 ### Core
-- Upload PDF documents
+- Upload PDF & DOCX documents
 - AI decode:
   - plain-language explanation
   - highlighted issues / risks

@@ -3,7 +3,7 @@
 ## Current Features
 
 ### Document Analysis
-- **PDF Upload**: Secure PDF document upload capability
+- **PDF/DOCX Upload**: Secure document upload capability
 - **AI-Powered Analysis**: Automated document understanding using Google Gemini
 - **Risk Identification**: Automatic detection and classification of potential risks
 - **Plain Language Explanations**: Complex clauses simplified in plain English
@@ -11,7 +11,7 @@
 - **Recommendations**: Suggestions for improving document terms
 
 ### Document Viewing
-- **Integrated PDF Viewer**: Built-in PDF rendering in the browser
+- **Integrated Viewer**: Built-in PDF and DOCX rendering in the browser
 - **Split Layout**: Document view alongside analysis tools
 - **Responsive Design**: Works on desktop and mobile devices
 - **Document Navigation**: Easy browsing through documents
@@ -76,7 +76,7 @@
 ### Current Feature Specifications
 
 #### Document Analysis
-- **Supported Formats**: PDF documents
+- **Supported Formats**: PDF and DOCX documents
 - **Analysis Speed**: Typically under 10 seconds for standard documents
 - **Risk Categories**: Financial, Legal, Operational, Other
 - **Risk Levels**: High, Medium, Low severity classification

@@ -6,10 +6,13 @@ import {
     getPdfJsStandardFontDataUrl,
 } from '../utils/pdfUtils';
 import { buildDocStats } from '../utils/docStats';
+import { extractDocxText } from '../utils/docxUtils';
 
 export const usePdfJs = () => {
     const [pdfLibLoaded, setPdfLibLoaded] = useState(false);
     const [pdfDoc, setPdfDoc] = useState(null);
+    const [docxBlob, setDocxBlob] = useState(null);
+    const [docType, setDocType] = useState(null); // 'pdf' or 'docx'
     const [numPages, setNumPages] = useState(null);
     const [pageNumber, setPageNumber] = useState(1);
     const [pageScale, setPageScale] = useState(1.5);
@@ -44,7 +47,9 @@ export const usePdfJs = () => {
     }, []);
 
     const loadPdfFromBlob = useCallback(async (fileBlob) => {
-        if (!window.pdfjsLib || !fileBlob) return;
+        if (!fileBlob) return;
+        const isDocx = fileBlob.name?.toLowerCase().endsWith('.docx') || fileBlob.type?.includes('wordprocessingml') || fileBlob.type?.includes('docx');
+        if (!isDocx && !window.pdfjsLib) return;
 
         try {
             setIsLoading(true);
@@ -56,27 +61,46 @@ export const usePdfJs = () => {
             const docHashValue = await computeSHA256(arrayBuffer);
             setDocHash(docHashValue);
 
-            const lib = window.pdfjsLib;
-            const pdf = await lib.getDocument({
-                data: arrayBuffer,
-                onProgress: (progress) => {
-                    if (progress.total > 0) {
-                        const percent = Math.round((progress.loaded / progress.total) * 100);
-                        setLoadingMessage(`Loading ${fileNameForDisplay}: ${percent}%`);
-                    }
-                },
-                standardFontDataUrl: getPdfJsStandardFontDataUrl(),
-            }).promise;
+            let extractedText = '';
+            let stats = null;
 
-            setPdfDoc(pdf);
-            setNumPages(pdf.numPages);
+            if (isDocx) {
+                setLoadingMessage(`Extracting text from ${fileNameForDisplay}...`);
+                extractedText = await extractDocxText(arrayBuffer);
+                setPdfTextContent(extractedText);
+                
+                stats = buildDocStats({ pageCount: 1, extractedText, pdfSizeBytes: arrayBuffer.byteLength });
+                setDocStats(stats);
+                
+                setDocType('docx');
+                setDocxBlob(fileBlob);
+                setPdfDoc(null);
+                setNumPages(1);
+            } else {
+                const lib = window.pdfjsLib;
+                const pdf = await lib.getDocument({
+                    data: arrayBuffer,
+                    onProgress: (progress) => {
+                        if (progress.total > 0) {
+                            const percent = Math.round((progress.loaded / progress.total) * 100);
+                            setLoadingMessage(`Loading ${fileNameForDisplay}: ${percent}%`);
+                        }
+                    },
+                    standardFontDataUrl: getPdfJsStandardFontDataUrl(),
+                }).promise;
 
-            setLoadingMessage(`Extracting text from ${fileNameForDisplay}...`);
-            const extractedText = await extractPdfTextAllPages(pdf);
-            setPdfTextContent(extractedText);
+                setPdfDoc(pdf);
+                setNumPages(pdf.numPages);
+                setDocType('pdf');
+                setDocxBlob(null);
 
-            const stats = buildDocStats({ pageCount: pdf.numPages, extractedText, pdfSizeBytes: arrayBuffer.byteLength });
-            setDocStats(stats);
+                setLoadingMessage(`Extracting text from ${fileNameForDisplay}...`);
+                extractedText = await extractPdfTextAllPages(pdf);
+                setPdfTextContent(extractedText);
+
+                stats = buildDocStats({ pageCount: pdf.numPages, extractedText, pdfSizeBytes: arrayBuffer.byteLength });
+                setDocStats(stats);
+            }
 
             setPageNumber(1);
             setLoadingMessage('');
@@ -93,7 +117,8 @@ export const usePdfJs = () => {
     }, []);
 
     const loadTestPdf = useCallback(async (fileName) => {
-        if (!window.pdfjsLib) return;
+        const isDocx = fileName?.toLowerCase().endsWith('.docx');
+        if (!isDocx && !window.pdfjsLib) return;
 
         try {
             setIsLoading(true);
@@ -110,27 +135,47 @@ export const usePdfJs = () => {
             const docHashValue = await computeSHA256(arrayBuffer);
             setDocHash(docHashValue);
 
-            const pdfjsLib = window.pdfjsLib;
-            const pdf = await pdfjsLib.getDocument({
-                data: arrayBuffer,
-                onProgress: (progress) => {
-                    if (progress.total > 0) {
-                        const percent = Math.round((progress.loaded / progress.total) * 100);
-                        setLoadingMessage(`Loading ${fileName}: ${percent}%`);
-                    }
-                },
-                standardFontDataUrl: getPdfJsStandardFontDataUrl(),
-            }).promise;
+            let extractedText = '';
+            let stats = null;
 
-            setPdfDoc(pdf);
-            setNumPages(pdf.numPages);
+            if (isDocx) {
+                setLoadingMessage(`Extracting text from ${fileName}...`);
+                extractedText = await extractDocxText(arrayBuffer);
+                setPdfTextContent(extractedText);
+                
+                stats = buildDocStats({ pageCount: 1, extractedText, pdfSizeBytes: arrayBuffer.byteLength });
+                setDocStats(stats);
+                
+                setDocType('docx');
+                const blob = new Blob([arrayBuffer]); // dummy blob for viewer
+                setDocxBlob(blob);
+                setPdfDoc(null);
+                setNumPages(1);
+            } else {
+                const pdfjsLib = window.pdfjsLib;
+                const pdf = await pdfjsLib.getDocument({
+                    data: arrayBuffer,
+                    onProgress: (progress) => {
+                        if (progress.total > 0) {
+                            const percent = Math.round((progress.loaded / progress.total) * 100);
+                            setLoadingMessage(`Loading ${fileName}: ${percent}%`);
+                        }
+                    },
+                    standardFontDataUrl: getPdfJsStandardFontDataUrl(),
+                }).promise;
 
-            setLoadingMessage(`Extracting text from ${fileName}...`);
-            const extractedText = await extractPdfTextAllPages(pdf);
-            setPdfTextContent(extractedText);
+                setPdfDoc(pdf);
+                setNumPages(pdf.numPages);
+                setDocType('pdf');
+                setDocxBlob(null);
 
-            const stats = buildDocStats({ pageCount: pdf.numPages, extractedText, pdfSizeBytes: arrayBuffer.byteLength });
-            setDocStats(stats);
+                setLoadingMessage(`Extracting text from ${fileName}...`);
+                extractedText = await extractPdfTextAllPages(pdf);
+                setPdfTextContent(extractedText);
+
+                stats = buildDocStats({ pageCount: pdf.numPages, extractedText, pdfSizeBytes: arrayBuffer.byteLength });
+                setDocStats(stats);
+            }
 
             setPageNumber(1);
             setLoadingMessage('');
@@ -142,7 +187,7 @@ export const usePdfJs = () => {
                 fileInfo: {
                     name: fileName,
                     size: arrayBuffer.byteLength,
-                    type: 'application/pdf'
+                    type: isDocx ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' : 'application/pdf'
                 }
             };
         } catch (error) {
@@ -167,6 +212,8 @@ export const usePdfJs = () => {
     const resetPdf = useCallback(() => {
         try { pdfDoc?.destroy?.(); } catch (e) { /* ignore */ }
         setPdfDoc(null);
+        setDocxBlob(null);
+        setDocType(null);
         setNumPages(null);
         setPageNumber(1);
         setPageScale(1.5);
@@ -181,6 +228,8 @@ export const usePdfJs = () => {
     return {
         pdfLibLoaded,
         pdfDoc,
+        docxBlob,
+        docType,
         numPages,
         pageNumber,
         pageScale,

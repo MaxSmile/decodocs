@@ -1,10 +1,14 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, Suspense, lazy } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { getFunctions } from 'firebase/functions';
 import { useAuth } from '../context/AuthContext';
 import PDFControls from './PDFControls';
-import PDFDisplay from './PDFDisplay';
 import PDFDropzone from './PDFDropzone';
+
+// Dynamically loaded engines
+const PDFDisplay = lazy(() => import('./PDFDisplay'));
+const DocxViewer = lazy(() => import('./DocxViewer'));
+
 import PageThumbnails from './PageThumbnails';
 import AnalysisSidebar from './AnalysisSidebar';
 import SignatureModal from './SignatureModal';
@@ -39,6 +43,8 @@ const DocumentViewer = () => {
   const {
     pdfLibLoaded,
     pdfDoc,
+    docxBlob,
+    docType,
     numPages,
     pageNumber,
     pageScale,
@@ -327,7 +333,7 @@ const DocumentViewer = () => {
       <div id="viewer-root" className="flex flex-col flex-1 h-full overflow-hidden bg-slate-100">
 
         {/* ─── Top Bar: Filename + Actions + Doc Type + Tools ─── */}
-        {pdfDoc && (
+        {(pdfDoc || docxBlob) && (
           <ViewerToolbar
             fileName={selectedDocument?.name}
             onShare={() => {
@@ -356,18 +362,20 @@ const DocumentViewer = () => {
         {/* ─── Main Content Area ─── */}
         <div id="viewer-content" className="flex flex-1 overflow-hidden relative">
 
-          {/* PDF Canvas Area */}
+          {/* Canvas Area */}
           <div id="viewer-canvas-area" className="flex-1 flex flex-col items-center justify-start overflow-hidden relative">
 
-            {pdfDoc ? (
+            {(pdfDoc || docxBlob) ? (
               <div className="w-full flex-1 relative flex overflow-hidden">
-                {/* Left Thumbnails */}
-                <PageThumbnails
-                  pdfDoc={pdfDoc}
-                  numPages={numPages}
-                  currentPage={pageNumber}
-                  onPageClick={scrollToPage}
-                />
+                {/* Left Thumbnails (PDF only for now) */}
+                {pdfDoc && (
+                  <PageThumbnails
+                    pdfDoc={pdfDoc}
+                    numPages={numPages}
+                    currentPage={pageNumber}
+                    onPageClick={scrollToPage}
+                  />
+                )}
 
                 {/* Center Scrollable Content */}
                 <div
@@ -375,18 +383,29 @@ const DocumentViewer = () => {
                   className={`flex-1 overflow-auto bg-slate-100/50 relative ${activeTool !== 'select' ? 'cursor-crosshair' : ''}`}
                   onClickCapture={handleCanvasClick}
                 >
-                  <PDFDisplay
-                    pdfDoc={pdfDoc}
-                    numPages={numPages}
-                    pageScale={pageScale}
-                    isLoading={isPdfBusy}
-                    loadingMessage={loadingMessage}
-                    onPageVisible={handlePageVisible}
-                    highlights={highlights}
-                    clauseMarkers={clauseMarkers}
-                    riskBadges={riskBadges}
-                    renderPageOverlay={renderPageOverlay}
-                  />
+                  <Suspense fallback={
+                    <div className="flex-1 flex flex-col h-full items-center justify-center text-slate-500">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-500 mb-2"></div>
+                      <p>Loading rendering engine...</p>
+                    </div>
+                  }>
+                    {docType === 'docx' && docxBlob ? (
+                        <DocxViewer blob={docxBlob} scale={pageScale} />
+                    ) : pdfDoc ? (
+                        <PDFDisplay
+                          pdfDoc={pdfDoc}
+                          numPages={numPages}
+                          pageScale={pageScale}
+                          isLoading={isPdfBusy}
+                          loadingMessage={loadingMessage}
+                          onPageVisible={handlePageVisible}
+                          highlights={highlights}
+                          clauseMarkers={clauseMarkers}
+                          riskBadges={riskBadges}
+                          renderPageOverlay={renderPageOverlay}
+                        />
+                    ) : null}
+                  </Suspense>
                 </div>
               </div>
             ) : (
@@ -396,7 +415,7 @@ const DocumentViewer = () => {
             )}
 
             {/* Floating Page Controls */}
-            {pdfDoc && (
+            {(pdfDoc || docxBlob) && (
               <PDFControls
                 onFileSelect={handleFileUpload}
                 onEdit={handleEditWithOverlays}

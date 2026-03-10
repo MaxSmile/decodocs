@@ -31,7 +31,7 @@
 The DecoDocs application is live and functional with:
 
 #### Core Features
-- **PDF Support**: View + extract text + run AI analysis
+- **PDF & DOCX Support**: View + extract text + run AI analysis (DOCX extraction via mammoth.js, client-side rendering via docx-preview)
 - **Email-to-sign flow**: specified (not assumed implemented unless explicitly built)
 - **Tiered entitlements**: Anonymous / Free / Pro, with token budgets + Pro-only OCR (see `SUBSCRIPTION_TIERS.md`)
 - **Storage**: Pro storage is specified; avoid implying availability unless the feature is enabled in production
