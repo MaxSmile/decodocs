@@ -22,7 +22,7 @@ test.describe('Auth — Anonymous first-visit happy path', () => {
     await expect(page.locator('#viewer-root')).toBeVisible({ timeout: 15000 });
 
     // Viewer initial state: upload prompt is visible.
-    await expect(page.getByText('Upload a PDF or .snapsign file')).toBeVisible();
+    await expect(page.getByText(/Upload a PDF/i)).toBeVisible();
 
     // Upload a known PDF so auth-gating prompt appears in the tools panel.
     const input = page.locator('#viewer-root input[type="file"]').first();

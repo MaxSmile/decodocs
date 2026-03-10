@@ -115,7 +115,13 @@ export const useViewerDocumentState = ({
 
     try {
       const file = files[0];
-      const opened = await openPdfOrEnvelopeFile(file);
+      const lowerName = String(file.name || '').toLowerCase();
+      const isDocx =
+        lowerName.endsWith('.docx')
+        || String(file.type || '').includes('wordprocessingml');
+      const opened = isDocx
+        ? { source: 'docx', pdfFile: file, envelope: null }
+        : await openPdfOrEnvelopeFile(file);
       const newDocument = {
         id: Date.now() + Math.random(),
         name: opened.pdfFile.name,
@@ -132,7 +138,7 @@ export const useViewerDocumentState = ({
     } catch (err) {
       setDialog({
         title: 'Unsupported or invalid file',
-        message: err?.message || 'Please upload a valid .pdf or .snapsign file.',
+        message: err?.message || 'Please upload a valid .pdf, .docx, or .snapsign file.',
         primaryLabel: 'OK',
       });
     }

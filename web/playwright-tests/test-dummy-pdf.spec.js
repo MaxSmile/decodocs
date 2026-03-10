@@ -29,7 +29,7 @@ test.describe('Dummy PDF Loading Test', () => {
 
     // Initial viewer should show upload prompt with a mounted (hidden) file input
     await expect(page.locator('#viewer-root')).toBeVisible({ timeout: 10000 });
-    await expect(page.getByText('Upload a PDF or .snapsign file')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/Upload a PDF/i)).toBeVisible({ timeout: 10000 });
     await page.locator('#viewer-root input[type="file"]').first().waitFor({ state: 'attached', timeout: 10000 });
   });
 

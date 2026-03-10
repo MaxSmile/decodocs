@@ -60,14 +60,14 @@ test.describe.serial('Core Document Workflow', () => {
   test.describe('3.1 Document Ingestion', () => {
     test('ING-01: Initial State', async ({ page }) => {
       await openViewer(page);
-      await expect(page.getByText('Upload a PDF or .snapsign file')).toBeVisible({ timeout: 10000 });
+      await expect(page.getByText(/Upload a PDF/i)).toBeVisible({ timeout: 10000 });
       await page.locator('#viewer-root input[type="file"]').first().waitFor({ state: 'attached', timeout: 10000 });
     });
 
     test('ING-02 to ING-05: File Selection and Rendering', async ({ page }) => {
       await openViewer(page);
       await uploadDummyPdf(page);
-      await expect(page.getByText('Upload a PDF or .snapsign file')).not.toBeVisible();
+      await expect(page.getByText(/Upload a PDF/i)).not.toBeVisible();
     });
 
     test('ING-06: Zoom Controls', async ({ page }) => {

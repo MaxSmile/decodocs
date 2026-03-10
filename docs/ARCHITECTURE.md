@@ -22,6 +22,7 @@ Browser
 
 - Marketing: static-first pages for fast first render and better Core Web Vitals
 - App: React-based document viewer/editor and authenticated workflows
+- Viewer upload supports `.pdf`, `.docx`, and `.snapsign` inputs
 - Routing:
   - marketing/documentation paths are static-routed
   - app paths are served via app shell + client routing
@@ -52,6 +53,7 @@ Authentication is active now (not planned):
 - Integrity is enforced with SHA-256 hash in `manifest.json`.
 - Relevant module: `Decodocs/web/src/services/envelopeService.js`.
 - Current UI entry points: `Decodocs/web/src/components/SignPage.jsx` and `Decodocs/web/src/components/DocumentViewer.jsx`.
+- Note: `SignPage` remains limited to PDF/`.snapsign` envelope workflows; DOCX is supported in the viewer/analysis path.
 - Sender email flow is manual: user downloads `.snapsign`, then sends from their own email client with manual attachments.
 - Functions do not expose envelope HTTP endpoints and do not orchestrate recipient invite/session lifecycle.
 - Canonical envelope tests are client-side unit tests in `Decodocs/web/src/__tests__/envelopeService.test.js`.

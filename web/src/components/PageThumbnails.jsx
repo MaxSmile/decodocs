@@ -163,6 +163,7 @@ const PageThumbnail = ({
         >
             <button
                 id={`thumb-${pageNum}`}
+                aria-label={`thumb-${pageNum}`} // aria-label added for accessibility/tests
                 onClick={onClick}
                 className="flex flex-col items-center gap-1 w-full"
                 disabled={isProcessing}

@@ -29,7 +29,7 @@ const PDFControls = ({
       <button
         onClick={() => fileInputRef.current?.click()}
         className="p-1 bg-transparent text-slate-300 hover:text-white hover:bg-white/10 rounded-full transition-colors"
-        title="Open PDF"
+        title="Open document"
       >
         <HiUpload className="w-3.5 h-3.5" />
       </button>
@@ -81,7 +81,7 @@ const PDFControls = ({
       <input
         type="file"
         ref={fileInputRef}
-        accept=".pdf"
+        accept=".pdf,.docx,.snapsign,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         onChange={onFileSelect}
         className="hidden"
       />

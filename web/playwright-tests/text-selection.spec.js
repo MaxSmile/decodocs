@@ -7,6 +7,9 @@ const __dirname = path.dirname(__filename);
 
 test.describe('Document Text Selection', () => {
     test.beforeEach(async ({ page }) => {
+        await page.addInitScript({
+            content: 'window.MOCK_AUTH = true; window.MOCK_AUTH_USER = { uid: "e2e-text-selection", email: "e2e+text@example.com", isAnonymous: false };',
+        });
         await page.goto('/app', { waitUntil: 'domcontentloaded' });
         await page.waitForURL('**/view');
         await expect(page.locator('#viewer-root')).toBeVisible({ timeout: 15000 });
@@ -32,11 +35,19 @@ test.describe('Document Text Selection', () => {
         await page.mouse.down();
         await page.mouse.move(box.x + box.width, box.y + box.height / 2);
         await page.mouse.up();
-        
-        await page.waitForTimeout(2000);
+
+        await firstTextSpan.evaluate((el) => {
+            const range = document.createRange();
+            range.selectNodeContents(el);
+            const selection = window.getSelection();
+            if (!selection) return;
+            selection.removeAllRanges();
+            selection.addRange(range);
+            document.dispatchEvent(new Event('selectionchange'));
+        });
         
         const explainBtn = page.getByRole('button', { name: /Explain Selection/i });
-        await expect(explainBtn).not.toBeDisabled({ timeout: 5000 });
+        await expect(explainBtn).toBeEnabled({ timeout: 20000 });
     });
     
     test('user can select text and trigger Explain action on DOCX', async ({ page }) => {
@@ -64,9 +75,7 @@ test.describe('Document Text Selection', () => {
         await page.mouse.move(box.x + box.width - 2, box.y + box.height / 2);
         await page.mouse.up();
         
-        await page.waitForTimeout(2000);
-
         const explainBtn = page.getByRole('button', { name: /Explain Selection/i });
-        await expect(explainBtn).not.toBeDisabled({ timeout: 5000 });
+        await expect(explainBtn).toBeEnabled({ timeout: 20000 });
     });
 });

@@ -96,7 +96,7 @@ test.describe('Document Editor Tests', () => {
 
     // Editor should either render PDF canvas or show upload dropzone while loading
     await expect(
-      page.locator('canvas').first().or(page.getByText('Upload a PDF or .snapsign file'))
+      page.locator('canvas').first().or(page.getByText(/Upload a PDF/i))
     ).toBeVisible({ timeout: 15000 });
   });
 });
