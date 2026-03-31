@@ -16,16 +16,18 @@ const FeatureGrid = () => {
         />
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {featureGridItems.map((feature, index) => (
-            <div
+            <a
               key={feature.title}
-              className="group rounded-3xl border border-slate-100 bg-white p-6 shadow-lg shadow-slate-900/5 transition hover:-translate-y-1"
+              href={feature.href}
+              className="group rounded-3xl border border-slate-100 bg-white p-6 shadow-lg shadow-slate-900/5 no-underline transition duration-200 hover:-translate-y-1 hover:border-slate-200 hover:shadow-xl hover:shadow-slate-900/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-slate-900"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-900 text-white">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-900 text-white transition-colors group-hover:bg-slate-800">
                 {React.createElement(featureIcons[index], { className: "w-5 h-5" })}
               </div>
-              <h3 className="mt-5 text-lg font-semibold text-slate-900">{feature.title}</h3>
+              <h3 className="mt-5 text-lg font-semibold text-slate-900 group-hover:text-slate-700">{feature.title}</h3>
               <p className="mt-3 text-sm text-slate-600">{feature.description}</p>
-            </div>
+              <p className="mt-5 text-sm font-semibold text-slate-900 opacity-0 transition-opacity group-hover:opacity-100">Learn more &rarr;</p>
+            </a>
           ))}
         </div>
       </div>

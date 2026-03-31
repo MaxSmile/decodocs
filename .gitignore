@@ -29,6 +29,7 @@ node_modules/
 # Build output
 dist/
 build/
+web/decodocs.com/
 
 # Vite cache
 .vite/

@@ -24,43 +24,91 @@ export const socialProofStats = [
 
 export const howItWorksSteps = [
   {
+    id: 'open-a-document',
+    href: '/how-it-works#open-a-document',
     title: 'Upload or open a PDF',
-    description: 'Drop in a contract, policy, or report. No setup required.'
+    description: 'Drop in a contract, policy, or report. No setup required.',
+    detailIntro:
+      'Start with the file you already have. DecoDocs is designed so you can open a PDF immediately for review, then decide later whether it should be saved into a managed workspace.',
+    details: [
+      'Open mode is the default, which keeps the first step fast and privacy-forward.',
+      'Free mode never stores files by default, so trial reviews do not become permanent uploads.',
+      'Pro users can explicitly save a document when they want history, cross-device access, or collaboration.'
+    ],
+    outcomes: [
+      'Immediate browser-based review for contracts, policies, and reports',
+      'A low-friction way to triage sensitive documents before committing to storage',
+      'A clear separation between temporary analysis and intentional document management'
+    ]
   },
   {
+    id: 'decode-with-ai',
+    href: '/how-it-works#decode-with-ai',
     title: 'Decode with AI',
-    description: 'We translate the text, highlight obligations, and surface risks.'
+    description: 'We translate the text, highlight obligations, and surface risks.',
+    detailIntro:
+      'Once the document is open, DecoDocs turns dense clauses into a structured review. The goal is not a vague summary. It is a source-backed explanation of what matters, where the risk sits, and what deserves follow-up.',
+    details: [
+      'The system extracts and processes the text needed for analysis instead of forcing a heavy manual review flow.',
+      'Clauses are rewritten into plain language so non-legal readers can understand meaning and impact quickly.',
+      'Risk flags call out obligations, deadlines, penalties, lock-ins, and one-sided terms that deserve attention.'
+    ],
+    outcomes: [
+      'Section-by-section explanations next to the source material',
+      'Clear lists of risks, obligations, and unclear language',
+      'A faster handoff to teammates, advisors, or legal counsel when escalation is needed'
+    ]
   },
   {
+    id: 'act-with-clarity',
+    href: '/how-it-works#act-with-clarity',
     title: 'Act with clarity',
-    description: 'Export notes or send for signature only when you are ready.'
+    description: 'Export notes or send for signature only when you are ready.',
+    detailIntro:
+      'Clarity should lead to action, not more ambiguity. After review, DecoDocs helps you capture decisions, export what matters, and move into sharing or signature workflows only when the document is actually ready.',
+    details: [
+      'Users can keep working notes, preserve highlights, and prepare a cleaner internal summary before sharing.',
+      'Exported outputs are built to help decision-makers understand what changed, what is risky, and what to do next.',
+      'Signing stays downstream of review, so execution happens after the document has been understood.'
+    ],
+    outcomes: [
+      'Decision-ready notes for founders, operators, procurement teams, and clients',
+      'Cleaner approval and negotiation workflows with less back-and-forth',
+      'A practical bridge from document understanding to sharing, signature, or storage'
+    ]
   }
 ];
 
 export const featureGridItems = [
   {
     title: 'Plain-language summaries',
-    description: 'Every section is rewritten into clear, actionable language.'
+    description: 'Every section is rewritten into clear, actionable language.',
+    href: 'https://docs.decodocs.com/plain-language-summaries'
   },
   {
     title: 'Risk and obligation flags',
-    description: 'Spot penalties, expiry traps, and one-sided clauses fast.'
+    description: 'Spot penalties, expiry traps, and one-sided clauses fast.',
+    href: 'https://docs.decodocs.com/risk-and-obligation-flags'
   },
   {
     title: 'Side-by-side evidence',
-    description: 'See the original text next to the AI explanation.'
+    description: 'See the original text next to the AI explanation.',
+    href: 'https://docs.decodocs.com/side-by-side-evidence'
   },
   {
     title: 'Shareable decision reports',
-    description: 'Create a clean, board-ready summary in one click.'
+    description: 'Create a clean, board-ready summary in one click.',
+    href: 'https://docs.decodocs.com/shareable-decision-reports'
   },
   {
     title: 'Structured highlights',
-    description: 'Tag sections as financial, legal, or operational.'
+    description: 'Tag sections as financial, legal, or operational.',
+    href: 'https://docs.decodocs.com/structured-highlights'
   },
   {
     title: 'Secure by design',
-    description: 'Free mode never stores files. Pro adds private vaults.'
+    description: 'Free mode never stores files. Pro adds private vaults.',
+    href: 'https://docs.decodocs.com/secure-by-design'
   }
 ];
 
@@ -539,7 +587,7 @@ export const faqs = [
 
 export const footerLinks = {
   product: [
-    { label: 'How it works', href: '#how-it-works' },
+    { label: 'How it works', href: '/how-it-works' },
     { label: 'Use cases', href: '/uses-cases' },
     { label: 'Pricing', href: '/pricing' }
   ],

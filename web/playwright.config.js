@@ -1,6 +1,11 @@
 // @ts-check
 import { defineConfig, devices } from '@playwright/test';
 
+const e2ePort = process.env.E2E_PORT || '3000';
+const baseURL = process.env.PLAYWRIGHT_BASE_URL || `http://localhost:${e2ePort}`;
+const previewCommand = `npm run build && npm run preview -- --host 127.0.0.1 --port ${e2ePort}`;
+const devCommand = `npm run dev -- --host 127.0.0.1 --port ${e2ePort}`;
+
 // Runtime flags are read from process environment only.
 // Do not load .env files in this project.
 
@@ -28,7 +33,7 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: 'http://localhost:3000',
+    baseURL,
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
@@ -37,8 +42,8 @@ export default defineConfig({
   /* Run preview by default for deterministic e2e behavior.
    * Opt into dev server with E2E_USE_DEV=1 when needed. */
   webServer: {
-    command: process.env.E2E_USE_DEV ? 'npm run dev' : 'npm run build && npm run preview',
-    url: 'http://localhost:3000',
+    command: process.env.E2E_USE_DEV ? devCommand : previewCommand,
+    url: baseURL,
     reuseExistingServer: !!process.env.E2E_USE_DEV && !process.env.CI,
   },
 

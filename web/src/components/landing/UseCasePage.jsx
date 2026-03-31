@@ -12,6 +12,7 @@ const UseCasePage = () => {
     return uc.slug === slug || generatedSlug === slug;
   });
   const relatedUseCases = useCases.filter((uc) => uc.slug !== useCase?.slug).slice(0, 3);
+  const resolveAppPath = (to) => (to === '/pricing' ? '/app/pricing' : to);
 
   if (!useCase) {
     return (
@@ -54,8 +55,8 @@ const UseCasePage = () => {
               <h1 className="mt-4 text-4xl font-bold leading-tight text-slate-900 lg:text-5xl">{useCase.heroTitle || useCase.title}</h1>
               <p className="mt-5 max-w-2xl text-lg leading-relaxed text-slate-600">{useCase.heroDescription || useCase.description}</p>
               <div className="mt-8 flex flex-wrap gap-3">
-                <Button size="md" to={useCase.cta?.primaryTo || '/view'}>{useCase.cta?.primaryLabel || 'Open viewer'}</Button>
-                <Button variant="outline" size="md" to={useCase.cta?.secondaryTo || '/contact'}>{useCase.cta?.secondaryLabel || 'Contact us'}</Button>
+                <Button size="md" to={resolveAppPath(useCase.cta?.primaryTo || '/view')}>{useCase.cta?.primaryLabel || 'Open viewer'}</Button>
+                <Button variant="outline" size="md" to={resolveAppPath(useCase.cta?.secondaryTo || '/contact')}>{useCase.cta?.secondaryLabel || 'Contact us'}</Button>
               </div>
             </div>
 
@@ -136,7 +137,7 @@ const UseCasePage = () => {
               </p>
               <div className="mt-5 flex flex-wrap gap-3">
                 <Button size="sm" to="/contact">Talk to us</Button>
-                <Button variant="outline" size="sm" to="/pricing">View pricing</Button>
+                <Button variant="outline" size="sm" to="/app/pricing">View pricing</Button>
               </div>
             </div>
           </section>

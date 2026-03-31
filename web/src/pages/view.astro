@@ -1,0 +1,17 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import ReactAppIsland from '../components/islands/ReactAppIsland.jsx';
+---
+
+<MainLayout
+  title="DecoDocs Viewer"
+  description="Open a document in the DecoDocs viewer."
+  canonical="https://decodocs.com/view/"
+  image="https://decodocs.com/og.svg"
+  noindex={true}
+  showHeader={false}
+>
+  <main class="min-h-screen">
+    <ReactAppIsland client:only="react" basename="/" />
+  </main>
+</MainLayout>

@@ -12,14 +12,15 @@ const HowItWorks = () => {
         <SectionHeader
           eyebrow="How it works"
           title="Three steps to clarity"
-          description="No onboarding, no templates. Drop in a document and get structured insights within seconds."
+          description="No onboarding, no templates. Open a step to see the full walkthrough of how DecoDocs works."
           align="left"
         />
         <div className="grid gap-6 md:grid-cols-3">
           {howItWorksSteps.map((step, index) => (
-            <div
+            <a
               key={step.title}
-              className="rounded-3xl border border-slate-100 bg-white p-6 shadow-lg shadow-slate-900/5"
+              href={step.href}
+              className="group rounded-3xl border border-slate-100 bg-white p-6 shadow-lg shadow-slate-900/5 no-underline transition duration-200 hover:-translate-y-1 hover:border-slate-200 hover:shadow-xl hover:shadow-slate-900/10"
             >
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
@@ -27,9 +28,10 @@ const HowItWorks = () => {
                 </span>
                 {React.createElement(stepIcons[index], { className: "w-6 h-6 text-slate-400" })}
               </div>
-              <h3 className="mt-6 text-xl font-semibold text-slate-900">{step.title}</h3>
+              <h3 className="mt-6 text-xl font-semibold text-slate-900 group-hover:text-slate-700">{step.title}</h3>
               <p className="mt-3 text-sm text-slate-600">{step.description}</p>
-            </div>
+              <p className="mt-5 text-sm font-semibold text-slate-900">Read this step in detail</p>
+            </a>
           ))}
         </div>
       </div>

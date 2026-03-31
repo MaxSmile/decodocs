@@ -325,7 +325,7 @@ const DocumentEditor = () => {
         onCancel={() => setDialog(null)}
         onConfirm={() => {
           if (dialog?.primaryTo) {
-            if (dialog.primaryTo === '/pricing' || dialog.primaryTo.startsWith('http')) {
+            if (dialog.primaryTo === '/app/pricing' || dialog.primaryTo.startsWith('http')) {
               window.location.assign(dialog.primaryTo);
             } else {
               navigate(dialog.primaryTo);
@@ -345,7 +345,7 @@ const DocumentEditor = () => {
               title: 'Pro required',
               message: 'Upgrade to Pro to share links.',
               primaryLabel: 'Upgrade to Pro',
-              primaryTo: '/pricing',
+              primaryTo: '/app/pricing',
               secondaryLabel: 'Cancel',
               secondaryTo: null,
             });
@@ -355,7 +355,7 @@ const DocumentEditor = () => {
               title: 'Pro required',
               message: 'Upgrade to Pro to upload to cloud.',
               primaryLabel: 'Upgrade to Pro',
-              primaryTo: '/pricing',
+              primaryTo: '/app/pricing',
               secondaryLabel: 'Cancel',
               secondaryTo: null,
             });

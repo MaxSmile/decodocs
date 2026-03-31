@@ -9,7 +9,7 @@ const coreNav = [
   { label: 'How it works', href: '#how-it-works' },
   { label: 'Features', href: '#features' },
   { label: 'Use cases', to: '/use-cases', external: true },
-  { label: 'Pricing', to: '/pricing', external: true },
+  { label: 'Pricing', to: '/app/pricing', external: true },
   { label: 'About', to: '/about' },
 ];
 
@@ -149,7 +149,7 @@ const SiteHeader = ({ variant = 'marketing', onOpenPdf, sticky = false, children
           {isAppLayout && (
             <div id="header-app-actions" className="flex items-center gap-2">
               <Link
-                to="/pricing"
+                to="/app/pricing"
                 className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 rounded-full transition-colors no-underline border border-amber-200/60"
               >
                 <HiSparkles className="w-3.5 h-3.5" />
@@ -213,7 +213,7 @@ const SiteHeader = ({ variant = 'marketing', onOpenPdf, sticky = false, children
             {isAppLayout ? (
               <>
                 <Link
-                  to="/pricing"
+                  to="/app/pricing"
                   onClick={closeMenu}
                   className="inline-flex items-center justify-center gap-1.5 rounded-full border border-amber-200/60 bg-amber-50 px-4 py-2 text-sm font-bold text-amber-700 no-underline hover:bg-amber-100"
                 >

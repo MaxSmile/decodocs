@@ -190,7 +190,7 @@ export const useViewerDocumentState = ({
           ? 'Cloud storage is available for Pro plans. Upgrade to continue.'
           : (err?.message || 'Unable to upload file to cloud storage.'),
         primaryLabel: isProGate ? 'View plans' : 'OK',
-        primaryTo: isProGate ? '/pricing' : null,
+        primaryTo: isProGate ? '/app/pricing' : null,
       });
     } finally {
       setIsCloudBusy(false);

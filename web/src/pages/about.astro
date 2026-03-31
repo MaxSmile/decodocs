@@ -1,0 +1,16 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import Footer from '../components/astro/Footer.astro';
+import AboutPage from '../components/AboutPage.jsx';
+
+const title = 'About DecoDocs';
+const description =
+  'Learn what DecoDocs is, what it is not, and how Snap Sign positions document understanding before signature.';
+---
+
+<MainLayout title={title} description={description} canonical="https://decodocs.com/about/" image="https://decodocs.com/og.svg">
+  <main class="bg-slate-50/50 py-8">
+    <AboutPage />
+  </main>
+  <Footer />
+</MainLayout>

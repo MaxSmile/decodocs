@@ -207,7 +207,7 @@ const AnalysisSidebar = ({
                                         Sign in
                                     </Link>
                                     <Link
-                                        to="/pricing"
+                                        to="/app/pricing"
                                         className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 no-underline"
                                     >
                                         See Free vs Pro

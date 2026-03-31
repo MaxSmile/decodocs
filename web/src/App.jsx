@@ -41,11 +41,12 @@ const AppRoutes = () => {
       <Route path="/" element={<HomePage />} />
 
       {/* Pricing Page */}
-      <Route path="/pricing" element={
+      <Route path="/app/pricing" element={
         <PublicLayout>
           <PricingPage />
         </PublicLayout>
       } />
+      <Route path="/pricing" element={<Navigate to="/app/pricing" replace />} />
 
       {/* About Page */}
       <Route path="/about" element={

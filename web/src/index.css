@@ -51,7 +51,7 @@
 
 .support-ukraine-banner-slot {
   position: relative;
-  height: 35px;
+  min-height: 40px;
 }
 
 @layer components {

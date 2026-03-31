@@ -9,7 +9,7 @@ type HeaderProps = {
 };
 
 const marketingNav = [
-  { label: 'How it works', href: '/#how-it-works' },
+  { label: 'How it works', href: '/how-it-works' },
   { label: 'Features', href: '/#features' },
   { label: 'Use cases', href: '/uses-cases' },
   { label: 'Pricing', href: '/pricing' },

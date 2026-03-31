@@ -122,14 +122,21 @@ const description =
         <div>
           <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">How it works</p>
           <h2 class="mt-3 text-4xl font-bold text-slate-900">Three steps to clarity</h2>
+          <p class="mt-4 max-w-2xl text-base leading-relaxed text-slate-600">
+            Explore the full walkthrough. Each step opens the detailed explanation on its own page.
+          </p>
         </div>
         <div class="grid gap-6 md:grid-cols-3">
           {howItWorksSteps.map((step, index) => (
-            <article class="rounded-3xl border border-slate-100 bg-white p-6 shadow-lg shadow-slate-900/5">
+            <a
+              href={step.href}
+              class="group rounded-3xl border border-slate-100 bg-white p-6 shadow-lg shadow-slate-900/5 no-underline transition duration-200 hover:-translate-y-1 hover:border-slate-200 hover:shadow-xl hover:shadow-slate-900/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-slate-900"
+            >
               <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Step {index + 1}</p>
-              <h3 class="mt-4 text-xl font-semibold text-slate-900">{step.title}</h3>
+              <h3 class="mt-4 text-xl font-semibold text-slate-900 group-hover:text-slate-700">{step.title}</h3>
               <p class="mt-3 text-sm text-slate-600">{step.description}</p>
-            </article>
+              <p class="mt-5 text-sm font-semibold text-slate-900">Read this step in detail</p>
+            </a>
           ))}
         </div>
       </div>
@@ -143,10 +150,14 @@ const description =
         </div>
         <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {featureGridItems.map((feature) => (
-            <article class="rounded-3xl border border-slate-100 bg-white p-6 shadow-lg shadow-slate-900/5">
-              <h3 class="text-lg font-semibold text-slate-900">{feature.title}</h3>
+            <a
+              href={feature.href}
+              class="group rounded-3xl border border-slate-100 bg-white p-6 shadow-lg shadow-slate-900/5 no-underline transition duration-200 hover:-translate-y-1 hover:border-slate-200 hover:shadow-xl hover:shadow-slate-900/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-slate-900"
+            >
+              <h3 class="text-lg font-semibold text-slate-900 group-hover:text-slate-700">{feature.title}</h3>
               <p class="mt-3 text-sm text-slate-600">{feature.description}</p>
-            </article>
+              <p class="mt-5 text-sm font-semibold text-slate-900 opacity-0 transition-opacity group-hover:opacity-100">Learn about this feature &rarr;</p>
+            </a>
           ))}
         </div>
       </div>

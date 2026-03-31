@@ -1,0 +1,216 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import Footer from '../components/astro/Footer.astro';
+import { howItWorksSteps } from '../lib/landingData.js';
+
+const pageTitle = 'How DecoDocs Works | DecoDocs';
+const pageDescription =
+  'See how DecoDocs takes a document from opening to AI explanation to clear next actions, with a privacy-forward workflow built around understanding first.';
+const canonical = 'https://decodocs.com/how-it-works/';
+
+const workflowPillars = [
+  {
+    title: 'Understand first',
+    description: 'DecoDocs starts by making the document readable, explainable, and reviewable before anything else happens.'
+  },
+  {
+    title: 'Store only when useful',
+    description: 'Open mode keeps the default workflow light. Persistent storage is an explicit decision, not an assumption.'
+  },
+  {
+    title: 'Act after review',
+    description: 'Sharing, exporting, and signature are downstream actions that happen after risks and obligations are visible.'
+  }
+];
+
+const operatingPrinciples = [
+  {
+    title: 'Privacy-forward defaults',
+    description: 'Free mode is designed around opening and analyzing documents without storing raw files by default.'
+  },
+  {
+    title: 'Source-backed explanations',
+    description: 'The AI output is tied back to the document so users can see what clause the explanation refers to.'
+  },
+  {
+    title: 'Human decision stays in control',
+    description: 'DecoDocs helps users understand, summarize, and escalate. It does not replace legal or commercial judgment.'
+  }
+];
+---
+
+<MainLayout title={pageTitle} description={pageDescription} canonical={canonical} image="https://decodocs.com/og.svg">
+  <main class="relative overflow-hidden bg-slate-50/70 px-6 pb-24 pt-14 lg:pt-20">
+    <div class="pointer-events-none absolute inset-0">
+      <div class="absolute -left-24 top-20 h-80 w-80 rounded-full bg-[#d8e6ff] opacity-60 blur-3xl" />
+      <div class="absolute -right-16 top-72 h-80 w-80 rounded-full bg-[#fde4c7] opacity-50 blur-3xl" />
+    </div>
+
+    <div class="relative mx-auto flex w-full max-w-6xl flex-col gap-8">
+      <section class="rounded-[2rem] border border-slate-200/80 bg-white/90 p-8 shadow-xl shadow-slate-900/5 backdrop-blur-sm lg:p-12">
+        <div class="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">How DecoDocs works</p>
+            <h1 class="mt-4 max-w-3xl text-4xl font-bold leading-tight text-slate-900 lg:text-5xl">
+              From first PDF to clear next action
+            </h1>
+            <p class="mt-5 max-w-3xl text-lg leading-relaxed text-slate-600">
+              DecoDocs follows a simple sequence: open the document, decode what matters, then decide what to do next.
+              The product is built around understanding first, so storage, sharing, and signature happen only after the
+              document becomes clear.
+            </p>
+
+            <div class="mt-8 flex flex-wrap gap-3">
+              <a
+                href="/view"
+                class="inline-flex items-center justify-center rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white no-underline transition hover:bg-slate-800"
+              >
+                Open a document
+              </a>
+              <a
+                href="#workflow-steps"
+                class="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-900 no-underline transition hover:bg-slate-100"
+              >
+                Jump to the steps
+              </a>
+            </div>
+          </div>
+
+          <aside class="rounded-3xl border border-slate-200 bg-slate-950 p-6 text-slate-100 shadow-lg">
+            <p class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-300">Workflow summary</p>
+            <div class="mt-6 space-y-4">
+              {workflowPillars.map((pillar, index) => (
+                <article class="rounded-2xl border border-slate-800 bg-slate-900/80 p-4">
+                  <p class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">Stage {index + 1}</p>
+                  <h2 class="mt-2 text-lg font-semibold text-white">{pillar.title}</h2>
+                  <p class="mt-2 text-sm leading-relaxed text-slate-300">{pillar.description}</p>
+                </article>
+              ))}
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section id="workflow-steps" class="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-lg shadow-slate-900/5 lg:p-10">
+        <div class="max-w-3xl">
+          <p class="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">The workflow at a glance</p>
+          <h2 class="mt-4 text-3xl font-bold text-slate-900">Jump to the part you care about</h2>
+          <p class="mt-4 text-base leading-relaxed text-slate-600">
+            Each section below explains what happens in DecoDocs at that stage, why it matters to users, and how it
+            supports a lower-risk document workflow.
+          </p>
+        </div>
+
+        <div class="mt-8 grid gap-5 md:grid-cols-3">
+          {howItWorksSteps.map((step, index) => (
+            <a
+              href={`#${step.id}`}
+              class="group rounded-3xl border border-slate-200 bg-slate-50 p-6 no-underline transition duration-200 hover:-translate-y-1 hover:border-slate-300 hover:bg-white hover:shadow-lg hover:shadow-slate-900/5"
+            >
+              <p class="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">Step {index + 1}</p>
+              <h3 class="mt-4 text-xl font-semibold text-slate-900 group-hover:text-slate-700">{step.title}</h3>
+              <p class="mt-3 text-sm leading-relaxed text-slate-600">{step.description}</p>
+            </a>
+          ))}
+        </div>
+      </section>
+
+      <div class="space-y-6">
+        {howItWorksSteps.map((step, index) => (
+          <section id={step.id} class="scroll-mt-24 rounded-[2rem] border border-slate-200 bg-white p-8 shadow-lg shadow-slate-900/5 lg:p-10">
+            <div class="grid gap-8 lg:grid-cols-[1.15fr_0.85fr]">
+              <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">Step {index + 1}</p>
+                <h2 class="mt-4 text-3xl font-bold text-slate-900">{step.title}</h2>
+                <p class="mt-5 text-[1.05rem] leading-8 text-slate-700">{step.detailIntro}</p>
+
+                <div class="mt-8 space-y-4">
+                  {step.details.map((detail) => (
+                    <article class="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4">
+                      <p class="text-base leading-7 text-slate-700">{detail}</p>
+                    </article>
+                  ))}
+                </div>
+              </div>
+
+              <aside class="space-y-4">
+                <article class="rounded-3xl border border-amber-200 bg-amber-50/80 p-6">
+                  <p class="text-xs font-semibold uppercase tracking-[0.25em] text-amber-700">What users get here</p>
+                  <ul class="mt-4 space-y-3 list-none p-0 text-sm leading-relaxed text-slate-700">
+                    {step.outcomes.map((outcome) => (
+                      <li class="flex items-start gap-3">
+                        <span class="mt-2 inline-block h-2.5 w-2.5 rounded-full bg-amber-500" />
+                        <span>{outcome}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </article>
+
+                <article class="rounded-3xl border border-slate-200 bg-slate-950 p-6 text-slate-100">
+                  <p class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">Why this matters</p>
+                  <p class="mt-4 text-sm leading-relaxed text-slate-300">
+                    {index === 0 &&
+                      'The first interaction needs to be simple. Users can begin understanding a document immediately instead of committing to a storage workflow before they have seen any value.'}
+                    {index === 1 &&
+                      'The core product promise is clarity, not automation theater. The AI layer should make obligations, risks, and meaning easier to inspect, compare, and explain.'}
+                    {index === 2 &&
+                      'Execution is safer after the document has been understood. By keeping action downstream, DecoDocs supports cleaner approvals, better negotiation, and more confident signatures.'}
+                  </p>
+                </article>
+              </aside>
+            </div>
+          </section>
+        ))}
+      </div>
+
+      <section class="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-lg shadow-slate-900/5 lg:p-10">
+        <div class="max-w-3xl">
+          <p class="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">Why the workflow is built this way</p>
+          <h2 class="mt-4 text-3xl font-bold text-slate-900">Clarity comes before commitment</h2>
+          <p class="mt-4 text-base leading-relaxed text-slate-600">
+            DecoDocs is not positioned as a signing tool first. It is a document understanding product. That means the
+            system is designed to reduce uncertainty before it asks users to save, share, or execute anything.
+          </p>
+        </div>
+
+        <div class="mt-8 grid gap-5 md:grid-cols-3">
+          {operatingPrinciples.map((principle) => (
+            <article class="rounded-3xl border border-slate-200 bg-slate-50 p-6">
+              <h3 class="text-xl font-semibold text-slate-900">{principle.title}</h3>
+              <p class="mt-3 text-sm leading-relaxed text-slate-600">{principle.description}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section class="rounded-[2rem] border border-slate-200 bg-slate-900 p-8 text-white shadow-xl shadow-slate-900/10 lg:p-10">
+        <div class="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.28em] text-slate-300">Start with a real document</p>
+            <h2 class="mt-4 text-3xl font-bold">See the workflow on your own PDF</h2>
+            <p class="mt-4 max-w-2xl text-base leading-relaxed text-slate-300">
+              Open a contract, policy, or report and move through the same sequence described above: understand it,
+              flag what matters, and act only when the document is ready.
+            </p>
+          </div>
+
+          <div class="flex flex-wrap gap-3 lg:justify-end">
+            <a
+              href="/view"
+              class="inline-flex items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-slate-900 no-underline transition hover:bg-slate-100"
+            >
+              Analyze a PDF document
+            </a>
+            <a
+              href="/pricing"
+              class="inline-flex items-center justify-center rounded-full border border-slate-600 px-6 py-3 text-sm font-semibold text-white no-underline transition hover:bg-white/10"
+            >
+              Compare plans
+            </a>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+  <Footer />
+</MainLayout>

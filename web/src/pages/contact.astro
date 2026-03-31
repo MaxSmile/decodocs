@@ -1,0 +1,16 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import Footer from '../components/astro/Footer.astro';
+import ContactPage from '../components/ContactPage.jsx';
+
+const title = 'Contact DecoDocs';
+const description =
+  'Contact DecoDocs for support, partnerships, account help, or integration requests.';
+---
+
+<MainLayout title={title} description={description} canonical="https://decodocs.com/contact/" image="https://decodocs.com/og.svg">
+  <main class="bg-slate-50/50 py-8">
+    <ContactPage />
+  </main>
+  <Footer />
+</MainLayout>

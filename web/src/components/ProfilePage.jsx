@@ -105,7 +105,7 @@ export default function ProfilePage() {
       </Card>
 
       <div className="mt-4 flex flex-wrap gap-3">
-        <Link to="/pricing" className="dd-link-strong">Pricing</Link>
+        <Link to="/app/pricing" className="dd-link-strong">Pricing</Link>
         <Link to="/view" className="dd-link-muted">Analyze a PDF</Link>
       </div>
     </PageSection>

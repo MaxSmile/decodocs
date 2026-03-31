@@ -57,7 +57,7 @@ export default function SignUpPage() {
       billing: upgradeBilling,
     });
     if (sandbox) qp.set('sandbox', sandbox);
-    return `/pricing?${qp.toString()}`;
+    return `/app/pricing?${qp.toString()}`;
   }, [intent, sandbox, upgradeBilling, upgradePlan]);
 
   const createGoogleProvider = () => {
@@ -239,7 +239,7 @@ export default function SignUpPage() {
       ) : null}
 
       <div className="mt-4 flex flex-wrap gap-3">
-        <Link to="/pricing" className="dd-link-strong">Back to pricing</Link>
+        <Link to="/app/pricing" className="dd-link-strong">Back to pricing</Link>
         <Link to="/" className="dd-link-muted">Home</Link>
       </div>
 

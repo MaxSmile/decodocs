@@ -178,7 +178,7 @@ export const useDocumentAnalysis = ({ functions, authState, isMockMode }) => {
                     title: 'Pro required',
                     message: msg,
                     primaryLabel: 'Upgrade to Pro',
-                    primaryTo: '/pricing',
+                    primaryTo: '/app/pricing',
                     secondaryLabel: 'Cancel',
                     secondaryTo: null,
                 });
@@ -282,7 +282,7 @@ export const useDocumentAnalysis = ({ functions, authState, isMockMode }) => {
                         title: 'Scanned PDF (OCR requires Pro)',
                         message: msg,
                         primaryLabel: 'Upgrade to Pro',
-                        primaryTo: '/pricing',
+                        primaryTo: '/app/pricing',
                         secondaryLabel: 'Cancel',
                         secondaryTo: null,
                         secondaryTo: null,
@@ -323,7 +323,7 @@ export const useDocumentAnalysis = ({ functions, authState, isMockMode }) => {
                         title: 'Daily limit reached',
                         message: msg,
                         primaryLabel: 'Upgrade to Pro',
-                        primaryTo: '/pricing',
+                        primaryTo: '/app/pricing',
                         secondaryLabel: 'Cancel',
                         secondaryTo: null,
                     });

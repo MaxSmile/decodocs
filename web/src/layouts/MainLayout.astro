@@ -49,7 +49,7 @@ const {
     <div class="support-ukraine-banner-slot">
       <SupportUkraineBannerIsland client:only="react" transition:persist />
     </div>
-    {showHeader ? <Header client:load transition:persist /> : null}
+    {showHeader ? <Header client:load /> : null}
     <slot />
   </body>
 </html>
